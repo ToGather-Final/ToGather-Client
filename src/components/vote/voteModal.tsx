@@ -5,7 +5,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -14,6 +13,7 @@ interface VoteModalProps {
   isOpen: boolean;
   onClose: () => void;
   voteType: "approve" | "reject";
+  proposalName: string;
   onConfirm: () => void;
 }
 
@@ -21,44 +21,40 @@ export default function VoteModal({
   isOpen,
   onClose,
   voteType,
+  proposalName,
   onConfirm,
 }: VoteModalProps) {
   const isApprove = voteType === "approve";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle
-            className={`text-center ${
-              isApprove ? "text-blue-600" : "text-red-600"
-            }`}
-          >
-            {isApprove ? "찬성" : "반대"}
+      <DialogContent className="sm:max-w-sm mx-4 rounded-2xl">
+        <DialogHeader className="text-center space-y-3 pt-4">
+          <DialogTitle className="text-lg font-medium text-gray-900">
+            {isApprove
+              ? "찬성에 투표하시겠습니까?"
+              : "반대에 투표하시겠습니까?"}
           </DialogTitle>
-          <DialogDescription className="text-center">
-            이 투표에 {isApprove ? "찬성" : "반대"}하시겠습니까?
+          <DialogDescription className="text-sm text-gray-600">
+            {proposalName}
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex gap-2 sm:gap-2">
+
+        <div className="flex gap-3 pt-4 pb-4">
           <Button
             variant="outline"
             onClick={onClose}
-            className="flex-1 bg-transparent"
+            className="flex-1 bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200 rounded-lg py-3"
           >
-            취소
+            아니오
           </Button>
           <Button
             onClick={onConfirm}
-            className={`flex-1 ${
-              isApprove
-                ? "bg-blue-500 hover:bg-blue-600"
-                : "bg-red-500 hover:bg-red-600"
-            }`}
+            className="flex-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-3"
           >
-            {isApprove ? "찬성" : "반대"}
+            예
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
