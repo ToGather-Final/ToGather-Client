@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown } from "lucide-react";
-import VoteModal from "../../containers/vote/voteModal";
+import VoteModal from "../../components/vote/VoteModal";
 import type { ProposalDTO } from "../../types/api/proposal";
 import {
   ProposalCategory,
