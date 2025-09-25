@@ -1,5 +1,6 @@
 // 서버가 주는 제안 한 건(DTO) 모양
 export type ProposalDTO = {
+  proposalId : number;  // 제안 아이디
   proposalName: string; // 제안 이름
   proposerName: string; // 제안자 이름
   category: ProposalCategory; // 제안 카테고리 (매매/페이)
@@ -10,7 +11,6 @@ export type ProposalDTO = {
   closeDate: string; // 투표 마감 날짜
   agreeCount: number; // 찬성한 사람 수
   disagreeCount: number; // 반대한 사람 수
-  neutralCount: number; // 투표 안 한 사람 수
   myVote: "AGREE" | "DISAGREE" | "NEUTRAL"; // 투표 했는지 안 했는지
 };
 
@@ -20,13 +20,13 @@ export enum ProposalCategory {
   PAY = "PAY",
 }
 
-// 제안의 실제 액션 종류 - 매수/매도/예수금/출금/계좌활성화
+// 제안의 실제 액션 종류 - 매수/매도/예수금/페이 충전
 export enum ProposalAction {
-  BUY = "BUY",
-  SELL = "SELL",
-  DEPOSIT = "DEPOSIT",
-  CHARGE = "CHARGE",
-  ENABLE = "ENABLE",
+  BUY = "BUY",              // 매수
+  SELL = "SELL",            // 매도
+  DEPOSIT = "DEPOSIT",      // 예수금 입금
+  CHARGE = "CHARGE",    // 페이 충전
+  // ENABLE = "ENABLE", -> 로직 없어짐.
 }
 
 // 제안의 상태 - 진행중/가결/부결
