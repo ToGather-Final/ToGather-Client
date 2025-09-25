@@ -65,7 +65,7 @@ export enum HistoryCategory {
 
     // 무엇을 / 어떻게
     side: TradeSide;   // "BUY" | "SELL"
-    name: string;      // 예: "테슬라"
+    stockName: string;      // 예: "테슬라"
 
     // 몇 주 / 얼마에
     shares: number;    // 예: 1
@@ -82,16 +82,16 @@ export enum HistoryCategory {
   // 매도/매수 완료
   export type TradeExecutedPayloadDTO = {
     side: TradeSide;         // "BUY" | "SELL"
-    name: string;            // 예: 테슬라
+    stockName: string;            // 예: 테슬라
     shares: number;          // 체결 수량
-    price: number;           // 1주 체결가
+    unitPrice: number;           // 1주 체결가
     accountBalance: number; // 체결 후 모임계좌잔액
   };
   
   // 매도/매수 실패
   export type TradeFailedPayloadDTO = {
     side: TradeSide;
-    name: string;
+    stockName: string;
     reason: string;         // 실패 사유(잔고부족, 호가변경 등)
   };
   

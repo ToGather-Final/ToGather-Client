@@ -64,7 +64,7 @@ const getHistoryDescription = (item: HistoryDTO) => {
     // 투표 가결
     case HistoryType.VOTE_APPROVED:
       const votePayload = item.payload as VoteApprovedPayloadDTO
-      return `${votePayload.scheduledAt}\n${votePayload.name} ${votePayload.shares}주 ${votePayload.unitPrice.toLocaleString()}원 ${votePayload.side === "BUY" ? "매수" : "매도"} 예정`
+      return `${votePayload.scheduledAt}\n${votePayload.stockName} ${votePayload.shares}주 ${votePayload.unitPrice.toLocaleString()}원 ${votePayload.side === "BUY" ? "매수" : "매도"} 예정`
     // 투표 부결
     case HistoryType.VOTE_REJECTED:
       const rejectedPayload = item.payload as VoteCreatedPayloadDTO
@@ -85,7 +85,7 @@ const getHistoryDescription = (item: HistoryDTO) => {
     // 거래 실패
     case HistoryType.TRADE_FAILED:
       const failedPayload = item.payload as TradeExecutedPayloadDTO
-      return `${failedPayload.name} ${failedPayload.shares}주 매도가 실패했습니다.\n계좌 잔액 ${failedPayload.accountBalance.toLocaleString()}원`
+      return `${failedPayload.stockName} ${failedPayload.shares}주 매도가 실패했습니다.\n계좌 잔액 ${failedPayload.accountBalance.toLocaleString()}원`
     // 목표 달성
     case HistoryType.GOAL_ACHIEVED:
       const goalPayload = item.payload as GoalAchievedPayloadDTO

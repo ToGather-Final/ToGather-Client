@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
   type HistoryDTO,
   HistoryType,
+  HistoryCategory,
   type VoteApprovedPayloadDTO,
   type TradeExecutedPayloadDTO,
   type CashDepositCompletedPayloadDTO,
@@ -19,21 +19,21 @@ import HistoryCalendar from "@/components/history/HistoryCalendar"
 const mockHistoryData: HistoryDTO[] = [
   {
     id: 1,
-    category: "TRADE" as any,
+    category: HistoryCategory.TRADE,
     type: HistoryType.TRADE_EXECUTED,
     title: "테슬라 1주 58000원 매도 완료",
     date: "2025-09-16",
     payload: {
       side: "SELL",
-      name: "테슬라",
+      stockName: "테슬라",
       shares: 1,
-      price: 5800000,
+      unitPrice: 5800000,
       accountBalance: 7800000,
     } as TradeExecutedPayloadDTO,
   },
   {
     id: 2,
-    category: "VOTE" as any,
+    category: HistoryCategory.VOTE,
     type: HistoryType.VOTE_APPROVED,
     title: "투표 가결",
     date: "2025-09-14",
@@ -41,14 +41,14 @@ const mockHistoryData: HistoryDTO[] = [
       proposalId: 1,
       scheduledAt: "2025년 9월 15일 오전 9시",
       side: "SELL",
-      name: "테슬라",
+      stockName: "테슬라",
       shares: 1,
       unitPrice: 5800000,
     } as VoteApprovedPayloadDTO,
   },
   {
     id: 3,
-    category: "CASH" as any,
+    category: HistoryCategory.CASH,
     type: HistoryType.CASH_DEPOSIT_COMPLETED,
     title: "예수금 충전 완료",
     date: "2025-09-14",
@@ -60,7 +60,7 @@ const mockHistoryData: HistoryDTO[] = [
   },
   {
     id: 4,
-    category: "VOTE" as any,
+    category: HistoryCategory.VOTE,
     type: HistoryType.VOTE_CREATED,
     title: "테슬라 1주 58000원 매도 제안",
     date: "2025-09-14",
@@ -72,7 +72,7 @@ const mockHistoryData: HistoryDTO[] = [
   },
   {
     id: 5,
-    category: "CASH" as any,
+    category: HistoryCategory.CASH,
     type: HistoryType.CASH_DEPOSIT_COMPLETED,
     title: "예수금 충전 완료",
     date: "2025-09-14",
@@ -84,7 +84,7 @@ const mockHistoryData: HistoryDTO[] = [
   },
   {
     id: 6,
-    category: "VOTE" as any,
+    category: HistoryCategory.VOTE,
     type: HistoryType.VOTE_REJECTED,
     title: "투표 부결",
     date: "2025-09-13",
@@ -96,21 +96,21 @@ const mockHistoryData: HistoryDTO[] = [
   },
   {
     id: 7,
-    category: "TRADE" as any,
+    category: HistoryCategory.TRADE,
     type: HistoryType.TRADE_FAILED,
     title: "삼성전자 5주 매도 실패",
     date: "2025-09-12",
     payload: {
       side: "SELL",
-      name: "삼성전자",
+      stockName: "삼성전자",
       shares: 5,
-      price: 4500000,
+      unitPrice: 4500000,
       accountBalance: 7800000,
     } as TradeExecutedPayloadDTO,
   },
   {
     id: 8,
-    category: "PAY" as any,
+    category: HistoryCategory.PAY,
     type: HistoryType.PAY_CHARGE_COMPLETED,
     title: "페이 충전 완료",
     date: "2025-09-11",
@@ -122,7 +122,7 @@ const mockHistoryData: HistoryDTO[] = [
   },
   {
     id: 9,
-    category: "GOAL" as any,
+    category: HistoryCategory.GOAL,
     type: HistoryType.GOAL_ACHIEVED,
     title: "목표 달성",
     date: "2025-09-10",
@@ -132,15 +132,15 @@ const mockHistoryData: HistoryDTO[] = [
   },
   {
     id: 10,
-    category: "TRADE" as any,
+    category: HistoryCategory.TRADE,
     type: HistoryType.TRADE_EXECUTED,
     title: "엔비디아 2주 49200원 매수 완료",
     date: "2025-09-09",
     payload: {
       side: "BUY",
-      name: "엔비디아",
+      stockName: "엔비디아",
       shares: 2,
-      price: 98400,
+      unitPrice: 98400,
       accountBalance: 7702160,
     } as TradeExecutedPayloadDTO,
   },
