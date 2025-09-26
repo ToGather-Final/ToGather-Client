@@ -47,10 +47,12 @@ export default function ToGatherApp() {
         />
 
         {/* Star coin top right */}
-        <div className="absolute top-8 right-8 w-20 h-20 transform rotate-12">
-          <div className="w-full h-full bg-yellow-400 rounded-full border-4 border-yellow-300 flex items-center justify-center shadow-lg">
-            <div className="text-white text-2xl">⭐</div>
-          </div>
+        <div className="absolute top-10 -right-4 w-36 h-36 transform -rotate-42 z-0">
+          <img 
+            src="/images/star_coin.png" 
+            alt="Star coin" 
+            className="w-full h-full object-contain drop-shadow-lg"
+          />
         </div>
 
         {/* Main content */}
@@ -75,18 +77,22 @@ export default function ToGatherApp() {
           </h1>
         </div>
 
-        {/* Happy emoji bottom left */}
-        <div className="absolute bottom-20 left-8 w-24 h-24">
-          <div className="w-full h-full bg-yellow-400 rounded-full border-4 border-yellow-300 flex items-center justify-center shadow-lg transform -rotate-12">
-            <div className="text-2xl">😊</div>
-          </div>
+        {/* Smile coin bottom left */}
+        <div className="absolute bottom-64 -left-2 w-40 h-40 transform rotate-28 scale-x-[-1] z-0">
+          <img 
+            src="/images/smile_coin.png" 
+            alt="Smile coin" 
+            className="w-full h-full object-contain drop-shadow-lg"
+          />
         </div>
 
-        {/* Crying emoji bottom right */}
-        <div className="absolute bottom-32 right-8 w-28 h-28">
-          <div className="w-full h-full bg-yellow-400 rounded-full border-4 border-yellow-300 flex items-center justify-center shadow-lg transform rotate-12">
-            <div className="text-3xl">😭</div>
-          </div>
+        {/* Heart coin bottom right */}
+        <div className="absolute -bottom-6 -right-4 w-56 h-56 transform -rotate-32 z-0">
+          <img 
+            src="/images/heart_coin.png" 
+            alt="Heart coin" 
+            className="w-full h-full object-contain drop-shadow-lg"
+          />
         </div>
       </div>
     )
@@ -97,10 +103,12 @@ export default function ToGatherApp() {
     return (
       <div className="min-h-screen bg-white relative overflow-hidden">
         {/* Star coin top right */}
-        <div className="absolute top-8 right-8 w-20 h-20 transform rotate-12">
-          <div className="w-full h-full bg-yellow-400 rounded-full border-4 border-yellow-300 flex items-center justify-center shadow-lg">
-            <div className="text-white text-2xl">⭐</div>
-          </div>
+        <div className="absolute top-10 -right-4 w-36 h-36 transform -rotate-42 z-0">
+          <img 
+            src="/images/star_coin.png" 
+            alt="Star coin" 
+            className="w-full h-full object-contain drop-shadow-lg"
+          />
         </div>
 
         {/* Main content */}
@@ -137,18 +145,22 @@ export default function ToGatherApp() {
           </div>
         </div>
 
-        {/* Happy emoji bottom left */}
-        <div className="absolute bottom-20 left-8 w-24 h-24">
-          <div className="w-full h-full bg-yellow-400 rounded-full border-4 border-yellow-300 flex items-center justify-center shadow-lg transform -rotate-12">
-            <div className="text-2xl">😊</div>
-          </div>
+        {/* Smile coin bottom left */}
+        <div className="absolute bottom-64 -left-2 w-40 h-40 transform rotate-28 scale-x-[-1] z-0">
+          <img 
+            src="/images/smile_coin.png" 
+            alt="Smile coin" 
+            className="w-full h-full object-contain drop-shadow-lg"
+          />
         </div>
 
-        {/* Crying emoji bottom right */}
-        <div className="absolute bottom-32 right-8 w-28 h-28">
-          <div className="w-full h-full bg-yellow-400 rounded-full border-4 border-yellow-300 flex items-center justify-center shadow-lg transform rotate-12">
-            <div className="text-3xl">😭</div>
-          </div>
+        {/* Heart coin bottom right */}
+        <div className="absolute -bottom-6 -right-4 w-56 h-56 transform -rotate-32 z-0">
+          <img 
+            src="/images/heart_coin.png" 
+            alt="Heart coin" 
+            className="w-full h-full object-contain drop-shadow-lg"
+          />
         </div>
       </div>
     )
