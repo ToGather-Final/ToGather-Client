@@ -1,0 +1,103 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
+// @ts-ignore
+import confetti from "canvas-confetti"
+
+export default function WelcomePage() {
+  const router = useRouter()
+  const [windowDimensions, setWindowDimensions] = useState({ width: 0, height: 0 })
+  useEffect(() => {
+    const updateWindowDimensions = () => {
+      setWindowDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
+    }
+
+    updateWindowDimensions()
+    window.addEventListener('resize', updateWindowDimensions)
+
+    // 직사각형 모양의 컨페티 생성
+    const createRectangularConfetti = () => {
+      const colors = ['#e53e3e', '#2b6cb0', '#38a169', '#d69e2e']
+      
+      // 여러 번 발사하여 지속적인 효과
+      const interval = setInterval(() => {
+        confetti({
+          particleCount: 10,
+          spread: 70,
+          origin: { y: 0 },
+          colors: colors,
+          shapes: ['square'], // 직사각형 모양
+          gravity: 1.5, // 중력 증가로 화면 밑까지 내려오도록
+          ticks: 300, // 더 오래 살아있도록
+        })
+      }, 300)
+
+      return () => clearInterval(interval)
+    }
+
+    const cleanup = createRectangularConfetti()
+
+    return () => {
+      window.removeEventListener('resize', updateWindowDimensions)
+      if (cleanup) cleanup()
+    }
+  }, [])
+
+  const handleCreateAccount = () => {
+    // 계좌 개설 페이지로 이동
+    router.push("/account-setup")
+  }
+
+  return (
+    <div className="min-h-screen bg-white relative overflow-hidden">
+      {/* Confetti canvas - 배경 레이어 */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <canvas 
+          id="confetti-canvas" 
+          className="w-full h-full"
+          style={{ zIndex: -1 }}
+        />
+      </div>
+
+      {/* Main content */}
+      <div className="flex flex-col items-center justify-center min-h-screen px-8 relative z-10">
+        {/* Logo */}
+        <div className="mb-8">
+          <div className="text-blue-500 text-6xl font-bold mb-2">T.</div>
+        </div>
+
+        {/* Welcome Message */}
+        <div className="text-center mb-20">
+          <h1 className="text-4xl font-bold text-blue-500 mb-8 leading-tight">
+            지구님
+            <br />
+            환영합니다
+          </h1>
+
+          <p className="text-xl text-blue-400 leading-relaxed font-medium">
+            계좌를 만들고
+            <br />
+            다함께
+            <br />
+            그룹 투자를
+            <br />
+            시작해보세요
+          </p>
+        </div>
+
+        {/* Account Setup Button */}
+        <button
+          onClick={handleCreateAccount}
+          className="w-full max-w-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white py-5 px-8 rounded-3xl font-bold text-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95"
+        >
+          계좌 개설하러 가기
+        </button>
+      </div>
+    </div>
+  )
+}

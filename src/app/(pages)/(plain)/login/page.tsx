@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
+import BackgroundCoins from "@/components/layout/BackgroundCoins"
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -29,15 +30,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
-      {/* Star coin top right */}
-      <div className="absolute top-8 right-8 w-20 h-20 transform rotate-12">
-        <div className="w-full h-full bg-yellow-400 rounded-full border-4 border-yellow-300 flex items-center justify-center shadow-lg">
-          <div className="text-white text-2xl">⭐</div>
-        </div>
-      </div>
+      {/* Background coins */}
+      <BackgroundCoins />
 
       {/* Back button */}
-      <div className="absolute top-8 left-8">
+      <div className="absolute top-8 left-8 z-20">
         <button
           onClick={handleBack}
           className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
@@ -49,7 +46,7 @@ export default function LoginPage() {
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col items-center justify-center min-h-screen px-8">
+      <div className="flex flex-col items-center justify-center min-h-screen px-8 relative z-10">
         {/* Logo */}
         <div className="mb-8">
           <div className="text-blue-500 text-6xl font-bold mb-2">T.</div>
@@ -63,14 +60,14 @@ export default function LoginPage() {
             placeholder="아이디"
             value={formData.loginId}
             onChange={(e) => handleInputChange("loginId", e.target.value)}
-            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400"
+            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
           />
           <Input
             type="password"
             placeholder="비밀번호"
             value={formData.loginPassword}
             onChange={(e) => handleInputChange("loginPassword", e.target.value)}
-            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400"
+            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
           />
 
           <Button
@@ -93,12 +90,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Happy emoji bottom left */}
-      <div className="absolute bottom-20 left-8 w-24 h-24">
-        <div className="w-full h-full bg-yellow-400 rounded-full border-4 border-yellow-300 flex items-center justify-center shadow-lg transform -rotate-12">
-          <div className="text-2xl">😊</div>
-        </div>
-      </div>
     </div>
   )
 }
