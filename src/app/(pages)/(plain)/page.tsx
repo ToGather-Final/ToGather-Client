@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
+import BackgroundCoins from "@/components/layout/BackgroundCoins"
 
 export default function ToGatherApp() {
   const [currentScreen, setCurrentScreen] = useState<"splash" | "auth-selection">("splash")
@@ -46,14 +47,8 @@ export default function ToGatherApp() {
           }`}
         />
 
-        {/* Star coin top right */}
-        <div className="absolute top-10 -right-4 w-36 h-36 transform -rotate-42 z-0">
-          <img 
-            src="/images/star_coin.png" 
-            alt="Star coin" 
-            className="w-full h-full object-contain drop-shadow-lg"
-          />
-        </div>
+        {/* Background coins */}
+        <BackgroundCoins />
 
         {/* Main content */}
         <div className="flex flex-col items-center justify-center min-h-screen px-8">
@@ -76,24 +71,6 @@ export default function ToGatherApp() {
             ToGather
           </h1>
         </div>
-
-        {/* Smile coin bottom left */}
-        <div className="absolute bottom-64 -left-2 w-40 h-40 transform rotate-28 scale-x-[-1] z-0">
-          <img 
-            src="/images/smile_coin.png" 
-            alt="Smile coin" 
-            className="w-full h-full object-contain drop-shadow-lg"
-          />
-        </div>
-
-        {/* Heart coin bottom right */}
-        <div className="absolute -bottom-6 -right-4 w-56 h-56 transform -rotate-32 z-0">
-          <img 
-            src="/images/heart_coin.png" 
-            alt="Heart coin" 
-            className="w-full h-full object-contain drop-shadow-lg"
-          />
-        </div>
       </div>
     )
   }
@@ -102,14 +79,8 @@ export default function ToGatherApp() {
   if (currentScreen === "auth-selection") {
     return (
       <div className="min-h-screen bg-white relative overflow-hidden">
-        {/* Star coin top right */}
-        <div className="absolute top-10 -right-4 w-36 h-36 transform -rotate-42 z-0">
-          <img 
-            src="/images/star_coin.png" 
-            alt="Star coin" 
-            className="w-full h-full object-contain drop-shadow-lg"
-          />
-        </div>
+        {/* Background coins */}
+        <BackgroundCoins />
 
         {/* Main content */}
         <div className="flex flex-col items-center justify-center min-h-screen px-8">
@@ -145,23 +116,6 @@ export default function ToGatherApp() {
           </div>
         </div>
 
-        {/* Smile coin bottom left */}
-        <div className="absolute bottom-64 -left-2 w-40 h-40 transform rotate-28 scale-x-[-1] z-0">
-          <img 
-            src="/images/smile_coin.png" 
-            alt="Smile coin" 
-            className="w-full h-full object-contain drop-shadow-lg"
-          />
-        </div>
-
-        {/* Heart coin bottom right */}
-        <div className="absolute -bottom-6 -right-4 w-56 h-56 transform -rotate-32 z-0">
-          <img 
-            src="/images/heart_coin.png" 
-            alt="Heart coin" 
-            className="w-full h-full object-contain drop-shadow-lg"
-          />
-        </div>
       </div>
     )
   }

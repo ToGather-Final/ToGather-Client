@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
+import BackgroundCoins from "@/components/layout/BackgroundCoins"
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -21,8 +22,8 @@ export default function SignupPage() {
   const handleSignup = () => {
     // Mock signup logic
     console.log("Signup attempt:", formData)
-    // After successful signup, redirect to welcome page or main app
-    // router.push("/welcome") // or wherever you want to redirect after signup
+    // After successful signup, redirect to welcome page
+    router.push("/welcome")
   }
 
   const handleBack = () => {
@@ -31,15 +32,11 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
-      {/* Star coin top right */}
-      <div className="absolute top-8 right-8 w-20 h-20 transform rotate-12">
-        <div className="w-full h-full bg-yellow-400 rounded-full border-4 border-yellow-300 flex items-center justify-center shadow-lg">
-          <div className="text-white text-2xl">⭐</div>
-        </div>
-      </div>
+      {/* Background coins */}
+      <BackgroundCoins />
 
       {/* Back button */}
-      <div className="absolute top-8 left-8">
+      <div className="absolute top-8 left-8 z-20">
         <button
           onClick={handleBack}
           className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
@@ -51,7 +48,7 @@ export default function SignupPage() {
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col items-center justify-center min-h-screen px-8 py-12">
+      <div className="flex flex-col items-center justify-center min-h-screen px-8 py-12 relative z-10">
         {/* Logo */}
         <div className="mb-6">
           <div className="text-blue-500 text-5xl font-bold mb-2">T.</div>
@@ -65,27 +62,27 @@ export default function SignupPage() {
             placeholder="닉네임"
             value={formData.nickname}
             onChange={(e) => handleInputChange("nickname", e.target.value)}
-            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400"
+            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
           />
           <Input
             placeholder="아이디"
             value={formData.id}
             onChange={(e) => handleInputChange("id", e.target.value)}
-            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400"
+            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
           />
           <Input
             type="password"
             placeholder="비밀번호"
             value={formData.password}
             onChange={(e) => handleInputChange("password", e.target.value)}
-            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400"
+            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
           />
           <Input
             type="password"
             placeholder="비밀번호 확인"
             value={formData.confirmPassword}
             onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400"
+            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
           />
 
           <Button
@@ -104,12 +101,6 @@ export default function SignupPage() {
         </div>
       </div>
 
-      {/* Happy emoji bottom left */}
-      <div className="absolute bottom-20 left-8 w-24 h-24">
-        <div className="w-full h-full bg-yellow-400 rounded-full border-4 border-yellow-300 flex items-center justify-center shadow-lg transform -rotate-12">
-          <div className="text-2xl">😊</div>
-        </div>
-      </div>
     </div>
   )
 }
