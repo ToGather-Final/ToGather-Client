@@ -26,35 +26,23 @@ export default function SignupPage() {
     router.push("/welcome")
   }
 
-  const handleBack = () => {
-    router.push("/")
-  }
-
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Background coins */}
       <BackgroundCoins />
 
-      {/* Back button */}
-      <div className="absolute top-8 left-8 z-20">
-        <button
-          onClick={handleBack}
-          className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
-        >
-          <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-      </div>
-
       {/* Main content */}
       <div className="flex flex-col items-center justify-center min-h-screen px-8 py-12 relative z-10">
         {/* Logo */}
         <div className="mb-6">
-          <div className="text-blue-500 text-5xl font-bold mb-2">T.</div>
+          <img 
+            src="/images/logo-blue.png"
+            alt="ToGather Logo"
+            className="h-16 w-16 object-contain"
+          />
         </div>
 
-        <h1 className="text-blue-500 text-4xl font-bold text-center mb-12">ToGather</h1>
+        <h1 className="text-4xl font-bold text-center mb-12" style={{ color: '#6592FD' }}>ToGather</h1>
 
         {/* Signup form */}
         <div className="w-full max-w-sm space-y-4">

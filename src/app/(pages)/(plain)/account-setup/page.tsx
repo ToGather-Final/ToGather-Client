@@ -44,15 +44,19 @@ export default function InvestmentAccountPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <div className="text-2xl font-bold text-blue-600">T.</div>
+        <img 
+          src="/images/logo-blue.png"
+          alt="ToGather Logo"
+          className="h-8 w-8 object-contain"
+        />
         <div className="w-6"></div>
       </div>
 
       {/* Content */}
       <div className="flex-1 px-6 py-8 relative z-10">
         <div className="max-w-md mx-auto">
-          <h1 className="text-2xl font-bold text-blue-600 text-center mb-2">투자 계좌 개설</h1>
-          <p className="text-blue-500 text-center mb-8">매매에 사용되는 개인 통장이에요</p>
+          <h1 className="text-2xl font-bold text-center mb-2" style={{ color: '#6592FD' }}>투자 계좌 개설</h1>
+          <p className="text-center mb-8" style={{ color: '#6592FD' }}>매매에 사용되는 개인 통장이에요</p>
 
           {/* Info Box */}
           <div className="bg-purple-50 rounded-lg p-4 mb-8">

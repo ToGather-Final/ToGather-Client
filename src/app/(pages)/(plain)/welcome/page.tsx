@@ -68,7 +68,11 @@ export default function WelcomePage() {
       <div className="flex flex-col items-center justify-center min-h-screen px-8 relative z-10">
         {/* Logo */}
         <div className="mb-8">
-          <div className="text-blue-500 text-6xl font-bold mb-2">T.</div>
+          <img 
+            src="/images/logo-blue.png"
+            alt="ToGather Logo"
+            className="h-16 w-16 object-contain"
+          />
         </div>
 
         {/* Welcome Message */}
