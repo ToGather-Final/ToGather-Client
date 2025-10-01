@@ -50,27 +50,27 @@ export default function SignupPage() {
             placeholder="닉네임"
             value={formData.nickname}
             onChange={(e) => handleInputChange("nickname", e.target.value)}
-            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
+            className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
           />
           <Input
             placeholder="아이디"
             value={formData.id}
             onChange={(e) => handleInputChange("id", e.target.value)}
-            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
+            className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
           />
           <Input
             type="password"
             placeholder="비밀번호"
             value={formData.password}
             onChange={(e) => handleInputChange("password", e.target.value)}
-            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
+            className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
           />
           <Input
             type="password"
             placeholder="비밀번호 확인"
             value={formData.confirmPassword}
             onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
+            className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
           />
 
           <MainButton onClick={handleSignup} className="mt-8">

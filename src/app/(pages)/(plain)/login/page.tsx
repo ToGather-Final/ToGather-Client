@@ -48,14 +48,14 @@ export default function LoginPage() {
             placeholder="아이디"
             value={formData.loginId}
             onChange={(e) => handleInputChange("loginId", e.target.value)}
-            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
+            className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
           />
           <Input
             type="password"
             placeholder="비밀번호"
             value={formData.loginPassword}
             onChange={(e) => handleInputChange("loginPassword", e.target.value)}
-            className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
+            className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
           />
 
           <MainButton onClick={handleLogin} className="mt-8">
