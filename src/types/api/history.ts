@@ -1,0 +1,121 @@
+// src/types/api/history.ts
+
+// 1) 공통 분류/타입
+export enum HistoryCategory {
+    VOTE = "VOTE",      // 투표 - 투표 올라옴(매도/매수/예수금/페이 충전), 투표 가결, 투표 부결
+    TRADE = "TRADE",    // 매매 - 매도/매수 완료, 매도/매수 실패
+    CASH = "CASH",      // 예수금 - 예수금 충전 완료
+    PAY = "PAY",        // 페이 충전 완료
+    GOAL = "GOAL",      // 목표(목표 달성)
+  }
+  
+  export enum HistoryType {
+    // 투표
+    VOTE_CREATED = "VOTE_CREATED",     // 투표 올라옴 (매매/예수금/페이 충전)
+    VOTE_APPROVED = "VOTE_APPROVED",   // 투표 가결
+    VOTE_REJECTED = "VOTE_REJECTED",   // 투표 부결
+  
+    // 매매
+    TRADE_EXECUTED = "TRADE_EXECUTED", // 매도/매수 완료
+    TRADE_FAILED = "TRADE_FAILED",     // 매도/매수 실패
+  
+    // 예수금
+    CASH_DEPOSIT_COMPLETED = "CASH_DEPOSIT_COMPLETED", // 예수금 충전 완료
+  
+    // 페이
+    PAY_CHARGE_COMPLETED = "PAY_CHARGE_COMPLETED", // 페이 충전 완료(모임통장으로 송금)
+  
+    // 목표
+    GOAL_ACHIEVED = "GOAL_ACHIEVED",            // 목표 달성
+  }
+  
+  export type TradeSide = "BUY" | "SELL";
+  
+  // 2) 서버가 주는 히스토리 아이템(DTO)
+  export type HistoryDTO = {
+    id: number;
+    category: HistoryCategory;
+    type: HistoryType;
+    title: string;           // 카드 타이틀
+    date: string;    // 우측 날짜 표기(선택, 서버 or 클라 포맷)
+    payload?:
+      | VoteCreatedPayloadDTO
+      | VoteApprovedPayloadDTO
+      | VoteRejectedPayloadDTO
+      | TradeExecutedPayloadDTO
+      | TradeFailedPayloadDTO
+      | CashDepositCompletedPayloadDTO
+      | PayChargeCompletedPayloadDTO
+      | GoalAchievedPayloadDTO;
+  };
+  
+  // 3) 타입별 페이로드
+  
+  // 투표 올라옴
+  export type VoteCreatedPayloadDTO = {
+    proposalId: number;
+    proposalName: string;
+    proposerName: string;
+  };
+  
+  // 투표 가결
+  export type VoteApprovedPayloadDTO = {
+    proposalId: number;
+    scheduledAt: string;    // 실행 예정 시각
+
+    // 무엇을 / 어떻게
+    side: TradeSide;   // "BUY" | "SELL"
+    stockName: string;      // 예: "테슬라"
+
+    // 몇 주 / 얼마에
+    shares: number;    // 예: 1
+    unitPrice: number; // 1주 가격 (원화 기준이면 KRW)
+    currency?: "KRW" | "USD";
+  };
+  
+  // 투표 부결
+  export type VoteRejectedPayloadDTO = {
+    proposalId: number;
+    proposalName: string;
+  };
+  
+  // 매도/매수 완료
+  export type TradeExecutedPayloadDTO = {
+    side: TradeSide;         // "BUY" | "SELL"
+    stockName: string;            // 예: 테슬라
+    shares: number;          // 체결 수량
+    unitPrice: number;           // 1주 체결가
+    accountBalance: number; // 체결 후 모임계좌잔액
+  };
+  
+  // 매도/매수 실패
+  export type TradeFailedPayloadDTO = {
+    side: TradeSide;
+    stockName: string;
+    reason: string;         // 실패 사유(잔고부족, 호가변경 등)
+  };
+  
+  // 예수금 충전 완료
+  export type CashDepositCompletedPayloadDTO = {
+    depositorName: string;   // 충전자
+    amount: number;          // 금액
+    accountBalance: number; // 이후 모임계좌잔액
+  };
+  
+  // 페이 충전 완료(모임통장으로 송금)
+  export type PayChargeCompletedPayloadDTO = {
+    amount: number;          // 금액
+    accountBalance: number; // 이후 모임계좌잔액
+  };
+  
+  // 목표 달성
+  export type GoalAchievedPayloadDTO = {
+    targetAmount: number;    // 목표 금액
+  };
+  
+  // 4) 목록 응답
+  export type GetHistoryResponse = {
+    items: HistoryDTO[];
+    nextCursor?: string;
+  };
+  
