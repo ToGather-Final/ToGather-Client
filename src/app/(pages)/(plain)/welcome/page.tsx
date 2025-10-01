@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 // @ts-ignore
 import confetti from "canvas-confetti"
+import MainButton from "@/components/common/MainButton"
 
 export default function WelcomePage() {
   const router = useRouter()
@@ -73,13 +73,13 @@ export default function WelcomePage() {
 
         {/* Welcome Message */}
         <div className="text-center mb-20">
-          <h1 className="text-4xl font-bold text-blue-500 mb-8 leading-tight">
+          <h1 className="text-4xl font-extrabold mb-8 leading-tight" style={{ color: '#6592FD' }}>
             지구님
             <br />
             환영합니다
           </h1>
 
-          <p className="text-xl text-blue-400 leading-relaxed font-medium">
+          <p className="text-xl leading-relaxed font-semibold" style={{ color: '#6592FD' }}>
             계좌를 만들고
             <br />
             다함께
@@ -91,12 +91,9 @@ export default function WelcomePage() {
         </div>
 
         {/* Account Setup Button */}
-        <button
-          onClick={handleCreateAccount}
-          className="w-full max-w-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white py-5 px-8 rounded-3xl font-bold text-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95"
-        >
+        <MainButton onClick={handleCreateAccount} className="max-w-sm">
           계좌 개설하러 가기
-        </button>
+        </MainButton>
       </div>
     </div>
   )

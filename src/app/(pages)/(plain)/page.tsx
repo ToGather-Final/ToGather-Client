@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import BackgroundCoins from "@/components/layout/BackgroundCoins"
+import BackgroundCoins from "@/components/common/BackgroundCoins"
+import MainButton from "@/components/common/MainButton"
 
 export default function ToGatherApp() {
   const [currentScreen, setCurrentScreen] = useState<"splash" | "auth-selection">("splash")
@@ -101,18 +101,12 @@ export default function ToGatherApp() {
               showButtons ? "transform translate-y-0 opacity-100" : "transform translate-y-12 opacity-0"
             }`}
           >
-            <Button
-              onClick={handleLogin}
-              className="w-full h-14 bg-blue-500 hover:bg-blue-600 text-white text-lg font-medium rounded-2xl"
-            >
+            <MainButton onClick={handleLogin}>
               로그인
-            </Button>
-            <Button
-              onClick={handleSignup}
-              className="w-full h-14 bg-blue-500 hover:bg-blue-600 text-white text-lg font-medium rounded-2xl"
-            >
+            </MainButton>
+            <MainButton onClick={handleSignup}>
               회원가입
-            </Button>
+            </MainButton>
           </div>
         </div>
 

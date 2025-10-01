@@ -134,5 +134,6 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-pretendard), -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
   }
 }
