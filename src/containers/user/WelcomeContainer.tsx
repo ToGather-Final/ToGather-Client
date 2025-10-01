@@ -1,14 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 // @ts-ignore
 import confetti from "canvas-confetti"
 import MainButton from "@/components/common/MainButton"
 
-export default function WelcomePage() {
-  const router = useRouter()
+interface WelcomeContainerProps {
+  onComplete: () => void
+}
+
+export default function WelcomeContainer({ onComplete }: WelcomeContainerProps) {
   const [windowDimensions, setWindowDimensions] = useState({ width: 0, height: 0 })
+
   useEffect(() => {
     const updateWindowDimensions = () => {
       setWindowDimensions({
@@ -47,11 +50,6 @@ export default function WelcomePage() {
       if (cleanup) cleanup()
     }
   }, [])
-
-  const handleCreateAccount = () => {
-    // 계좌 개설 페이지로 이동
-    router.push("/account-setup")
-  }
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
@@ -95,7 +93,7 @@ export default function WelcomePage() {
         </div>
 
         {/* Account Setup Button */}
-        <MainButton onClick={handleCreateAccount} className="max-w-sm">
+        <MainButton onClick={onComplete} className="max-w-sm">
           계좌 개설하러 가기
         </MainButton>
       </div>
