@@ -27,41 +27,54 @@ export default function InvestmentAccountPage() {
     }))
   }
 
-  const handleBack = () => {
-    router.back()
-  }
-
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="h-screen bg-white relative overflow-hidden flex flex-col">
 
       {/* Header */}
-      <div className="flex items-center justify-between p-6 relative z-10">
-        <button 
-          onClick={handleBack} 
-          className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
-        >
-          <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
+      <div className="p-6 relative z-10 flex-shrink-0">
         <img 
           src="/images/logo-blue.png"
           alt="ToGather Logo"
           className="h-8 w-8 object-contain"
         />
-        <div className="w-6"></div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-6 py-8 relative z-10">
+      <div className="flex-1 px-6 pb-8 relative z-10 overflow-y-auto">
         <div className="max-w-md mx-auto">
-          <h1 className="text-2xl font-bold text-center mb-2" style={{ color: '#6592FD' }}>투자 계좌 개설</h1>
-          <p className="text-center mb-8" style={{ color: '#6592FD' }}>매매에 사용되는 개인 통장이에요</p>
+          <h1 
+            className="text-4xl font-extrabold text-center mb-4"
+            style={{ 
+              backgroundImage: 'linear-gradient(to right, #4078FF, #6989D4)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              fontWeight: 900,
+              WebkitTextStroke: '0.4px #4078FF'
+            }}
+          >
+            투자 계좌 개설
+          </h1>
+          <p 
+            className="text-lg font-extrabold text-center mb-8"
+            style={{ 
+              backgroundImage: 'linear-gradient(to right, #234085, #6989D4)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}
+          >
+            매매에 사용되는 개인 통장이에요
+          </p>
 
           {/* Info Box */}
-          <div className="bg-purple-50 rounded-lg p-4 mb-8">
-            <p className="text-sm text-gray-800 leading-relaxed">
-              주식과 금융상품을 한 계좌에서 거래할 수 있으며, 국내/해외주식, 금융상품(펀드, 채권, 연금) 서비스를 이용할 수 있습니다. 울랄라
+          <div className="rounded-3xl p-3 mb-8" style={{ backgroundColor: '#EEF2FF' }}>
+            <p className="text-xs text-gray-800 leading-relaxed text-center">
+              주식과 금융상품을 한 계좌에서 거래할 수 있으며,
+              <br />
+              국내/해외주식, 금융상품(펀드, 채권, 연금) 서비스를
+              <br />
+              이용할 수 있습니다. 울랄라
             </p>
           </div>
 
@@ -71,7 +84,7 @@ export default function InvestmentAccountPage() {
               placeholder="이름"
               value={formData.name}
               onChange={(e) => handleInputChange("name", e.target.value)}
-              className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
+              className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
               required
             />
 
@@ -80,7 +93,7 @@ export default function InvestmentAccountPage() {
               placeholder="영문 성"
               value={formData.englishLastName}
               onChange={(e) => handleInputChange("englishLastName", e.target.value)}
-              className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
+              className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
               required
             />
 
@@ -89,7 +102,7 @@ export default function InvestmentAccountPage() {
               placeholder="영문 이름"
               value={formData.englishFirstName}
               onChange={(e) => handleInputChange("englishFirstName", e.target.value)}
-              className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
+              className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
               required
             />
 
