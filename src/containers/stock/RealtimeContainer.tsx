@@ -42,7 +42,6 @@ export default function RealtimeContainer() {
   const [currenPrice, setCurrentPrice] = useState(103);
   return (
     <div>
-      <MenuTab tabs={uptabs} defaultTab="국내주식" />
       <div className="flex gap-[10px] items-center justify-start py-2 px-5">
         <button
           onClick={() => window.history.back()}

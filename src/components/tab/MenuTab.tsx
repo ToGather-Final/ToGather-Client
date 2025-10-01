@@ -10,9 +10,10 @@ interface Tab {
 interface MenuTabProps {
   tabs: Tab[];
   defaultTab: string;
+  children: React.ReactNode;
 }
 
-export default function MenuTab({ tabs, defaultTab }: MenuTabProps) {
+export default function MenuTab({ tabs, defaultTab, children }: MenuTabProps) {
   const [activeTab, setActiveTab] = useState(defaultTab);
   //아래와 같은 매개변수로 보내줘야 함
   // const tabs = [
@@ -22,23 +23,26 @@ export default function MenuTab({ tabs, defaultTab }: MenuTabProps) {
   // ];
 
   return (
-    <div className="flex items-center justify-around">
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          onClick={() => setActiveTab(tab.id)}
-          className={`
-              px-6 py-2 text-[14px] font-medium rounded-[15px] transition-all duration-200 ease-in-out
+    <div>
+      <div className="sticky top-0 bg-white border-b flex items-center justify-around">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`
+              px-6 py-3 text-[14px] font-medium rounded-[15px] transition-all duration-200 ease-in-out
               ${
                 activeTab === tab.id
                   ? "bg-blue-500 text-white shadow-md"
                   : "text-gray-600 hover:text-gray-800 hover:bg-gray-200"
               }
             `}
-        >
-          {tab.label}
-        </button>
-      ))}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+      {children}
     </div>
   );
 }

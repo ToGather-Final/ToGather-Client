@@ -1409,7 +1409,6 @@ const tabs = [
 export default function ChartContainer() {
   return (
     <div>
-      <MenuTab tabs={tabs} defaultTab="국내주식" />
       <div className="flex justify-between py-2  px-5">
         <div className="flex gap-[10px] items-center justify-start">
           <button
