@@ -39,7 +39,7 @@ export default function ToGatherApp() {
   // Splash Screen
   if (currentScreen === "splash") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-500 to-blue-600 relative overflow-hidden">
+      <div className="min-h-screen relative overflow-hidden" style={{ background: '#6592FD' }}>
         {/* Animated slide up overlay */}
         <div
           className={`absolute inset-0 bg-white transition-transform duration-800 ease-out ${
@@ -55,18 +55,34 @@ export default function ToGatherApp() {
           {/* Logo */}
           <div className="mb-8">
             <div
-              className={`text-6xl font-bold mb-2 transition-all duration-800 ${
-                showAnimation ? "text-blue-500 transform -translate-y-24" : "text-white transform translate-y-4"
+              className={`relative transition-all duration-800 ${
+                showAnimation ? "transform -translate-y-24" : "transform translate-y-4"
               }`}
             >
-              T.
+              {/* White logo */}
+              <img 
+                src="/images/logo-white.png"
+                alt="ToGather Logo"
+                className={`h-16 w-16 object-contain transition-opacity duration-800 ${
+                  showAnimation ? "opacity-0" : "opacity-100"
+                }`}
+              />
+              {/* Blue logo */}
+              <img 
+                src="/images/logo-blue.png"
+                alt="ToGather Logo"
+                className={`h-16 w-16 object-contain absolute top-0 left-0 transition-opacity duration-800 ${
+                  showAnimation ? "opacity-100" : "opacity-0"
+                }`}
+              />
             </div>
           </div>
 
           <h1
             className={`text-5xl font-bold text-center mb-16 transition-all duration-800 ${
-              showAnimation ? "text-blue-500 transform -translate-y-24" : "text-white transform translate-y-4"
+              showAnimation ? "transform -translate-y-24" : "text-white transform translate-y-4"
             }`}
+            style={showAnimation ? { color: '#6592FD' } : {}}
           >
             ToGather
           </h1>
@@ -86,12 +102,14 @@ export default function ToGatherApp() {
         <div className="flex flex-col items-center justify-center min-h-screen px-8">
           {/* Logo */}
           <div className="mb-8">
-            <div className="text-blue-500 text-6xl font-bold mb-2">
-              T.
-            </div>
+            <img 
+              src="/images/logo-blue.png"
+              alt="ToGather Logo"
+              className="h-16 w-16 object-contain"
+            />
           </div>
 
-          <h1 className="text-blue-500 text-5xl font-bold text-center mb-32">
+          <h1 className="text-5xl font-bold text-center mb-32" style={{ color: '#6592FD' }}>
             ToGather
           </h1>
 
