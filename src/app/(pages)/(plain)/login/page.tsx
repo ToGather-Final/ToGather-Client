@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
-import BackgroundCoins from "@/components/layout/BackgroundCoins"
+import BackgroundCoins from "@/components/common/BackgroundCoins"
+import MainButton from "@/components/common/MainButton"
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -70,12 +70,9 @@ export default function LoginPage() {
             className="h-14 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
           />
 
-          <Button
-            onClick={handleLogin}
-            className="w-full h-14 bg-blue-500 hover:bg-blue-600 text-white text-lg font-medium rounded-2xl mt-8"
-          >
+          <MainButton onClick={handleLogin} className="mt-8">
             로그인
-          </Button>
+          </MainButton>
 
           <div className="text-center mt-6">
             <span className="text-gray-600">아직 계정이 없다면? </span>

@@ -4,6 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
+import MainButton from "@/components/common/MainButton"
 
 export default function InvestmentAccountPage() {
   const router = useRouter()
@@ -103,12 +104,9 @@ export default function InvestmentAccountPage() {
             </div>
 
             {/* Submit Button */}
-            <button
-              type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white text-lg font-medium rounded-2xl h-14 transition-all mt-8"
-            >
+            <MainButton type="submit" className="mt-8">
               계좌 만들기
-            </button>
+            </MainButton>
           </form>
         </div>
       </div>
