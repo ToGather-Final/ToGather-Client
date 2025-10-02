@@ -2,12 +2,14 @@
 
 import type React from "react"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import MainButton from "@/components/common/MainButton"
 
-export default function InvestmentAccountPage() {
-  const router = useRouter()
+interface AccountSetupContainerProps {
+  onComplete: () => void
+}
+
+export default function AccountSetupContainer({ onComplete }: AccountSetupContainerProps) {
   const [formData, setFormData] = useState({
     name: "",
     englishLastName: "",
@@ -17,7 +19,7 @@ export default function InvestmentAccountPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // 계좌 개설 완료 화면으로 이동
-    router.push("/account-complete")
+    onComplete()
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -29,7 +31,6 @@ export default function InvestmentAccountPage() {
 
   return (
     <div className="h-screen bg-white relative overflow-hidden flex flex-col">
-
       {/* Header */}
       <div className="p-6 relative z-10 flex-shrink-0">
         <img 
