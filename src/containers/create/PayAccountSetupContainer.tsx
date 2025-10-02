@@ -2,12 +2,14 @@
 
 import type React from "react"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import MainButton from "@/components/common/MainButton"
 
-export default function PayAccountSetupPage() {
-  const router = useRouter()
+interface PayAccountSetupContainerProps {
+  onComplete: () => void
+}
+
+export default function PayAccountSetupContainer({ onComplete }: PayAccountSetupContainerProps) {
   const [formData, setFormData] = useState({
     name: "",
     englishLastName: "",
@@ -17,7 +19,7 @@ export default function PayAccountSetupPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // 그룹 생성 완료 화면으로 이동
-    router.push("/group-complete")
+    onComplete()
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -107,12 +109,12 @@ export default function PayAccountSetupPage() {
             <div className="flex items-start gap-3 py-4">
               <input
                 type="checkbox"
-                id="agreement"
+                id="pay-agreement"
                 className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 defaultChecked
                 required
               />
-              <label htmlFor="agreement" className="text-sm text-gray-700 leading-relaxed">
+              <label htmlFor="pay-agreement" className="text-sm text-gray-700 leading-relaxed">
                 개인(신용) 정보 처리 동의서 (금융 거래)
               </label>
             </div>
