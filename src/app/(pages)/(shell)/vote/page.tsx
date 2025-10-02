@@ -1,1 +1,1 @@
-export { default } from "../../../../containers/vote/votePage";
+// export { default } from "../../../../containers/vote/votePage";
