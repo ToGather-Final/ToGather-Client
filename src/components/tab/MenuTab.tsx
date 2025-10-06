@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useStockTab } from "@/contexts/stockTabContext";
+import { useEffect } from "react";
 
 interface Tab {
   id: string;
@@ -14,27 +15,23 @@ interface MenuTabProps {
 }
 
 export default function MenuTab({ tabs, defaultTab, children }: MenuTabProps) {
-  const [activeTab, setActiveTab] = useState(defaultTab);
-  //아래와 같은 매개변수로 보내줘야 함
-  // const tabs = [
-  //   { id: "보유주식", label: "보유주식" },
-  //   { id: "국내주식", label: "국내주식" },
-  //   { id: "해외주식", label: "해외주식" }
-  // ];
-
+  const { stockTab, setStockTab } = useStockTab();
+  useEffect(() => {
+    setStockTab(defaultTab);
+  }, []);
   return (
     <div>
-      <div className="sticky top-0 bg-white border-b flex items-center justify-around">
+      <div className="sticky top-0 bg-white flex items-center justify-center px-4 py-3 w-full gap-2">
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => setStockTab(tab.id)}
             className={`
-              px-6 py-3 text-[14px] font-medium rounded-[15px] transition-all duration-200 ease-in-out
+              flex-1 px-6 py-3 text-sm font-medium rounded-xl transition-colors
               ${
-                activeTab === tab.id
-                  ? "bg-blue-500 text-white shadow-md"
-                  : "text-gray-600 hover:text-gray-800 hover:bg-gray-200"
+                stockTab === tab.id
+                  ? "bg-[#447AFA] text-white"
+                  : "text-gray-600 bg-gray-100 hover:bg-gray-200"
               }
             `}
           >

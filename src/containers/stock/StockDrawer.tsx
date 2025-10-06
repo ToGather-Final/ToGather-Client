@@ -1,6 +1,15 @@
 "use client";
-import { ChartComponent } from "@/components/chart/Chart";
-import { ChevronLeft } from "lucide-react";
+
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerClose,
+} from "@/components/ui/drawer";
+import { SimpleChart } from "@/components/chart/SimpleChart";
+import { useRouter } from "next/navigation";
 
 // 일봉 (Day Data) - 매일 데이터
 const dayData = [
@@ -1398,58 +1407,211 @@ const yearData = [
   },
 ];
 
-const tabs = [
-  { id: "보유주식", label: "보유주식" },
-  { id: "국내주식", label: "국내주식" },
-  { id: "해외주식", label: "해외주식" },
+const stockList = [
+  {
+    name: "NAVER",
+    image:
+      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
+    area: "KOSPI",
+    code: "035420",
+    currentPrice: 269000, //업다운에따라 ui달라짐
+    increase: 500,
+    percent: 2.51,
+  },
+  {
+    name: "NAVER",
+    image:
+      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
+    area: "KOSPI",
+    code: "035420",
+    currentPrice: 269000, //업다운에따라 ui달라짐
+    increase: 500,
+    percent: 2.51,
+  },
+  {
+    name: "NAVER",
+    image:
+      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
+    area: "KOSPI",
+    code: "035420",
+    currentPrice: 269000, //업다운에따라 ui달라짐
+    increase: 500,
+    percent: 2.51,
+  },
+  {
+    name: "NAVER",
+    image:
+      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
+    area: "KOSPI",
+    code: "035420",
+    currentPrice: 269000, //업다운에따라 ui달라짐
+    increase: 500,
+    percent: 2.51,
+  },
+  {
+    name: "NAVER",
+    image:
+      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
+    area: "KOSPI",
+    code: "035420",
+    currentPrice: 269000, //업다운에따라 ui달라짐
+    increase: 500,
+    percent: 2.51,
+  },
+  {
+    name: "NAVER",
+    image:
+      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
+    area: "KOSPI",
+    code: "035420",
+    currentPrice: 269000, //업다운에따라 ui달라짐
+    increase: 500,
+    percent: 2.51,
+  },
+  {
+    name: "NAVER",
+    image:
+      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
+    area: "KOSPI",
+    code: "035420",
+    currentPrice: 269000, //업다운에따라 ui달라짐
+    increase: 500,
+    percent: 2.51,
+  },
+  {
+    name: "NAVER",
+    image:
+      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
+    area: "KOSPI",
+    code: "035420",
+    currentPrice: 269000, //업다운에따라 ui달라짐
+    increase: 500,
+    percent: 2.51,
+  },
+  {
+    name: "NAVER",
+    image:
+      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
+    area: "KOSPI",
+    code: "035420",
+    currentPrice: 269000, //업다운에따라 ui달라짐
+    increase: 500,
+    percent: 2.51,
+  },
+  {
+    name: "NAVER",
+    image:
+      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
+    area: "KOSPI",
+    code: "035420",
+    currentPrice: 269000, //업다운에따라 ui달라짐
+    increase: 500,
+    percent: 2.51,
+  },
+  {
+    name: "NAVER",
+    image:
+      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
+    area: "KOSPI",
+    code: "035420",
+    currentPrice: 269000, //업다운에따라 ui달라짐
+    increase: 500,
+    percent: 2.51,
+  },
+  {
+    name: "NAVER",
+    image:
+      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
+    area: "KOSPI",
+    code: "035420",
+    currentPrice: 269000, //업다운에따라 ui달라짐
+    increase: 500,
+    percent: 2.51,
+  },
 ];
 
-//주문 버튼부터 하면 됨
-export default function ChartContainer() {
-  return (
-    <div>
-      <div className="flex justify-between py-2  px-5">
-        <div className="flex gap-[10px] items-center justify-start">
-          <button
-            onClick={() => window.history.back()}
-            className="flex items-center text-gray-800 hover:text-black"
-          >
-            <ChevronLeft className="w-5 h-5 mr-1" />
-          </button>
-          <span className="text-[14px] font-bold">아마존닷컴</span>
-        </div>
-        <button className="text-[12px] text-white bg-blue-600 rounded-[8px] px-[8px] py-[4px]">
-          주문
-        </button>
-      </div>
+const ownStockList = [
+  {
+    name: "NAVER",
+    image:
+      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
+    owned: 33,
+    code: "035420",
+    currentPrice: 269000, //업다운에따라 ui달라짐
+    increase: 500,
+    percent: 2.51,
+  },
+];
 
-      <div className="px-8">
-        <div className="flex justify-start items-center text-[10px] gap-[10px]">
-          <div>005930</div>
-          <div>KOSPI</div>
-          <div>KRX</div>
-        </div>
-        <div className="flex justify-between items-center">
-          <div className="flex items-center text-blue-600 font-bold  gap-[10px] text-[10px] ">
-            <div className="text-[20px]">82,900</div>
-            <div className="flex items-center">
-              <div>▼</div>
-              <div>3,200</div>
+interface props {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  stockCode?: string;
+}
+
+export default function StockDrawer({ open, onOpenChange, stockCode }: props) {
+  const router = useRouter();
+  const goRealtime = () => {
+    router.push(`http://localhost:3000/stock/${stockCode}/realtime`);
+  };
+
+  return (
+    <div className="max-w-[600px]">
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle asChild>
+              <span className="text-[14px] font-bold px-4">아마존닷컴</span>
+            </DrawerTitle>
+            <DrawerDescription asChild></DrawerDescription>
+          </DrawerHeader>
+          <div className="px-8">
+            <div className="flex justify-start items-center text-[10px] gap-[10px]">
+              <div>{stockCode}</div>
+              <div>KOSPI</div>
+              <div>KRX</div>
             </div>
-            <div>-3.72%</div>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center text-blue-600 font-bold  gap-[10px] text-[10px] ">
+                <div className="text-[20px]">82,900</div>
+                <div className="flex items-center">
+                  <div>▼</div>
+                  <div>3,200</div>
+                </div>
+                <div>-3.72%</div>
+              </div>
+              <div className="flex gap-[10px] text-[10px]">
+                <div>거래량</div>
+                <div>2,629,345</div>
+              </div>
+            </div>
+            <SimpleChart
+              dayData={dayData}
+              weekData={weekData}
+              monthData={monthData}
+              yearData={yearData}
+            />
           </div>
-          <div className="flex gap-[10px] text-[10px]">
-            <div>거래량</div>
-            <div>2,629,345</div>
+
+          <div className="grid grid-cols-2 gap-[10px] px-[10px] mt-[10px]">
+            <DrawerClose asChild>
+              <button
+                className="text-[12px] h-[50px] text-white bg-red-600 rounded-[8px] px-[8px] py-[4px]"
+                onClick={goRealtime}
+              >
+                매수제안
+              </button>
+            </DrawerClose>
+
+            <DrawerClose asChild>
+              <button className="text-[12px] h-[50px] text-white bg-blue-600 rounded-[8px] px-[8px] py-[4px]">
+                매도제안
+              </button>
+            </DrawerClose>
           </div>
-        </div>
-        <ChartComponent
-          dayData={dayData}
-          weekData={weekData}
-          monthData={monthData}
-          yearData={yearData}
-        />
-      </div>
+          <div className="p-2"></div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }

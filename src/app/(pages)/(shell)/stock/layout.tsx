@@ -1,4 +1,5 @@
 import MenuTab from "@/components/tab/MenuTab";
+import { StockTabProvider } from "@/contexts/stockTabContext";
 
 export default function StockLayout({
   children,
@@ -6,13 +7,15 @@ export default function StockLayout({
   children: React.ReactNode;
 }) {
   const uptabs = [
-    { id: "보유주식", label: "보유주식" },
-    { id: "국내주식", label: "국내주식" },
-    { id: "해외주식", label: "해외주식" },
+    { id: "MY", label: "보유주식" },
+    { id: "DOMESTIC", label: "국내주식" },
+    { id: "OVERSEAS", label: "해외주식" },
   ];
   return (
-    <MenuTab tabs={uptabs} defaultTab="국내주식">
-      {children}
-    </MenuTab>
+    <StockTabProvider>
+      <MenuTab tabs={uptabs} defaultTab="MY">
+        {children}
+      </MenuTab>
+    </StockTabProvider>
   );
 }
