@@ -14,7 +14,7 @@ export default function SignupFlow() {
   }
 
   const handleWelcomeComplete = () => {
-    router.push("/account-setup")
+    router.push("/account-create")
   }
 
   if (currentStep === "signup") {
