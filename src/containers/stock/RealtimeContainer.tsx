@@ -1,8 +1,6 @@
 "use client";
 
-import MenuTab from "@/components/tab/MenuTab";
 import SimpleTab from "@/components/tab/SimpleTab";
-import SimpleTabComponent from "@/components/tab/SimpleTab";
 import { ChevronLeft } from "lucide-react";
 import { useState } from "react";
 

@@ -1,6 +1,5 @@
 "use client";
 import { ChartComponent } from "@/components/chart/Chart";
-import MenuTab from "@/components/tab/MenuTab";
 import { ChevronLeft } from "lucide-react";
 
 // 일봉 (Day Data) - 매일 데이터
