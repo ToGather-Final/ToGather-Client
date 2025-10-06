@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CreditCard } from "lucide-react";
+import Image from "next/image";
 
 export default function Header() {
   const pathname = usePathname();
@@ -14,7 +15,7 @@ export default function Header() {
                  bg-white border-b border-stone-200
                  flex items-center gap-3 px-4"
     >
-      <strong className="text-base">ToGather</strong>
+      <Image src="/logo.png" alt="logo" width={35} height={35} />
 
       <Link
         href="/pay"
@@ -27,7 +28,7 @@ export default function Header() {
                         : "text-stone-500 hover:bg-stone-50"
                     }`}
       >
-        <CreditCard size={20} className="stroke-current" />
+        <CreditCard size={25} className="stroke-current" />
       </Link>
     </header>
   );
