@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
+import BackgroundCoins from "@/components/common/BackgroundCoins"
+import MainButton from "@/components/common/MainButton"
 
 export default function ToGatherApp() {
   const [currentScreen, setCurrentScreen] = useState<"splash" | "auth-selection">("splash")
@@ -38,7 +39,7 @@ export default function ToGatherApp() {
   // Splash Screen
   if (currentScreen === "splash") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-500 to-blue-600 relative overflow-hidden">
+      <div className="min-h-screen relative overflow-hidden" style={{ background: '#6592FD' }}>
         {/* Animated slide up overlay */}
         <div
           className={`absolute inset-0 bg-white transition-transform duration-800 ease-out ${
@@ -46,53 +47,45 @@ export default function ToGatherApp() {
           }`}
         />
 
-        {/* Star coin top right */}
-        <div className="absolute top-10 -right-4 w-36 h-36 transform -rotate-42 z-0">
-          <img 
-            src="/images/star_coin.png" 
-            alt="Star coin" 
-            className="w-full h-full object-contain drop-shadow-lg"
-          />
-        </div>
+        {/* Background coins */}
+        <BackgroundCoins />
 
         {/* Main content */}
         <div className="flex flex-col items-center justify-center min-h-screen px-8">
           {/* Logo */}
           <div className="mb-8">
             <div
-              className={`text-6xl font-bold mb-2 transition-all duration-800 ${
-                showAnimation ? "text-blue-500 transform -translate-y-24" : "text-white transform translate-y-4"
+              className={`relative transition-all duration-800 ${
+                showAnimation ? "transform -translate-y-24" : "transform translate-y-4"
               }`}
             >
-              T.
+              {/* White logo */}
+              <img 
+                src="/images/logo-white.png"
+                alt="ToGather Logo"
+                className={`h-16 w-16 object-contain transition-opacity duration-800 ${
+                  showAnimation ? "opacity-0" : "opacity-100"
+                }`}
+              />
+              {/* Blue logo */}
+              <img 
+                src="/images/logo-blue.png"
+                alt="ToGather Logo"
+                className={`h-16 w-16 object-contain absolute top-0 left-0 transition-opacity duration-800 ${
+                  showAnimation ? "opacity-100" : "opacity-0"
+                }`}
+              />
             </div>
           </div>
 
           <h1
             className={`text-5xl font-bold text-center mb-16 transition-all duration-800 ${
-              showAnimation ? "text-blue-500 transform -translate-y-24" : "text-white transform translate-y-4"
+              showAnimation ? "transform -translate-y-24" : "text-white transform translate-y-4"
             }`}
+            style={showAnimation ? { color: '#6592FD' } : {}}
           >
             ToGather
           </h1>
-        </div>
-
-        {/* Smile coin bottom left */}
-        <div className="absolute bottom-64 -left-2 w-40 h-40 transform rotate-28 scale-x-[-1] z-0">
-          <img 
-            src="/images/smile_coin.png" 
-            alt="Smile coin" 
-            className="w-full h-full object-contain drop-shadow-lg"
-          />
-        </div>
-
-        {/* Heart coin bottom right */}
-        <div className="absolute -bottom-6 -right-4 w-56 h-56 transform -rotate-32 z-0">
-          <img 
-            src="/images/heart_coin.png" 
-            alt="Heart coin" 
-            className="w-full h-full object-contain drop-shadow-lg"
-          />
         </div>
       </div>
     )
@@ -102,25 +95,21 @@ export default function ToGatherApp() {
   if (currentScreen === "auth-selection") {
     return (
       <div className="min-h-screen bg-white relative overflow-hidden">
-        {/* Star coin top right */}
-        <div className="absolute top-10 -right-4 w-36 h-36 transform -rotate-42 z-0">
-          <img 
-            src="/images/star_coin.png" 
-            alt="Star coin" 
-            className="w-full h-full object-contain drop-shadow-lg"
-          />
-        </div>
+        {/* Background coins */}
+        <BackgroundCoins />
 
         {/* Main content */}
         <div className="flex flex-col items-center justify-center min-h-screen px-8">
           {/* Logo */}
           <div className="mb-8">
-            <div className="text-blue-500 text-6xl font-bold mb-2">
-              T.
-            </div>
+            <img 
+              src="/images/logo-blue.png"
+              alt="ToGather Logo"
+              className="h-16 w-16 object-contain"
+            />
           </div>
 
-          <h1 className="text-blue-500 text-5xl font-bold text-center mb-32">
+          <h1 className="text-5xl font-bold text-center mb-32" style={{ color: '#6592FD' }}>
             ToGather
           </h1>
 
@@ -130,38 +119,15 @@ export default function ToGatherApp() {
               showButtons ? "transform translate-y-0 opacity-100" : "transform translate-y-12 opacity-0"
             }`}
           >
-            <Button
-              onClick={handleLogin}
-              className="w-full h-14 bg-blue-500 hover:bg-blue-600 text-white text-lg font-medium rounded-2xl"
-            >
+            <MainButton onClick={handleLogin}>
               로그인
-            </Button>
-            <Button
-              onClick={handleSignup}
-              className="w-full h-14 bg-blue-500 hover:bg-blue-600 text-white text-lg font-medium rounded-2xl"
-            >
+            </MainButton>
+            <MainButton onClick={handleSignup}>
               회원가입
-            </Button>
+            </MainButton>
           </div>
         </div>
 
-        {/* Smile coin bottom left */}
-        <div className="absolute bottom-64 -left-2 w-40 h-40 transform rotate-28 scale-x-[-1] z-0">
-          <img 
-            src="/images/smile_coin.png" 
-            alt="Smile coin" 
-            className="w-full h-full object-contain drop-shadow-lg"
-          />
-        </div>
-
-        {/* Heart coin bottom right */}
-        <div className="absolute -bottom-6 -right-4 w-56 h-56 transform -rotate-32 z-0">
-          <img 
-            src="/images/heart_coin.png" 
-            alt="Heart coin" 
-            className="w-full h-full object-contain drop-shadow-lg"
-          />
-        </div>
       </div>
     )
   }
