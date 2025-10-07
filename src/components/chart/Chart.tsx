@@ -296,7 +296,7 @@ export const ChartComponent: React.FC<ChartProps> = ({
   return (
     <div>
       <PeriodSelector value={selectedPeriod} onChange={setSelectedPeriod} />
-      <div ref={chartContainerRef} className="w-full h-[calc(100dvh-300px)]" />
+      <div ref={chartContainerRef} className="w-full h-[calc(100dvh-285px)]" />
     </div>
   );
 };
