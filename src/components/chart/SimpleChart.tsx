@@ -18,6 +18,7 @@ import {
   HistogramSeries,
   AreaSeries,
 } from "lightweight-charts";
+import { useRouter } from "next/navigation";
 import PeriodSelector from "./PeriodSelector";
 
 import "./chart-style.css";
@@ -40,6 +41,7 @@ interface ChartProps {
   weekData: ChartData[];
   monthData: ChartData[];
   yearData: ChartData[];
+  stockCode?: string;
 }
 type PriceLineHandle = ReturnType<ISeriesApi<"Candlestick">["createPriceLine"]>;
 type Period = "일" | "주" | "월" | "년";
@@ -49,7 +51,9 @@ export const SimpleChart: React.FC<ChartProps> = ({
   weekData,
   monthData,
   yearData,
+  stockCode,
 }) => {
+  const router = useRouter();
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
 
@@ -61,6 +65,12 @@ export const SimpleChart: React.FC<ChartProps> = ({
   const maxLineRef = useRef<PriceLineHandle | null>(null);
 
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("일");
+
+  const handleChartClick = useCallback(() => {
+    if (stockCode) {
+      router.push(`/stock/${stockCode}`);
+    }
+  }, [router, stockCode]);
 
   const seriesesData = useMemo(
     () =>
@@ -190,7 +200,11 @@ export const SimpleChart: React.FC<ChartProps> = ({
     <div>
       <div ref={buttonsContainerRef} className="mt-2 flex justify-center" />
       <PeriodSelector value={selectedPeriod} onChange={setSelectedPeriod} />
-      <div ref={chartContainerRef} className="w-full h-[calc(50dvh)]" />
+      <div
+        ref={chartContainerRef}
+        className="w-full h-[calc(50dvh)] cursor-pointer"
+        onClick={handleChartClick}
+      />
     </div>
   );
 };
