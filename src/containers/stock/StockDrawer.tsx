@@ -1407,141 +1407,16 @@ const yearData = [
   },
 ];
 
-const stockList = [
-  {
-    name: "NAVER",
-    image:
-      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
-    area: "KOSPI",
-    code: "035420",
-    currentPrice: 269000, //업다운에따라 ui달라짐
-    increase: 500,
-    percent: 2.51,
-  },
-  {
-    name: "NAVER",
-    image:
-      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
-    area: "KOSPI",
-    code: "035420",
-    currentPrice: 269000, //업다운에따라 ui달라짐
-    increase: 500,
-    percent: 2.51,
-  },
-  {
-    name: "NAVER",
-    image:
-      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
-    area: "KOSPI",
-    code: "035420",
-    currentPrice: 269000, //업다운에따라 ui달라짐
-    increase: 500,
-    percent: 2.51,
-  },
-  {
-    name: "NAVER",
-    image:
-      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
-    area: "KOSPI",
-    code: "035420",
-    currentPrice: 269000, //업다운에따라 ui달라짐
-    increase: 500,
-    percent: 2.51,
-  },
-  {
-    name: "NAVER",
-    image:
-      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
-    area: "KOSPI",
-    code: "035420",
-    currentPrice: 269000, //업다운에따라 ui달라짐
-    increase: 500,
-    percent: 2.51,
-  },
-  {
-    name: "NAVER",
-    image:
-      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
-    area: "KOSPI",
-    code: "035420",
-    currentPrice: 269000, //업다운에따라 ui달라짐
-    increase: 500,
-    percent: 2.51,
-  },
-  {
-    name: "NAVER",
-    image:
-      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
-    area: "KOSPI",
-    code: "035420",
-    currentPrice: 269000, //업다운에따라 ui달라짐
-    increase: 500,
-    percent: 2.51,
-  },
-  {
-    name: "NAVER",
-    image:
-      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
-    area: "KOSPI",
-    code: "035420",
-    currentPrice: 269000, //업다운에따라 ui달라짐
-    increase: 500,
-    percent: 2.51,
-  },
-  {
-    name: "NAVER",
-    image:
-      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
-    area: "KOSPI",
-    code: "035420",
-    currentPrice: 269000, //업다운에따라 ui달라짐
-    increase: 500,
-    percent: 2.51,
-  },
-  {
-    name: "NAVER",
-    image:
-      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
-    area: "KOSPI",
-    code: "035420",
-    currentPrice: 269000, //업다운에따라 ui달라짐
-    increase: 500,
-    percent: 2.51,
-  },
-  {
-    name: "NAVER",
-    image:
-      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
-    area: "KOSPI",
-    code: "035420",
-    currentPrice: 269000, //업다운에따라 ui달라짐
-    increase: 500,
-    percent: 2.51,
-  },
-  {
-    name: "NAVER",
-    image:
-      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
-    area: "KOSPI",
-    code: "035420",
-    currentPrice: 269000, //업다운에따라 ui달라짐
-    increase: 500,
-    percent: 2.51,
-  },
-];
-
-const ownStockList = [
-  {
-    name: "NAVER",
-    image:
-      "https://play-lh.googleusercontent.com/gJZYXTPS_9AJYJfzRj1tT8IRMQ7rerhhlYmXSVyt8bV_gouL3kW46d_zY6VLnreyMA",
-    owned: 33,
-    code: "035420",
-    currentPrice: 269000, //업다운에따라 ui달라짐
-    increase: 500,
-    percent: 2.51,
-  },
-];
+const stockInfo = {
+  name: "NAVER",
+  trading_volume: 2629345,
+  code: "035420",
+  area: "KOSPI",
+  exchange: "KRX",
+  currentPrice: 829000, //업다운에따라 ui달라짐
+  increase: 3200,
+  percent: 3.72,
+};
 
 interface props {
   open: boolean;
@@ -1561,28 +1436,39 @@ export default function StockDrawer({ open, onOpenChange, stockCode }: props) {
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle asChild>
-              <span className="text-[14px] font-bold px-4">아마존닷컴</span>
+              <span className="text-[14px] font-bold px-4">
+                {stockInfo.name}
+              </span>
             </DrawerTitle>
             <DrawerDescription asChild></DrawerDescription>
           </DrawerHeader>
           <div className="px-8">
             <div className="flex justify-start items-center text-[10px] gap-[10px]">
-              <div>{stockCode}</div>
-              <div>KOSPI</div>
-              <div>KRX</div>
+              <div>{stockInfo.code}</div>
+              <div>{stockInfo.area}</div>
+              <div>{stockInfo.exchange}</div>
             </div>
             <div className="flex justify-between items-center">
-              <div className="flex items-center text-blue-600 font-bold  gap-[10px] text-[10px] ">
-                <div className="text-[20px]">82,900</div>
-                <div className="flex items-center">
-                  <div>▼</div>
-                  <div>3,200</div>
+              <div
+                className={`flex items-center font-bold gap-[10px] text-[10px] ${
+                  stockInfo.increase >= 0 ? "text-red-600" : "text-blue-600"
+                }`}
+              >
+                <div className="text-[20px]">
+                  {stockInfo.currentPrice.toLocaleString()}
                 </div>
-                <div>-3.72%</div>
+                <div className="flex items-center">
+                  <div>{stockInfo.increase >= 0 ? "▲" : "▼"}</div>
+                  <div>{Math.abs(stockInfo.increase).toLocaleString()}</div>
+                </div>
+                <div>
+                  {stockInfo.increase >= 0 ? "+" : "-"}
+                  {stockInfo.percent}%
+                </div>
               </div>
               <div className="flex gap-[10px] text-[10px]">
                 <div>거래량</div>
-                <div>2,629,345</div>
+                <div>{stockInfo.trading_volume.toLocaleString()}</div>
               </div>
             </div>
             <SimpleChart
@@ -1590,6 +1476,7 @@ export default function StockDrawer({ open, onOpenChange, stockCode }: props) {
               weekData={weekData}
               monthData={monthData}
               yearData={yearData}
+              stockCode={stockCode}
             />
           </div>
 
