@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStockTab } from "@/contexts/stockTabContext";
 import StockDrawer from "./StockDrawer";
+import MenuTab from "@/components/tab/MenuTab";
 
 const stockList: Stock[] = [
   {
@@ -170,9 +171,15 @@ export default function StockListContainer() {
   const [selected, setSelected] = useState<null | Stock>(null);
   const { stockTab, setStockTab } = useStockTab();
 
+  const uptabs = [
+    { id: "MY", label: "보유주식" },
+    { id: "DOMESTIC", label: "국내주식" },
+    { id: "OVERSEAS", label: "해외주식" },
+  ];
+
   //주식 코드만 넘겨주는 것도 생각해보기
   return (
-    <>
+    <MenuTab tabs={uptabs} defaultTab="MY">
       <ul>
         {stockList.map((stock, idx) => (
           <li
@@ -221,6 +228,6 @@ export default function StockListContainer() {
         onOpenChange={setOpen}
         stockCode={selected?.code}
       ></StockDrawer>
-    </>
+    </MenuTab>
   );
 }

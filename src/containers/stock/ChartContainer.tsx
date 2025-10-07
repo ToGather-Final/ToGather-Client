@@ -1398,11 +1398,16 @@ const yearData = [
   },
 ];
 
-const tabs = [
-  { id: "보유주식", label: "보유주식" },
-  { id: "국내주식", label: "국내주식" },
-  { id: "해외주식", label: "해외주식" },
-];
+const stockInfo = {
+  name: "NAVER",
+  code: "035420",
+  trading_volume: 2629345,
+  area: "KOSPI",
+  exchange: "KRX",
+  currentPrice: 829000, //업다운에따라 ui달라짐
+  increase: 3200,
+  percent: 3.72,
+};
 
 //주문 버튼부터 하면 됨
 export default function ChartContainer() {
@@ -1416,31 +1421,40 @@ export default function ChartContainer() {
           >
             <ChevronLeft className="w-5 h-5 mr-1" />
           </button>
-          <span className="text-[14px] font-bold">아마존닷컴</span>
+          <span className="text-[14px] font-bold">{stockInfo.name}</span>
         </div>
         <button className="text-[12px] text-white bg-blue-600 rounded-[8px] px-[8px] py-[4px]">
           주문
         </button>
       </div>
 
-      <div className="px-8">
-        <div className="flex justify-start items-center text-[10px] gap-[10px]">
-          <div>005930</div>
-          <div>KOSPI</div>
-          <div>KRX</div>
+      <div className="px-8 ">
+        <div className="flex justify-start items-center text-[10px] gap-[10px] my-2">
+          <div>{stockInfo.code}</div>
+          <div>{stockInfo.area}</div>
+          <div>{stockInfo.exchange}</div>
         </div>
-        <div className="flex justify-between items-center">
-          <div className="flex items-center text-blue-600 font-bold  gap-[10px] text-[10px] ">
-            <div className="text-[20px]">82,900</div>
-            <div className="flex items-center">
-              <div>▼</div>
-              <div>3,200</div>
+        <div className="flex justify-between items-center mt-2 mb-4">
+          <div
+            className={`flex items-center font-bold gap-[10px] text-[10px] ${
+              stockInfo.increase >= 0 ? "text-red-600" : "text-blue-600"
+            }`}
+          >
+            <div className="text-[20px]">
+              {stockInfo.currentPrice.toLocaleString()}
             </div>
-            <div>-3.72%</div>
+            <div className="flex items-center">
+              <div>{stockInfo.increase >= 0 ? "▲" : "▼"}</div>
+              <div>{Math.abs(stockInfo.increase).toLocaleString()}</div>
+            </div>
+            <div>
+              {stockInfo.increase >= 0 ? "+" : "-"}
+              {stockInfo.percent}%
+            </div>
           </div>
           <div className="flex gap-[10px] text-[10px]">
             <div>거래량</div>
-            <div>2,629,345</div>
+            <div>{stockInfo.trading_volume.toLocaleString()}</div>
           </div>
         </div>
         <ChartComponent
