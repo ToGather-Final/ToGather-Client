@@ -10,7 +10,7 @@ interface StockTabCtx {
 const StockTabContext = createContext<StockTabCtx | undefined>(undefined);
 
 export function StockTabProvider({ children }: { children: ReactNode }) {
-  const [stockTab, setStockTab] = useState("My");
+  const [stockTab, setStockTab] = useState("MY");
   return (
     <StockTabContext.Provider value={{ stockTab, setStockTab }}>
       {children}
