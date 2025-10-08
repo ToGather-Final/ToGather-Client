@@ -22,6 +22,7 @@ export type Holding = {
 };
 
 export type Portfolio = {
+  goal: number; // 목표 금액
   netAssets: number; // 전체 순자산 = valuation + cash
   valuation: number; // 보유상품 평가금액(총합)
   cash: number; // 예수금(현금)
@@ -32,6 +33,7 @@ export type Portfolio = {
 
 // dummy data
 export const dummyPortfolio: Portfolio = {
+  goal: 5_000_000, // 목표 금액 500만원
   netAssets: 2_745_000, // 2,745,000 = 2,245,000(평가) + 500,000(현금)
   valuation: 2_245_000,
   cash: 500_000,
@@ -122,8 +124,15 @@ const options = {
 } as const;
 
 export default function PortfolioContainer() {
+  // 목표 달성률 계산 (최대 100%)
+  const goalAchievementRate = Math.min(
+    (dummyPortfolio.netAssets / dummyPortfolio.goal) * 100,
+    100
+  );
+  const progressBarWidth = `${goalAchievementRate}%`;
+
   return (
-    <>
+    <div>
       <div className="border border-[#e9e9e9] m-[15px] p-[20px] rounded-[20px]">
         <div className="flex justify-between">
           <div className="flex items-center">
@@ -137,10 +146,19 @@ export default function PortfolioContainer() {
         <div className="flex gap-[15px] items-center pt-[15px] justify-center">
           <div className="w-full">
             <div className="relative h-[15px] w-full bg-blue-100 rounded-full">
-              <div className="absolute h-[15px] w-[90px] bg-blue-600 rounded-full"></div>
+              <div
+                className="absolute h-[15px] bg-blue-600 rounded-full transition-all duration-300"
+                style={{ width: progressBarWidth }}
+              ></div>
             </div>
           </div>
-          <div className="text-[16px] font-bold">30%</div>
+          <div className="text-[16px] font-bold">
+            {goalAchievementRate.toFixed(1)}%
+          </div>
+        </div>
+        <div className="flex justify-between text-[12px] text-gray-500 mt-2">
+          <span>현재: {currency.format(dummyPortfolio.netAssets)}원</span>
+          <span>목표: {currency.format(dummyPortfolio.goal)}원</span>
         </div>
       </div>
       <div className="border border-[#e9e9e9] m-[15px] p-[20px] rounded-[20px]">
@@ -289,6 +307,6 @@ export default function PortfolioContainer() {
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }
