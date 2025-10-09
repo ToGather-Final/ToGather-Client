@@ -2,9 +2,12 @@
 
 import SimpleTab from "@/components/tab/SimpleTab";
 import { ChevronLeft } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function RealtimeContainer() {
+  const searchParams = useSearchParams();
+
   const uptabs = [
     { id: "보유주식", label: "보유주식" },
     { id: "국내주식", label: "국내주식" },
@@ -38,6 +41,16 @@ export default function RealtimeContainer() {
 
   const [activeTab, setActiveTab] = useState("매수");
   const [currenPrice, setCurrentPrice] = useState(103);
+
+  // URL 쿼리 파라미터에서 탭 정보 읽기
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "buy") {
+      setActiveTab("매수");
+    } else if (tab === "sell") {
+      setActiveTab("매도");
+    }
+  }, [searchParams]);
   return (
     <div>
       <div className="flex gap-[10px] items-center justify-start py-2 px-5">
@@ -65,7 +78,11 @@ export default function RealtimeContainer() {
           <div>001-12-566789</div>
           <div className="text-[#686868] text-[12px]">[종합매매]가나다</div>
         </div>
-        <SimpleTab tabs={downtabs} defaultTab="매수"></SimpleTab>
+        <SimpleTab
+          tabs={downtabs}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        ></SimpleTab>
         <div className="grid grid-cols-2">
           <div className="flex flex-col overflow-y-auto max-h-[55vh]">
             {/* 하 여기서 스크롤되게 해야하는디;;;; */}
