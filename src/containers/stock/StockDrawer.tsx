@@ -1,6 +1,15 @@
 "use client";
-import { ChartComponent } from "@/components/chart/Chart";
-import { ChevronLeft } from "lucide-react";
+
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerClose,
+} from "@/components/ui/drawer";
+import { SimpleChart } from "@/components/chart/SimpleChart";
+import { useRouter } from "next/navigation";
 
 // 일봉 (Day Data) - 매일 데이터
 const dayData = [
@@ -1400,8 +1409,8 @@ const yearData = [
 
 const stockInfo = {
   name: "NAVER",
-  code: "035420",
   trading_volume: 2629345,
+  code: "035420",
   area: "KOSPI",
   exchange: "KRX",
   currentPrice: 829000, //업다운에따라 ui달라짐
@@ -1409,61 +1418,87 @@ const stockInfo = {
   percent: 3.72,
 };
 
-//주문 버튼부터 하면 됨
-export default function ChartContainer() {
-  return (
-    <div>
-      <div className="flex justify-between py-2  px-5">
-        <div className="flex gap-[10px] items-center justify-start">
-          <button
-            onClick={() => window.history.back()}
-            className="flex items-center text-gray-800 hover:text-black"
-          >
-            <ChevronLeft className="w-5 h-5 mr-1" />
-          </button>
-          <span className="text-[14px] font-bold">{stockInfo.name}</span>
-        </div>
-        <button className="text-[12px] text-white bg-blue-600 rounded-[8px] px-[8px] py-[4px]">
-          주문
-        </button>
-      </div>
+interface props {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  stockCode?: string;
+}
 
-      <div className="px-8 ">
-        <div className="flex justify-start items-center text-[10px] gap-[10px] my-2">
-          <div>{stockInfo.code}</div>
-          <div>{stockInfo.area}</div>
-          <div>{stockInfo.exchange}</div>
-        </div>
-        <div className="flex justify-between items-center mt-2 mb-4">
-          <div
-            className={`flex items-center font-bold gap-[10px] text-[10px] ${
-              stockInfo.increase >= 0 ? "text-red-600" : "text-blue-600"
-            }`}
-          >
-            <div className="text-[20px]">
-              {stockInfo.currentPrice.toLocaleString()}
+export default function StockDrawer({ open, onOpenChange, stockCode }: props) {
+  const router = useRouter();
+  const goRealtime = () => {
+    router.push(`http://localhost:3000/stock/${stockCode}/realtime`);
+  };
+
+  return (
+    <div className="max-w-[600px]">
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle asChild>
+              <span className="text-[14px] font-bold px-4">
+                {stockInfo.name}
+              </span>
+            </DrawerTitle>
+            <DrawerDescription asChild></DrawerDescription>
+          </DrawerHeader>
+          <div className="px-8">
+            <div className="flex justify-start items-center text-[10px] gap-[10px]">
+              <div>{stockInfo.code}</div>
+              <div>{stockInfo.area}</div>
+              <div>{stockInfo.exchange}</div>
             </div>
-            <div className="flex items-center">
-              <div>{stockInfo.increase >= 0 ? "▲" : "▼"}</div>
-              <div>{Math.abs(stockInfo.increase).toLocaleString()}</div>
+            <div className="flex justify-between items-center">
+              <div
+                className={`flex items-center font-bold gap-[10px] text-[10px] ${
+                  stockInfo.increase >= 0 ? "text-red-600" : "text-blue-600"
+                }`}
+              >
+                <div className="text-[20px]">
+                  {stockInfo.currentPrice.toLocaleString()}
+                </div>
+                <div className="flex items-center">
+                  <div>{stockInfo.increase >= 0 ? "▲" : "▼"}</div>
+                  <div>{Math.abs(stockInfo.increase).toLocaleString()}</div>
+                </div>
+                <div>
+                  {stockInfo.increase >= 0 ? "+" : "-"}
+                  {stockInfo.percent}%
+                </div>
+              </div>
+              <div className="flex gap-[10px] text-[10px]">
+                <div>거래량</div>
+                <div>{stockInfo.trading_volume.toLocaleString()}</div>
+              </div>
             </div>
-            <div>
-              {stockInfo.increase >= 0 ? "+" : "-"}
-              {stockInfo.percent}%
-            </div>
+            <SimpleChart
+              dayData={dayData}
+              weekData={weekData}
+              monthData={monthData}
+              yearData={yearData}
+              stockCode={stockCode}
+            />
           </div>
-          <div className="flex gap-[10px] text-[10px]">
-            <div>거래량</div>
-            <div>{stockInfo.trading_volume.toLocaleString()}</div>
+
+          <div className="grid grid-cols-2 gap-[10px] px-[10px] mt-[10px]">
+            <DrawerClose asChild>
+              <button
+                className="text-[12px] h-[50px] text-white bg-red-600 rounded-[8px] px-[8px] py-[4px]"
+                onClick={goRealtime}
+              >
+                매수제안
+              </button>
+            </DrawerClose>
+
+            <DrawerClose asChild>
+              <button className="text-[12px] h-[50px] text-white bg-blue-600 rounded-[8px] px-[8px] py-[4px]">
+                매도제안
+              </button>
+            </DrawerClose>
           </div>
-        </div>
-        <ChartComponent
-          dayData={dayData}
-          weekData={weekData}
-          monthData={monthData}
-          yearData={yearData}
-        />
-      </div>
+          <div className="p-2"></div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }

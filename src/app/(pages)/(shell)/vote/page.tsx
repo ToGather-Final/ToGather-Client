@@ -1,1 +1,1 @@
-export { default } from "../../../../containers/vote/voteContainer";
+export { default } from "@/containers/vote/voteContainer";

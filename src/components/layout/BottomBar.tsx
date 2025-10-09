@@ -23,16 +23,20 @@ export default function BottomBar() {
             href={href}
             aria-label={label}
             aria-current={active ? "page" : undefined}
-            className={`text-xs px-3 py-2 rounded-lg flex flex-col items-center gap-1
+            className={`group text-xs px-3 py-2 rounded-lg flex flex-col items-center gap-1 
                         ${
                           active
-                            ? "text-stone-900 bg-stone-100"
-                            : "text-stone-500 hover:bg-stone-50"
+                            ? "text-[#447AFA]"
+                            : "text-stone-500 hover:text-[#447AFA] "
                         }`}
           >
             <Icon
               size={18}
-              className={active ? "stroke-stone-900" : "stroke-stone-500"}
+              className={
+                active
+                  ? "stroke-[#447AFA]"
+                  : "stroke-stone-500 group-hover:stroke-[#447AFA]"
+              }
             />
             <span>{label}</span>
           </Link>
