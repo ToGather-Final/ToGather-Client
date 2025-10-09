@@ -41,7 +41,7 @@ export default function GroupJoinFlow() {
   // Step 1: 코드 입력 화면
   if (step === "code") {
     return (
-      <div className="min-h-screen bg-white relative overflow-hidden flex flex-col">
+      <div className="h-full bg-white relative overflow-hidden flex flex-col">
         {/* Header */}
         <div className="p-6 relative z-10 flex-shrink-0">
           <img 
@@ -112,7 +112,7 @@ export default function GroupJoinFlow() {
   // Step 2: 로딩 화면
   if (step === "loading") {
     return (
-      <div className="min-h-screen bg-white relative overflow-hidden flex flex-col">
+      <div className="h-full bg-white relative overflow-hidden flex flex-col">
         {/* Header */}
         <div className="p-6 relative z-10 flex-shrink-0">
           <img 
@@ -164,7 +164,7 @@ export default function GroupJoinFlow() {
   // Step 3: 그룹 규칙 화면
   if (step === "rules") {
     return (
-      <div className="min-h-screen bg-white relative overflow-hidden flex flex-col">
+      <div className="h-full bg-white relative overflow-hidden flex flex-col">
         {/* Header */}
         <div className="p-6 relative z-10 flex-shrink-0">
           <img 
