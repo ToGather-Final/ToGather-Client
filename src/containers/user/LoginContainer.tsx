@@ -72,7 +72,7 @@ export default function LoginFlow() {
         } else if (err.status === 500) {
           setError("서버에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
         } else if (err.status === 0) {
-          setError("서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요.")
+          setError("서버에 연결할 수 없습니다.")
         } else {
           setError(err.message)
         }
