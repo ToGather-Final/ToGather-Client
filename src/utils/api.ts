@@ -63,11 +63,16 @@ async function apiCall<T>(
     }
     
     try {
-      return JSON.parse(text)
+      const parsed = JSON.parse(text)
+      console.log('Parsed response:', parsed)
+      return parsed
     } catch (parseError) {
       console.error('JSON parse error:', parseError)
       console.log('Raw response text:', text)
+      
       // JSON 파싱 실패 시에도 빈 객체 반환 (성공 응답으로 처리)
+      // 이는 서버에서 잘못된 JSON을 보내거나 빈 응답을 보낼 때 발생
+      console.log('Treating parse error as su 서버가 실행 중인지 확인해주세요.ccess (empty object)')
       return {} as T
     }
   } catch (error) {
@@ -83,7 +88,7 @@ async function apiCall<T>(
 
 // 회원가입 API 호출
 export async function signup(data: SignupRequest): Promise<void> {
-  return apiCall<void>('/auth/signup', {
+  await apiCall<void>('/auth/signup', {
     method: 'POST',
     body: JSON.stringify(data),
   })
