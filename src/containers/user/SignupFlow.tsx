@@ -8,8 +8,10 @@ import WelcomeContainer from "./WelcomeContainer"
 export default function SignupFlow() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState<"signup" | "welcome">("signup")
+  const [userNickname, setUserNickname] = useState<string>("")
 
-  const handleSignupComplete = () => {
+  const handleSignupComplete = (nickname: string) => {
+    setUserNickname(nickname)
     setCurrentStep("welcome")
   }
 
@@ -22,7 +24,7 @@ export default function SignupFlow() {
   }
 
   if (currentStep === "welcome") {
-    return <WelcomeContainer onComplete={handleWelcomeComplete} />
+    return <WelcomeContainer onComplete={handleWelcomeComplete} nickname={userNickname} />
   }
 
   return null

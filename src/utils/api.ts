@@ -73,7 +73,7 @@ async function apiCall<T>(
   } catch (error) {
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
       throw {
-        message: '서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요.',
+        message: '서버에 연결할 수 없습니다.',
         status: 0,
       } as ApiError
     }

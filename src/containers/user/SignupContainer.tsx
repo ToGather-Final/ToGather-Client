@@ -8,7 +8,7 @@ import { signup } from "@/utils/api"
 import { SignupRequest } from "@/types/api/auth"
 
 interface SignupContainerProps {
-  onSignupComplete: () => void
+  onSignupComplete: (nickname: string) => void
 }
 
 export default function SignupContainer({ onSignupComplete }: SignupContainerProps) {
@@ -68,8 +68,8 @@ export default function SignupContainer({ onSignupComplete }: SignupContainerPro
 
       await signup(signupData)
       
-      // 회원가입 성공
-      onSignupComplete()
+      // 회원가입 성공 - 닉네임 전달
+      onSignupComplete(formData.nickname)
     } catch (err: any) {
       console.error("Signup error:", err)
       setError(err.message || "회원가입에 실패했습니다. 다시 시도해주세요.")
