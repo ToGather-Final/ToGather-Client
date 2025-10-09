@@ -4,6 +4,8 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import BackgroundCoins from "@/components/common/BackgroundCoins"
 import MainButton from "@/components/common/MainButton"
+import { signup } from "@/utils/api"
+import { SignupRequest } from "@/types/api/auth"
 
 interface SignupContainerProps {
   onSignupComplete: () => void
@@ -16,16 +18,64 @@ export default function SignupContainer({ onSignupComplete }: SignupContainerPro
     password: "",
     confirmPassword: "",
   })
+  
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+    // 에러 메시지 초기화
+    if (error) setError(null)
   }
 
-  const handleSignup = () => {
-    // Mock signup logic
-    console.log("Signup attempt:", formData)
-    // After successful signup, move to welcome
-    onSignupComplete()
+  const validateForm = (): boolean => {
+    if (!formData.nickname.trim()) {
+      setError("닉네임을 입력해주세요.")
+      return false
+    }
+    if (!formData.id.trim()) {
+      setError("아이디를 입력해주세요.")
+      return false
+    }
+    if (!formData.password.trim()) {
+      setError("비밀번호를 입력해주세요.")
+      return false
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError("비밀번호가 일치하지 않습니다.")
+      return false
+    }
+    if (formData.password.length < 8) {
+      setError("비밀번호는 최소 8자 이상이어야 합니다.")
+      return false
+    }
+    return true
+  }
+
+  const handleSignup = async () => {
+    if (!validateForm()) return
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const signupData: SignupRequest = {
+        username: formData.id,
+        password: formData.password,
+        passwordConfirm: formData.confirmPassword,
+        nickname: formData.nickname,
+      }
+
+      await signup(signupData)
+      
+      // 회원가입 성공
+      onSignupComplete()
+    } catch (err: any) {
+      console.error("Signup error:", err)
+      setError(err.message || "회원가입에 실패했습니다. 다시 시도해주세요.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -53,12 +103,14 @@ export default function SignupContainer({ onSignupComplete }: SignupContainerPro
             value={formData.nickname}
             onChange={(e) => handleInputChange("nickname", e.target.value)}
             className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
+            disabled={isLoading}
           />
           <Input
             placeholder="아이디"
             value={formData.id}
             onChange={(e) => handleInputChange("id", e.target.value)}
             className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
+            disabled={isLoading}
           />
           <Input
             type="password"
@@ -66,6 +118,7 @@ export default function SignupContainer({ onSignupComplete }: SignupContainerPro
             value={formData.password}
             onChange={(e) => handleInputChange("password", e.target.value)}
             className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
+            disabled={isLoading}
           />
           <Input
             type="password"
@@ -73,10 +126,18 @@ export default function SignupContainer({ onSignupComplete }: SignupContainerPro
             value={formData.confirmPassword}
             onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
             className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
+            disabled={isLoading}
           />
 
-          <MainButton onClick={handleSignup} className="mt-8">
-            회원가입
+          {/* 에러 메시지 */}
+          {error && (
+            <div className="text-red-500 text-sm text-center mt-2">
+              {error}
+            </div>
+          )}
+
+          <MainButton onClick={handleSignup} className="mt-8" disabled={isLoading}>
+            {isLoading ? "회원가입 중..." : "회원가입"}
           </MainButton>
         </div>
       </div>
