@@ -4,6 +4,9 @@ import SimpleTab from "@/components/tab/SimpleTab";
 import { ChevronLeft } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import YesNoModal from "@/components/common/YesNoModal";
+import Modal from "@/components/common/Modal";
+import { DialogTitle } from "@/components/ui/dialog";
 
 export default function RealtimeContainer() {
   const searchParams = useSearchParams();
@@ -46,7 +49,29 @@ export default function RealtimeContainer() {
   const [quantity, setQuantity] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [reason, setReason] = useState("");
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+  const [orderType, setOrderType] = useState<"매수" | "매도">("매수");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleConfirmYes = () => {
+    console.log(`${orderType} 주문:`, {
+      price: currentPrice,
+      quantity: parseInt(quantity),
+      dueDate,
+      reason,
+    });
+    setIsConfirmModalOpen(false);
+    setIsCompleteModalOpen(true);
+  };
+
+  const handleCompleteClose = () => {
+    setIsCompleteModalOpen(false);
+    // 폼 초기화
+    setQuantity("");
+    setDueDate("");
+    setReason("");
+  };
 
   // 주문 폼 공통 컴포넌트
   const OrderForm = ({ type }: { type: "매수" | "매도" }) => {
@@ -58,13 +83,8 @@ export default function RealtimeContainer() {
     const maxQuantity = isBuy ? "최대 100주" : "최대 50주";
 
     const handleSubmit = () => {
-      console.log(`${type} 주문:`, {
-        price: currentPrice,
-        quantity: parseInt(quantity),
-        dueDate,
-        reason,
-      });
-      alert(`${type} 주문이 제안되었습니다!`);
+      setOrderType(type);
+      setIsConfirmModalOpen(true);
     };
 
     return (
@@ -267,6 +287,38 @@ export default function RealtimeContainer() {
           </div>
         </div>
       </div>
+
+      {/* 확인 모달 */}
+      <YesNoModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onYes={handleConfirmYes}
+      >
+        <div className="text-center py-8">
+          <DialogTitle className="text-2xl font-bold text-gray-900 mb-4">
+            {orderType} 제안
+          </DialogTitle>
+          <div className="max-h-[50dvh] overflow-y-auto">
+            <p className="text-lg text-gray-700">
+              {orderType} 주문을 제안하시겠습니까?
+            </p>
+          </div>
+        </div>
+      </YesNoModal>
+
+      {/* 완료 모달 */}
+      <Modal isOpen={isCompleteModalOpen} onClose={handleCompleteClose}>
+        <div className="text-center py-8">
+          <DialogTitle className="text-2xl font-bold text-gray-900 mb-4">
+            {orderType} 제안 완료
+          </DialogTitle>
+          <div className="mb-6">
+            <p className="text-lg text-gray-700">
+              {orderType} 주문이 제안되었습니다!
+            </p>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
