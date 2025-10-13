@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown } from "lucide-react";
@@ -12,6 +12,49 @@ import {
   ProposalStatus,
 } from "../../types/api/proposal";
 import { cn } from "@/lib/utils";
+import { getAuthHeaders } from "@/utils/token";
+
+// Vote Service API 호출 함수
+async function fetchProposals(): Promise<ProposalDTO[]> {
+  const VOTE_SERVICE_URL = process.env.NEXT_PUBLIC_VOTE_SERVICE_URL
+  
+  try {
+    const response = await fetch(`${VOTE_SERVICE_URL}/vote`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(), // Authorization 헤더 자동 추가
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    console.log('Fetched proposals:', data)
+    
+    // API 응답을 ProposalDTO 형식으로 변환
+    return data.map((item: any) => ({
+      proposalId: item.proposalId,
+      proposalName: item.proposalName,
+      proposerName: item.proposerName,
+      category: item.category as ProposalCategory,
+      action: item.action as ProposalAction,
+      payload: typeof item.payload === 'string' ? JSON.parse(item.payload) : item.payload,
+      status: item.status as ProposalStatus,
+      date: item.date,
+      closeDate: item.closeDate || item.date, // closeDate가 없으면 date 사용
+      agreeCount: item.agreeCount,
+      disagreeCount: item.disagreeCount,
+      myVote: item.myVote,
+    }))
+  } catch (error) {
+    console.error('Failed to fetch proposals:', error)
+    // 에러 발생 시 빈 배열 반환
+    return []
+  }
+}
 
 const mockProposals: ProposalDTO[] = [
   {
@@ -169,6 +212,32 @@ export default function VotingPage() {
     proposalName: "",
     voteType: "AGREE",
   });
+  
+  // 실제 API에서 가져온 제안 데이터
+  const [proposals, setProposals] = useState<ProposalDTO[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 컴포넌트 마운트 시 데이터 가져오기
+  useEffect(() => {
+    const loadProposals = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await fetchProposals();
+        setProposals(data);
+      } catch (err) {
+        console.error('Failed to load proposals:', err);
+        setError('제안 데이터를 불러오는데 실패했습니다.');
+        // 에러 발생 시 mock 데이터 사용
+        setProposals(mockProposals);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProposals();
+  }, []);
 
   // 탭 바꿀 때 로직. 탭 바꾸면 드롭다운 닫음
   const handleTabChange = (tab: "ALL" | "TRADE" | "PAY") => {
@@ -176,13 +245,13 @@ export default function VotingPage() {
     setIsDropdownOpen(false);
   };
 
-  // 닫힌 카드에서 “자세히 보기” 토글
-  const toggleExpanded = (proposalName: string) => {
+  // 닫힌 카드에서 "자세히 보기" 토글
+  const toggleExpanded = (proposalId: string) => {
     const newExpanded = new Set(expandedProposals);
-    if (newExpanded.has(proposalName)) {
-      newExpanded.delete(proposalName);
+    if (newExpanded.has(proposalId)) {
+      newExpanded.delete(proposalId);
     } else {
-      newExpanded.add(proposalName);
+      newExpanded.add(proposalId);
     }
     setExpandedProposals(newExpanded);
   };
@@ -197,7 +266,7 @@ export default function VotingPage() {
   };
 
   const getFilteredProposals = () => {
-    let filtered = mockProposals;
+    let filtered = proposals;
 
     // 1) 탭 필터
     if (activeTab === "TRADE") {
@@ -358,9 +427,22 @@ export default function VotingPage() {
       )}
 
       <div className="p-4 space-y-3">
-        {getFilteredProposals().map((proposal) => (
+        {isLoading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="text-gray-500">제안 데이터를 불러오는 중...</div>
+          </div>
+        ) : error ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="text-red-500">{error}</div>
+          </div>
+        ) : getFilteredProposals().length === 0 ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="text-gray-500">표시할 제안이 없습니다.</div>
+          </div>
+        ) : (
+          getFilteredProposals().map((proposal) => (
           <Card
-            key={proposal.proposalName}
+            key={proposal.proposalId}
             className={cn(
               proposal.status === ProposalStatus.OPEN
                 ? "bg-[#EEF2FF]"
@@ -425,7 +507,7 @@ export default function VotingPage() {
                     </button>
                   </div>
                 </div>
-              ) : expandedProposals.has(proposal.proposalName) ? (
+              ) : expandedProposals.has(proposal.proposalId.toString()) ? (
                 <div className="space-y-4">
                   <p className="text-sm text-gray-700">
                     {proposal.payload.reason}
@@ -445,7 +527,7 @@ export default function VotingPage() {
                     {truncateText(proposal.payload.reason)}
                   </p>
                   <button
-                    onClick={() => toggleExpanded(proposal.proposalName)}
+                    onClick={() => toggleExpanded(proposal.proposalId.toString())}
                     className="flex items-center gap-1 text-gray-600 text-sm hover:text-gray-800 transition-colors"
                   >
                     자세히 보기
@@ -455,7 +537,7 @@ export default function VotingPage() {
               )}
             </div>
           </Card>
-        ))}
+        )))}
       </div>
 
       <VoteModal
