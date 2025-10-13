@@ -8,7 +8,7 @@ import MainButton from "@/components/common/MainButton"
 import { login } from "@/utils/api"
 import { getDeviceId } from "@/utils/deviceId"
 import { saveTokens } from "@/utils/token"
-import { LoginRequest } from "@/types/api/auth"
+import { LoginRequest, ApiErrorWithStatus } from "@/types/api/auth"
 
 export default function LoginFlow() {
   const [formData, setFormData] = useState({
@@ -58,20 +58,36 @@ export default function LoginFlow() {
       
       // 로그인 성공 후 그룹 페이지로 이동
       router.push("/group")
-    } catch (err: any) {
+    } catch (err) {
       console.error("Login error:", err)
-      console.error("Login error message:", err?.message)
-      console.error("Login error status:", err?.status)
       
-      // API 에러 객체인 경우
-      if (err && err.message && err.status) {
+      // API 에러 타입 체크
+      const isApiError = (error: unknown): error is ApiErrorWithStatus => {
+        return (
+          typeof error === 'object' &&
+          error !== null &&
+          'code' in error &&
+          'message' in error &&
+          'path' in error &&
+          'timestamp' in error &&
+          'status' in error
+        )
+      }
+      
+      if (isApiError(err)) {
+        console.error("Login error code:", err.code)
+        console.error("Login error message:", err.message)
+        console.error("Login error path:", err.path)
+        console.error("Login error timestamp:", err.timestamp)
+        console.error("Login error status:", err.status)
+        
         if (err.status === 401) {
           setError("아이디 또는 비밀번호가 일치하지 않습니다.")
         } else if (err.status === 400) {
           setError("X-Device-Id 헤더 누락 또는 잘못된 요청입니다.")
         } else if (err.status === 500) {
           setError("서버에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
-        } else if (err.status === 0) {
+        } else if (err.code === 'NETWORK_ERROR') {
           setError("서버에 연결할 수 없습니다.")
         } else {
           setError(err.message)

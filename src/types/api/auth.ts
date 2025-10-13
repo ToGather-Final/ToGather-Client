@@ -19,8 +19,15 @@ export interface LoginResponse {
   userId: string
 }
 
-// API 에러 응답 타입
+// API 에러 응답 타입 (백엔드 응답)
 export interface ApiError {
+  code: string
   message: string
+  path: string
+  timestamp: string
+}
+
+// API 에러 타입 (프론트엔드에서 사용 - HTTP status 포함)
+export interface ApiErrorWithStatus extends ApiError {
   status: number
 }
