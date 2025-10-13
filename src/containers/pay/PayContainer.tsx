@@ -1,15 +1,9 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import ChargeModal from "@/components/pay/ChargeModal";
-import MenuTab from "@/components/tab/MenuTab";
+import QRScannerWithOverlay from "@/app/(pages)/(shell)/test/page";
+import { usePayTab } from "@/contexts/payTabContext";
 
 const currency = new Intl.NumberFormat("ko-KR");
 
@@ -41,14 +35,9 @@ const mockTransactions: Transaction[] = [
   },
 ];
 
-const tabs = [
-  { id: "BARCODE", label: "바코드" },
-  { id: "QR", label: "QR스캔" },
-];
-
 export default function PayContainer() {
   const [isChargeModalOpen, setIsChargeModalOpen] = useState(false);
-  const [payTab, setPayTab] = useState("BARCODE");
+  const { payTab, setPayTab } = usePayTab();
   const accountNo = "937702-00-058937";
   const payMoney = 210000;
 
@@ -62,28 +51,7 @@ export default function PayContainer() {
   };
 
   return (
-    <>
-      {/* <MenuTab tabs={tabs} defaultTab="BARCODE"> */}
-
-      <div className="sticky top-0 bg-white flex items-center justify-center px-4 py-3 w-full gap-2">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setPayTab(tab.id)}
-            className={`
-              flex-1 px-6 py-3 text-sm font-medium rounded-xl transition-colors
-              ${
-                payTab === tab.id
-                  ? "bg-[#447AFA] text-white"
-                  : "text-gray-600 bg-gray-100 hover:bg-gray-200"
-              }
-            `}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
+    <div className="h-full">
       {/* 바코드 탭 화면 */}
       {payTab === "BARCODE" && (
         <div className="h-full ">
@@ -176,16 +144,21 @@ export default function PayContainer() {
 
       {/* QR 탭 화면 */}
       {payTab === "QR" && (
-        <div className="h-full flex flex-col items-center justify-center px-6 py-6">
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">QR 스캔</h2>
-            <div className="w-64 h-64 bg-gray-100 rounded-lg flex items-center justify-center mb-6">
-              <div className="text-gray-500">QR 스캔 영역</div>
-            </div>
-            <p className="text-gray-600">QR 코드를 스캔하여 결제하세요</p>
-          </div>
+        <div className="bg-[#E5F0FE] h-full">
+          <QRScannerWithOverlay
+            once
+            onDetected={(text: string) => {
+              // 여기에서 원하는 동작 수행 (검증/라우팅/모달 닫기 등)
+              // 예: URL이면 이동
+              try {
+              } catch {
+                // URL이 아니면 앱 내 처리
+                console.log("스캔 텍스트:", text);
+              }
+            }}
+          />
         </div>
       )}
-    </>
+    </div>
   );
 }
