@@ -64,7 +64,9 @@ export const ChartComponent: React.FC<ChartProps> = ({
   const maxLineRef = useRef<PriceLineHandle | null>(null);
 
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("일");
-
+  const [legendData, setLegendData] = useState({
+    volume: "",
+  });
   const seriesesData = useMemo(
     () =>
       new Map<Period, ChartData[]>([
@@ -76,26 +78,44 @@ export const ChartComponent: React.FC<ChartProps> = ({
     [dayData, weekData, monthData, yearData]
   );
 
+  // 날짜 형식 변환 함수
+  const formatTimeForChart = (timeStr: string): Time => {
+    // yyyy-mm 형식인 경우 (월 데이터)
+    if (/^\d{4}-\d{2}$/.test(timeStr)) {
+      return `${timeStr}-01` as Time; // yyyy-mm-01로 변환
+    }
+    // yyyy-mm-dd 형식인 경우 (일/주 데이터)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(timeStr)) {
+      return timeStr as Time;
+    }
+    // yyyy 형식인 경우 (년 데이터)
+    if (/^\d{4}$/.test(timeStr)) {
+      return `${timeStr}-01-01` as Time; // yyyy-01-01로 변환
+    }
+    // 기본값
+    return timeStr as Time;
+  };
+
   const setChartInterval = useCallback(
     (interval: Period) => {
       const data = seriesesData.get(interval);
       if (!data) return;
       ma5SeriesRef.current?.setData(
-        data.map((d) => ({ time: d.time as Time, value: d.ma_5 }))
+        data.map((d) => ({ time: formatTimeForChart(d.time), value: d.ma_5 }))
       );
       ma20SeriesRef.current?.setData(
-        data.map((d) => ({ time: d.time as Time, value: d.ma_20 }))
+        data.map((d) => ({ time: formatTimeForChart(d.time), value: d.ma_20 }))
       );
       ma60SeriesRef.current?.setData(
-        data.map((d) => ({ time: d.time as Time, value: d.ma_60 }))
+        data.map((d) => ({ time: formatTimeForChart(d.time), value: d.ma_60 }))
       );
       ma120SeriesRef.current?.setData(
-        data.map((d) => ({ time: d.time as Time, value: d.ma_120 }))
+        data.map((d) => ({ time: formatTimeForChart(d.time), value: d.ma_120 }))
       );
 
       candleSeriesRef.current?.setData(
         data.map((d) => ({
-          time: d.time as Time,
+          time: formatTimeForChart(d.time),
           open: d.open,
           high: d.high,
           low: d.low,
@@ -103,12 +123,15 @@ export const ChartComponent: React.FC<ChartProps> = ({
         }))
       );
       histogramSeriesRef.current?.setData(
-        data.map((d) => ({ time: d.time as Time, value: d.trading_volume }))
+        data.map((d) => ({
+          time: formatTimeForChart(d.time),
+          value: d.trading_volume,
+        }))
       );
 
-      //hover tooltip
-      // const container = document.getElementById('container');
+      // 범례 추가
 
+      //hover tooltip
       // const toolTipWidth = 80;
       // const toolTipHeight = 80;
       // const toolTipMargin = 15;
@@ -168,16 +191,16 @@ export const ChartComponent: React.FC<ChartProps> = ({
           lineWidth: 1,
           lineStyle: 2, // LineStyle.Dashed
           axisLabelVisible: true,
-          //title: 'min price',
+          //title: "min price",
         });
 
         maxLineRef.current = candleSeriesRef.current.createPriceLine({
           price: maximumPrice,
-          color: "#ef5350",
+          color: "#ff0000ff",
           lineWidth: 1,
           lineStyle: 2, // LineStyle.Dashed
           axisLabelVisible: true,
-          //title: 'max price',
+          //title: "max price",
         });
       }
     },
@@ -202,6 +225,25 @@ export const ChartComponent: React.FC<ChartProps> = ({
       //height: chartContainerRef.current.clientHeight,
     });
 
+    chart.applyOptions({
+      rightPriceScale: {
+        scaleMargins: {
+          top: 0.17, // leave some space for the legend
+          bottom: 0.1,
+        },
+      },
+
+      // // hide the grid lines
+      // grid: {
+      //     vertLines: {
+      //         visible: false,
+      //     },
+      //     horzLines: {
+      //         visible: false,
+      //     },
+      // },
+    });
+
     chart.timeScale().fitContent();
     chart.timeScale().applyOptions({
       barSpacing: 5,
@@ -209,28 +251,28 @@ export const ChartComponent: React.FC<ChartProps> = ({
     chartRef.current = chart;
 
     const ma5lineSeries = chart.addSeries(LineSeries, {
-      color: "#454545",
+      color: "#545454",
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
     });
     ma5SeriesRef.current = ma5lineSeries;
     const ma20lineSeries = chart.addSeries(LineSeries, {
-      color: "#F79F3A",
+      color: "#FF4868",
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
     });
     ma20SeriesRef.current = ma20lineSeries;
     const ma60lineSeries = chart.addSeries(LineSeries, {
-      color: "#47B187",
+      color: "#F1A626",
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
     });
     ma60SeriesRef.current = ma60lineSeries;
     const ma120lineSeries = chart.addSeries(LineSeries, {
-      color: "#11AFCE",
+      color: "#40B27F",
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
@@ -241,8 +283,8 @@ export const ChartComponent: React.FC<ChartProps> = ({
       upColor: "#ff0000ff",
       downColor: "#2200ffff",
       borderVisible: false,
-      wickUpColor: "#ff0000ff",
-      wickDownColor: "#2200ffff",
+      wickUpColor: "#ADADAD",
+      wickDownColor: "#ADADAD",
     });
     candleSeriesRef.current = candlestickSeries;
 
@@ -250,7 +292,7 @@ export const ChartComponent: React.FC<ChartProps> = ({
       priceFormat: {
         type: "volume",
       },
-      color: "#686868",
+      color: "#ADADAD",
     });
     chart.addPane();
     histogramSeries.moveToPane(1);
@@ -259,6 +301,21 @@ export const ChartComponent: React.FC<ChartProps> = ({
     chart.panes()[1].setHeight(chartContainerRef.current.clientHeight / 4);
 
     setChartInterval(selectedPeriod);
+
+    // Crosshair move 이벤트 구독
+    chart.subscribeCrosshairMove((param) => {
+      let volumeText = "";
+
+      if (param.time) {
+        const data = param.seriesData.get(histogramSeries);
+        const volume = data?.value ?? 0;
+        volumeText = Math.round(volume).toLocaleString("ko-KR");
+      }
+
+      setLegendData({
+        volume: volumeText,
+      });
+    });
 
     const handleResize = () => {
       chart.applyOptions({
@@ -296,7 +353,21 @@ export const ChartComponent: React.FC<ChartProps> = ({
   return (
     <div>
       <PeriodSelector value={selectedPeriod} onChange={setSelectedPeriod} />
-      <div ref={chartContainerRef} className="w-full h-[calc(100dvh-285px)]" />
+      <div className="relative">
+        <div className="absolute left-0 top-3 z-10 text-sm font-light bg-white/80">
+          <span style={{ color: "#545454" }}>■ 5</span>{" "}
+          <span style={{ color: "#FF4868" }}>■ 20</span>{" "}
+          <span style={{ color: "#F1A626" }}>■ 60</span>{" "}
+          <span style={{ color: "#40B27F" }}>■ 120</span>
+        </div>
+        <div className="absolute left-0 bottom-[17dvh] z-10 text-sm font-light bg-white/80">
+          {legendData.volume ? `거래량 ${legendData.volume}` : "거래량"}
+        </div>
+        <div
+          ref={chartContainerRef}
+          className="w-full h-[calc(100dvh-285px)]"
+        />
+      </div>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import MainButton from "./MainButton";
 
 interface ModalProps {
@@ -23,6 +23,7 @@ export default function YesNoModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="mx-auto w-[calc(100vw-32px)] max-w-[calc(var(--app-max-w)-32px)] rounded-xl ">
+        <DialogTitle className="sr-only">모달</DialogTitle>
         {children}
         <div className="flex gap-3">
           <MainButton onClick={onClose} disabled={true} className="max-w-sm">
