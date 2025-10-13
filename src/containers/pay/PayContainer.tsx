@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import ChargeModal from "@/components/pay/ChargeModal";
-import QRScannerWithOverlay from "@/app/(pages)/(shell)/test/page";
 import { usePayTab } from "@/contexts/payTabContext";
+import QRScannerContainer from "./QRScannerContainer";
 
 const currency = new Intl.NumberFormat("ko-KR");
 
@@ -145,18 +145,7 @@ export default function PayContainer() {
       {/* QR 탭 화면 */}
       {payTab === "QR" && (
         <div className="bg-[#E5F0FE] h-full">
-          <QRScannerWithOverlay
-            once
-            onDetected={(text: string) => {
-              // 여기에서 원하는 동작 수행 (검증/라우팅/모달 닫기 등)
-              // 예: URL이면 이동
-              try {
-              } catch {
-                // URL이 아니면 앱 내 처리
-                console.log("스캔 텍스트:", text);
-              }
-            }}
-          />
+          <QRScannerContainer once />
         </div>
       )}
     </div>
