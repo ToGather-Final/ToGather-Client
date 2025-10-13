@@ -64,7 +64,9 @@ export const ChartComponent: React.FC<ChartProps> = ({
   const maxLineRef = useRef<PriceLineHandle | null>(null);
 
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("일");
-
+  const [legendData, setLegendData] = useState({
+    volume: "",
+  });
   const seriesesData = useMemo(
     () =>
       new Map<Period, ChartData[]>([
@@ -127,9 +129,9 @@ export const ChartComponent: React.FC<ChartProps> = ({
         }))
       );
 
-      //hover tooltip
-      // const container = document.getElementById('container');
+      // 범례 추가
 
+      //hover tooltip
       // const toolTipWidth = 80;
       // const toolTipHeight = 80;
       // const toolTipMargin = 15;
@@ -223,6 +225,25 @@ export const ChartComponent: React.FC<ChartProps> = ({
       //height: chartContainerRef.current.clientHeight,
     });
 
+    chart.applyOptions({
+      rightPriceScale: {
+        scaleMargins: {
+          top: 0.17, // leave some space for the legend
+          bottom: 0.1,
+        },
+      },
+
+      // // hide the grid lines
+      // grid: {
+      //     vertLines: {
+      //         visible: false,
+      //     },
+      //     horzLines: {
+      //         visible: false,
+      //     },
+      // },
+    });
+
     chart.timeScale().fitContent();
     chart.timeScale().applyOptions({
       barSpacing: 5,
@@ -281,6 +302,21 @@ export const ChartComponent: React.FC<ChartProps> = ({
 
     setChartInterval(selectedPeriod);
 
+    // Crosshair move 이벤트 구독
+    chart.subscribeCrosshairMove((param) => {
+      let volumeText = "";
+
+      if (param.time) {
+        const data = param.seriesData.get(histogramSeries);
+        const volume = data?.value ?? 0;
+        volumeText = Math.round(volume).toLocaleString("ko-KR");
+      }
+
+      setLegendData({
+        volume: volumeText,
+      });
+    });
+
     const handleResize = () => {
       chart.applyOptions({
         width: chartContainerRef.current?.clientWidth || 0,
@@ -317,7 +353,21 @@ export const ChartComponent: React.FC<ChartProps> = ({
   return (
     <div>
       <PeriodSelector value={selectedPeriod} onChange={setSelectedPeriod} />
-      <div ref={chartContainerRef} className="w-full h-[calc(100dvh-285px)]" />
+      <div className="relative">
+        <div className="absolute left-0 top-3 z-10 text-sm font-light bg-white/80">
+          <span style={{ color: "#545454" }}>■ 5</span>{" "}
+          <span style={{ color: "#FF4868" }}>■ 20</span>{" "}
+          <span style={{ color: "#F1A626" }}>■ 60</span>{" "}
+          <span style={{ color: "#40B27F" }}>■ 120</span>
+        </div>
+        <div className="absolute left-0 bottom-[17dvh] z-10 text-sm font-light bg-white/80">
+          {legendData.volume ? `거래량 ${legendData.volume}` : "거래량"}
+        </div>
+        <div
+          ref={chartContainerRef}
+          className="w-full h-[calc(100dvh-285px)]"
+        />
+      </div>
     </div>
   );
 };
