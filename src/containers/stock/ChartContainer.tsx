@@ -1,6 +1,7 @@
 "use client";
 import { ChartComponent } from "@/components/chart/Chart";
 import { ChevronLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // 일봉 (Day Data) - 매일 데이터
 const dayData = [
@@ -1411,6 +1412,12 @@ const stockInfo = {
 
 //주문 버튼부터 하면 됨
 export default function ChartContainer() {
+  const router = useRouter();
+
+  const handleOrderClick = () => {
+    router.push(`/stock/${stockInfo.code}/realtime`);
+  };
+
   return (
     <div>
       <div className="flex justify-between py-2  px-5">
@@ -1423,7 +1430,10 @@ export default function ChartContainer() {
           </button>
           <span className="text-[14px] font-bold">{stockInfo.name}</span>
         </div>
-        <button className="text-[12px] text-white bg-blue-600 rounded-[8px] px-[8px] py-[4px]">
+        <button
+          onClick={handleOrderClick}
+          className="text-[12px] text-white bg-blue-600 rounded-[8px] px-[8px] py-[4px]"
+        >
           주문
         </button>
       </div>

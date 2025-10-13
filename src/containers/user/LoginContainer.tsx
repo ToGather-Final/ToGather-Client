@@ -101,12 +101,12 @@ export default function LoginFlow() {
   }
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="h-full bg-white relative overflow-hidden">
       {/* Background coins */}
       <BackgroundCoins />
 
       {/* Main content */}
-      <div className="flex flex-col items-center justify-center min-h-screen px-8 relative z-10">
+      <div className="flex flex-col items-center justify-center h-full px-8 relative z-10">
         {/* Logo */}
         <div className="mb-8">
           <img 

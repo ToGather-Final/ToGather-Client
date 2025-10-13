@@ -39,7 +39,7 @@ export default function ToGatherApp() {
   // Splash Screen
   if (currentScreen === "splash") {
     return (
-      <div className="min-h-screen relative overflow-hidden" style={{ background: '#6592FD' }}>
+      <div className="h-full relative overflow-hidden" style={{ background: '#6592FD' }}>
         {/* Animated slide up overlay */}
         <div
           className={`absolute inset-0 bg-white transition-transform duration-800 ease-out ${
@@ -51,7 +51,7 @@ export default function ToGatherApp() {
         <BackgroundCoins />
 
         {/* Main content */}
-        <div className="flex flex-col items-center justify-center min-h-screen px-8">
+        <div className="flex flex-col items-center justify-center h-full px-8">
           {/* Logo */}
           <div className="mb-8">
             <div
@@ -94,12 +94,12 @@ export default function ToGatherApp() {
   // Auth Selection Screen
   if (currentScreen === "auth-selection") {
     return (
-      <div className="min-h-screen bg-white relative overflow-hidden">
+      <div className="h-full bg-white relative overflow-hidden">
         {/* Background coins */}
         <BackgroundCoins />
 
         {/* Main content */}
-        <div className="flex flex-col items-center justify-center min-h-screen px-8">
+        <div className="flex flex-col items-center justify-center h-full px-8">
           {/* Logo */}
           <div className="mb-8">
             <img 

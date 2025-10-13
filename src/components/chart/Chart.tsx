@@ -209,28 +209,28 @@ export const ChartComponent: React.FC<ChartProps> = ({
     chartRef.current = chart;
 
     const ma5lineSeries = chart.addSeries(LineSeries, {
-      color: "#ffd900ff",
+      color: "#454545",
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
     });
     ma5SeriesRef.current = ma5lineSeries;
     const ma20lineSeries = chart.addSeries(LineSeries, {
-      color: "#2200ffff",
+      color: "#F79F3A",
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
     });
     ma20SeriesRef.current = ma20lineSeries;
     const ma60lineSeries = chart.addSeries(LineSeries, {
-      color: "#2d953bff",
+      color: "#47B187",
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
     });
     ma60SeriesRef.current = ma60lineSeries;
     const ma120lineSeries = chart.addSeries(LineSeries, {
-      color: "#00ffe5ff",
+      color: "#11AFCE",
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,

@@ -12,7 +12,7 @@ export default function AccountCompleteContainer({
   onJoinGroup 
 }: AccountCompleteContainerProps) {
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden flex flex-col">
+    <div className="h-full bg-white relative overflow-hidden flex flex-col">
       {/* Header */}
       <div className="p-6 relative z-10">
         <img 

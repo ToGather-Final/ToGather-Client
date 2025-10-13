@@ -72,6 +72,16 @@ export default function SignupContainer({ onSignupComplete }: SignupContainerPro
       onSignupComplete(formData.nickname)
     } catch (err: any) {
       console.error("Signup error:", err)
+      console.error("Signup error type:", typeof err)
+      console.error("Signup error keys:", err ? Object.keys(err) : 'null/undefined')
+      
+      // 빈 객체인 경우 (성공 응답이지만 본문이 없는 경우)
+      if (err && typeof err === 'object' && Object.keys(err).length === 0) {
+        console.log("Empty response detected - treating as success")
+        onSignupComplete(formData.nickname)
+        return
+      }
+      
       setError(err.message || "회원가입에 실패했습니다. 다시 시도해주세요.")
     } finally {
       setIsLoading(false)
@@ -79,12 +89,12 @@ export default function SignupContainer({ onSignupComplete }: SignupContainerPro
   }
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="h-full bg-white relative overflow-hidden">
       {/* Background coins */}
       <BackgroundCoins />
 
       {/* Main content */}
-      <div className="flex flex-col items-center justify-center min-h-screen px-8 py-12 relative z-10">
+      <div className="flex flex-col items-center justify-center h-full px-8 py-12 relative z-10">
         {/* Logo */}
         <div className="mb-6">
           <img 

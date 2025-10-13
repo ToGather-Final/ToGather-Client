@@ -1426,8 +1426,12 @@ interface props {
 
 export default function StockDrawer({ open, onOpenChange, stockCode }: props) {
   const router = useRouter();
-  const goRealtime = () => {
-    router.push(`http://localhost:3000/stock/${stockCode}/realtime`);
+
+  const goRealtime = (tab?: string) => {
+    const url = tab
+      ? `/stock/${stockCode}/realtime?tab=${tab}`
+      : `/stock/${stockCode}/realtime`;
+    router.push(url);
   };
 
   return (
@@ -1484,14 +1488,17 @@ export default function StockDrawer({ open, onOpenChange, stockCode }: props) {
             <DrawerClose asChild>
               <button
                 className="text-[12px] h-[50px] text-white bg-red-600 rounded-[8px] px-[8px] py-[4px]"
-                onClick={goRealtime}
+                onClick={() => goRealtime("buy")}
               >
                 매수제안
               </button>
             </DrawerClose>
 
             <DrawerClose asChild>
-              <button className="text-[12px] h-[50px] text-white bg-blue-600 rounded-[8px] px-[8px] py-[4px]">
+              <button
+                className="text-[12px] h-[50px] text-white bg-blue-600 rounded-[8px] px-[8px] py-[4px]"
+                onClick={() => goRealtime("sell")}
+              >
                 매도제안
               </button>
             </DrawerClose>
