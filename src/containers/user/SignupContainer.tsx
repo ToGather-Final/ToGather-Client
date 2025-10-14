@@ -4,11 +4,13 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import BackgroundCoins from "@/components/common/BackgroundCoins"
 import MainButton from "@/components/common/MainButton"
-import { signup } from "@/utils/api"
-import { SignupRequest } from "@/types/api/auth"
+import { signup, login } from "@/utils/api"
+import { getDeviceId } from "@/utils/deviceId"
+import { saveTokens } from "@/utils/token"
+import { SignupRequest, LoginRequest } from "@/types/api/auth"
 
 interface SignupContainerProps {
-  onSignupComplete: (nickname: string) => void
+  onSignupComplete: (nickname: string, userId?: string) => void
 }
 
 export default function SignupContainer({ onSignupComplete }: SignupContainerProps) {
@@ -66,10 +68,29 @@ export default function SignupContainer({ onSignupComplete }: SignupContainerPro
         nickname: formData.nickname,
       }
 
-      await signup(signupData)
+      // Device ID 가져오기
+      const deviceId = getDeviceId()
       
-      // 회원가입 성공 - 닉네임 전달
-      onSignupComplete(formData.nickname)
+      // 회원가입 시 X-Device-Id 헤더 포함
+      await signup(signupData, deviceId)
+      
+      // 회원가입 성공 후 자동 로그인
+      console.log("회원가입 완료, 자동 로그인 시작...")
+      
+      const loginData: LoginRequest = {
+        username: formData.id,
+        password: formData.password,
+      }
+      
+      const loginResponse = await login(loginData, deviceId)
+      
+      // 토큰 저장
+      saveTokens(loginResponse.accessToken, loginResponse.refreshToken, loginResponse.userId)
+      
+      console.log("자동 로그인 완료:", loginResponse.userId)
+      
+      // 회원가입 완료 - 닉네임과 userId 전달
+      onSignupComplete(formData.nickname, loginResponse.userId)
     } catch (err: any) {
       console.error("Signup error:", err)
       console.error("Signup error type:", typeof err)

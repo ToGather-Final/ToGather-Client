@@ -8,6 +8,7 @@ import MainButton from "@/components/common/MainButton"
 import { login } from "@/utils/api"
 import { getDeviceId } from "@/utils/deviceId"
 import { saveTokens } from "@/utils/token"
+import { checkUserStatus } from "@/utils/userStatus"
 import { LoginRequest, ApiErrorWithStatus } from "@/types/api/auth"
 
 export default function LoginFlow() {
@@ -56,8 +57,31 @@ export default function LoginFlow() {
       // 토큰 저장
       saveTokens(response.accessToken, response.refreshToken, response.userId)
       
-      // 로그인 성공 후 그룹 페이지로 이동
-      router.push("/group")
+      // 사용자 상태 확인 후 적절한 페이지로 리다이렉트
+      try {
+        const userStatus = await checkUserStatus(response.userId)
+        console.log("로그인 후 사용자 상태:", userStatus)
+        
+        switch (userStatus.nextStep) {
+          case 'account-create':
+            router.push("/account-create")
+            break
+          case 'group-create':
+          case 'group-join':
+            // 그룹 생성/참여 선택 페이지로 이동 (추후 구현)
+            router.push("/group-create")
+            break
+          case 'group':
+            router.push("/group")
+            break
+          default:
+            router.push("/account-create")
+        }
+      } catch (error) {
+        console.error("사용자 상태 확인 실패:", error)
+        // 에러 시 기본적으로 계좌 개설 페이지로 이동
+        router.push("/account-create")
+      }
     } catch (err) {
       console.error("Login error:", err)
       
