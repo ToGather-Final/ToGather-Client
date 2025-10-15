@@ -298,7 +298,7 @@ export const ChartComponent: React.FC<ChartProps> = ({
 
       if (param.time) {
         const data = param.seriesData.get(histogramSeries);
-        const volume = data?.value ?? 0;
+        const volume = data && "value" in data ? data.value : 0;
         volumeText = Math.round(volume).toLocaleString("ko-KR");
       }
 
