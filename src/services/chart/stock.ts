@@ -1,5 +1,6 @@
 import { baseUrl } from "@/constants/baseUrl";
-import { Stock } from "@/types/api/stock";
+import { Stock, StockDetail } from "@/types/api/stock";
+import { Response } from "@/types/api/response";
 
 // export const getStockList = async () => {
 //   const res = await fetch(`${baseUrl}/trading/stocks`, {
@@ -17,8 +18,8 @@ import { Stock } from "@/types/api/stock";
 //   return data;
 // };
 
-export const getStockList = (url: string) =>
+export const getStockList = (url: string): Promise<Response<Stock[]>> =>
   fetch(url).then((res) => res.json());
 
-export const getStockDetail = (url: string) =>
+export const getStockDetail = (url: string): Promise<Response<StockDetail>> =>
   fetch(url).then((res) => res.json());

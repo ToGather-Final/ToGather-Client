@@ -12,22 +12,10 @@ import {
 import { useRouter } from "next/navigation";
 
 import "./chart-style.css";
-
-interface ChartData {
-  time: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  ma_5: number;
-  ma_20: number;
-  ma_60: number;
-  ma_120: number;
-  trading_volume: number;
-}
+import { SimpleChartData } from "@/types/api/stock";
 
 interface ChartProps {
-  dayData: ChartData[];
+  dayData: SimpleChartData[];
   stockCode?: string;
 }
 type PriceLineHandle = ReturnType<ISeriesApi<"Candlestick">["createPriceLine"]>;
@@ -42,6 +30,22 @@ export const SimpleChart: React.FC<ChartProps> = ({ dayData, stockCode }) => {
   const minLineRef = useRef<PriceLineHandle | null>(null);
   const maxLineRef = useRef<PriceLineHandle | null>(null);
 
+  // 날짜 형식 변환 함수 (YYYYMMDD -> YYYY-MM-DD)
+  const formatDateForChart = (dateStr: string | undefined | null): Time => {
+    if (!dateStr || typeof dateStr !== "string") {
+      return new Date().toISOString().split("T")[0] as Time;
+    }
+
+    if (dateStr.length === 8) {
+      // YYYYMMDD 형식을 YYYY-MM-DD로 변환
+      const year = dateStr.substring(0, 4);
+      const month = dateStr.substring(4, 6);
+      const day = dateStr.substring(6, 8);
+      return `${year}-${month}-${day}` as Time;
+    }
+    return dateStr as Time;
+  };
+
   const handleChartClick = useCallback(() => {
     if (stockCode) {
       router.push(`/stock/${stockCode}`);
@@ -51,9 +55,22 @@ export const SimpleChart: React.FC<ChartProps> = ({ dayData, stockCode }) => {
   const setChartData = useCallback(() => {
     if (!dayData || dayData.length === 0) return;
 
+    // 유효한 데이터만 필터링
+    const validData = dayData.filter(
+      (d) =>
+        d &&
+        d.time &&
+        d.open !== undefined &&
+        d.high !== undefined &&
+        d.low !== undefined &&
+        d.close !== undefined
+    );
+
+    if (validData.length === 0) return;
+
     candleSeriesRef.current?.setData(
-      dayData.map((d) => ({
-        time: d.time as Time,
+      validData.map((d) => ({
+        time: formatDateForChart(d.time),
         open: d.open,
         high: d.high,
         low: d.low,
@@ -61,14 +78,14 @@ export const SimpleChart: React.FC<ChartProps> = ({ dayData, stockCode }) => {
       }))
     );
 
-    let minimumPrice = dayData[0].low;
-    let maximumPrice = dayData[0].high;
-    for (let i = 1; i < dayData.length; i++) {
-      const highPrice = dayData[i].high;
+    let minimumPrice = validData[0].low;
+    let maximumPrice = validData[0].high;
+    for (let i = 1; i < validData.length; i++) {
+      const highPrice = validData[i].high;
       if (highPrice > maximumPrice) {
         maximumPrice = highPrice;
       }
-      const lowPrice = dayData[i].low;
+      const lowPrice = validData[i].low;
       if (lowPrice < minimumPrice) {
         minimumPrice = lowPrice;
       }

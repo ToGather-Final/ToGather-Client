@@ -5,6 +5,7 @@ import StockDrawer from "./StockDrawer";
 import MenuTab from "@/components/tab/MenuTab";
 import { getStockList } from "@/services/chart/stock";
 import { Stock } from "@/types/api/stock";
+import { Response } from "@/types/api/response";
 import { baseUrl } from "@/constants/baseUrl";
 import useSWR from "swr";
 
@@ -191,11 +192,13 @@ export default function StockListContainer() {
     getStockList
   );
 
+  console.log(data);
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Failed to load</div>;
 
-  // SWR에서 받은 data를 stockList로 사용
-  const stockList = data || [];
+  // API 응답이 Response<Stock[]> 형태이므로 data.data를 사용
+  const stockList = data?.data || [];
 
   const uptabs = [
     { id: "MY", label: "보유주식" },

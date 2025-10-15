@@ -15,24 +15,24 @@ export interface Stock {
 //   enabled: boolean
 
 export interface SimpleChartData {
-  date: string;
+  time: string; //time
   open: number;
   high: number;
   low: number;
   close: number;
-  volume: number;
+  trading_volume: number; //trading_volume
 }
 
 export interface StockDetail {
   stockId: string;
-  stockCode: string;
-  stockName: string;
-  market: string;
+  stockCode: string; //code
+  stockName: string; //name
+  market: string; //area
   currentPrice: number;
-  changeAmount: number;
-  changeRate: number;
+  changeAmount: number; //increase
+  changeRate: number; //percent
   changeDirection: "up" | "down";
-  volume: number;
+  volume: number; //trading_volume
   highPrice: number;
   lowPrice: number;
   openPrice: number;
