@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import AppShell from "../components/layout/AppShell";
+import { GroupIdProvider } from "@/contexts/groupIdContext";
 
 const pretendard = localFont({
   // src: [
@@ -54,7 +55,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={`${pretendard.variable}`}>
-      <body className={pretendard.className}>{children}</body>
+      <GroupIdProvider>
+        <body className={pretendard.className}>{children}</body>
+      </GroupIdProvider>
     </html>
   );
 }
