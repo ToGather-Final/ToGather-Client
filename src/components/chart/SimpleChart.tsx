@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   createChart,
   ColorType,
@@ -14,57 +8,43 @@ import {
   ISeriesApi,
   Time,
   CandlestickSeries,
-  LineSeries,
-  HistogramSeries,
-  AreaSeries,
 } from "lightweight-charts";
 import { useRouter } from "next/navigation";
-import PeriodSelector from "./PeriodSelector";
 
 import "./chart-style.css";
-
-interface ChartData {
-  time: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  ma_5: number;
-  ma_20: number;
-  ma_60: number;
-  ma_120: number;
-  trading_volume: number;
-}
+import { SimpleChartData } from "@/types/api/stock";
 
 interface ChartProps {
-  dayData: ChartData[];
-  weekData: ChartData[];
-  monthData: ChartData[];
-  yearData: ChartData[];
+  dayData: SimpleChartData[];
   stockCode?: string;
 }
 type PriceLineHandle = ReturnType<ISeriesApi<"Candlestick">["createPriceLine"]>;
-type Period = "일" | "주" | "월" | "년";
 
-export const SimpleChart: React.FC<ChartProps> = ({
-  dayData,
-  weekData,
-  monthData,
-  yearData,
-  stockCode,
-}) => {
+export const SimpleChart: React.FC<ChartProps> = ({ dayData, stockCode }) => {
   const router = useRouter();
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
 
-  const areaSeriesRef = useRef<ISeriesApi<"Area"> | null>(null);
-
-  const buttonsContainerRef = useRef<HTMLDivElement>(null);
+  const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
 
   const minLineRef = useRef<PriceLineHandle | null>(null);
   const maxLineRef = useRef<PriceLineHandle | null>(null);
 
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>("일");
+  // 날짜 형식 변환 함수 (YYYYMMDD -> YYYY-MM-DD)
+  const formatDateForChart = (dateStr: string | undefined | null): Time => {
+    if (!dateStr || typeof dateStr !== "string") {
+      return new Date().toISOString().split("T")[0] as Time;
+    }
+
+    if (dateStr.length === 8) {
+      // YYYYMMDD 형식을 YYYY-MM-DD로 변환
+      const year = dateStr.substring(0, 4);
+      const month = dateStr.substring(4, 6);
+      const day = dateStr.substring(6, 8);
+      return `${year}-${month}-${day}` as Time;
+    }
+    return dateStr as Time;
+  };
 
   const handleChartClick = useCallback(() => {
     if (stockCode) {
@@ -72,69 +52,72 @@ export const SimpleChart: React.FC<ChartProps> = ({
     }
   }, [router, stockCode]);
 
-  const seriesesData = useMemo(
-    () =>
-      new Map<Period, ChartData[]>([
-        ["일", dayData],
-        ["주", weekData],
-        ["월", monthData],
-        ["년", yearData],
-      ]),
-    [dayData, weekData, monthData, yearData]
-  );
+  const setChartData = useCallback(() => {
+    if (!dayData || dayData.length === 0) return;
 
-  const setChartInterval = useCallback(
-    (interval: Period) => {
-      const data = seriesesData.get(interval);
-      if (!data) return;
+    // 유효한 데이터만 필터링
+    const validData = dayData.filter(
+      (d) =>
+        d &&
+        d.time &&
+        d.open !== undefined &&
+        d.high !== undefined &&
+        d.low !== undefined &&
+        d.close !== undefined
+    );
 
-      areaSeriesRef.current?.setData(
-        data.map((d) => ({ time: d.time as Time, value: d.trading_volume }))
-      );
+    if (validData.length === 0) return;
 
-      let minimumPrice = data[0].trading_volume;
-      let maximumPrice = data[0].trading_volume;
-      for (let i = 1; i < data.length; i++) {
-        const price = data[i].trading_volume;
-        if (price > maximumPrice) {
-          maximumPrice = price;
-        }
-        if (price < minimumPrice) {
-          minimumPrice = price;
-        }
+    candleSeriesRef.current?.setData(
+      validData.map((d) => ({
+        time: formatDateForChart(d.time),
+        open: d.open,
+        high: d.high,
+        low: d.low,
+        close: d.close,
+      }))
+    );
+
+    let minimumPrice = validData[0].low;
+    let maximumPrice = validData[0].high;
+    for (let i = 1; i < validData.length; i++) {
+      const highPrice = validData[i].high;
+      if (highPrice > maximumPrice) {
+        maximumPrice = highPrice;
       }
-      if (areaSeriesRef.current) {
-        if (minLineRef.current) {
-          areaSeriesRef.current.removePriceLine(minLineRef.current);
-          minLineRef.current = null;
-        }
-        if (maxLineRef.current) {
-          areaSeriesRef.current.removePriceLine(maxLineRef.current);
-          maxLineRef.current = null;
-        }
-
-        minLineRef.current = areaSeriesRef.current.createPriceLine({
-          price: minimumPrice,
-          color: "#2200ffff",
-          lineWidth: 1,
-          lineStyle: 2, // LineStyle.Dashed
-          axisLabelVisible: true,
-          //title: 'min price',
-        });
-
-        maxLineRef.current = areaSeriesRef.current.createPriceLine({
-          price: maximumPrice,
-          color: "#ef5350",
-          lineWidth: 1,
-          lineStyle: 2, // LineStyle.Dashed
-          axisLabelVisible: true,
-          //title: 'max price',
-        });
+      const lowPrice = validData[i].low;
+      if (lowPrice < minimumPrice) {
+        minimumPrice = lowPrice;
       }
-    },
-    [seriesesData]
-  );
-  //lineSeries.applyOptions({ color: intervalColors[interval] });
+    }
+
+    if (candleSeriesRef.current) {
+      if (minLineRef.current) {
+        candleSeriesRef.current.removePriceLine(minLineRef.current);
+        minLineRef.current = null;
+      }
+      if (maxLineRef.current) {
+        candleSeriesRef.current.removePriceLine(maxLineRef.current);
+        maxLineRef.current = null;
+      }
+
+      minLineRef.current = candleSeriesRef.current.createPriceLine({
+        price: minimumPrice,
+        color: "#2200ffff",
+        lineWidth: 1,
+        lineStyle: 2, // LineStyle.Dashed
+        axisLabelVisible: true,
+      });
+
+      maxLineRef.current = candleSeriesRef.current.createPriceLine({
+        price: maximumPrice,
+        color: "#ef5350",
+        lineWidth: 1,
+        lineStyle: 2, // LineStyle.Dashed
+        axisLabelVisible: true,
+      });
+    }
+  }, [dayData]);
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
@@ -159,14 +142,16 @@ export const SimpleChart: React.FC<ChartProps> = ({
     });
     chartRef.current = chart;
 
-    const areaSeries = chart.addSeries(AreaSeries, {
-      lineWidth: 1,
-      lastValueVisible: false,
-      priceLineVisible: false,
+    const candlestickSeries = chart.addSeries(CandlestickSeries, {
+      upColor: "#ff0000ff",
+      downColor: "#2200ffff",
+      borderVisible: false,
+      wickUpColor: "#ADADAD",
+      wickDownColor: "#ADADAD",
     });
-    areaSeriesRef.current = areaSeries;
+    candleSeriesRef.current = candlestickSeries;
 
-    setChartInterval(selectedPeriod);
+    setChartData();
 
     const handleResize = () => {
       chart.applyOptions({
@@ -177,29 +162,27 @@ export const SimpleChart: React.FC<ChartProps> = ({
 
     return () => {
       if (minLineRef.current) {
-        areaSeries?.removePriceLine(minLineRef.current);
+        candlestickSeries?.removePriceLine(minLineRef.current);
         minLineRef.current = null;
       }
       if (maxLineRef.current) {
-        areaSeries?.removePriceLine(maxLineRef.current);
+        candlestickSeries?.removePriceLine(maxLineRef.current);
         maxLineRef.current = null;
       }
       window.removeEventListener("resize", handleResize);
       chart.remove();
-      areaSeriesRef.current = null;
+      candleSeriesRef.current = null;
       chartRef.current = null;
     };
-  }, []);
+  }, [setChartData]);
 
   useEffect(() => {
     if (!chartRef.current) return;
-    setChartInterval(selectedPeriod);
-  }, [selectedPeriod, seriesesData]);
+    setChartData();
+  }, [setChartData]);
 
   return (
     <div>
-      <div ref={buttonsContainerRef} className="mt-2 flex justify-center" />
-      <PeriodSelector value={selectedPeriod} onChange={setSelectedPeriod} />
       <div
         ref={chartContainerRef}
         className="w-full h-[calc(50dvh)] cursor-pointer"

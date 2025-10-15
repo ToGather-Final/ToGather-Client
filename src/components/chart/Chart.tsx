@@ -43,6 +43,19 @@ interface ChartProps {
 type PriceLineHandle = ReturnType<ISeriesApi<"Candlestick">["createPriceLine"]>;
 type Period = "일" | "주" | "월" | "년";
 
+interface TooltipData {
+  time: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  ma5: number;
+  ma20: number;
+  ma60: number;
+  ma120: number;
+}
+
 export const ChartComponent: React.FC<ChartProps> = ({
   dayData,
   weekData,
@@ -67,6 +80,10 @@ export const ChartComponent: React.FC<ChartProps> = ({
   const [legendData, setLegendData] = useState({
     volume: "",
   });
+  const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+
   const seriesesData = useMemo(
     () =>
       new Map<Period, ChartData[]>([
@@ -94,6 +111,24 @@ export const ChartComponent: React.FC<ChartProps> = ({
     }
     // 기본값
     return timeStr as Time;
+  };
+
+  // 날짜 포맷팅 함수
+  const formatDate = (timeStr: string) => {
+    const date = new Date(timeStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const days = ["일", "월", "화", "수", "목", "금", "토"];
+    const dayOfWeek = days[date.getDay()];
+    return `${year}.${month}.${day} (${dayOfWeek})`;
+  };
+
+  // 변화율 계산 함수
+  const calculateChange = (current: number, previous: number) => {
+    const diff = current - previous;
+    const percent = ((diff / previous) * 100).toFixed(2);
+    return { diff, percent };
   };
 
   const setChartInterval = useCallback(
@@ -128,40 +163,6 @@ export const ChartComponent: React.FC<ChartProps> = ({
           value: d.trading_volume,
         }))
       );
-
-      // 범례 추가
-
-      //hover tooltip
-      // const toolTipWidth = 80;
-      // const toolTipHeight = 80;
-      // const toolTipMargin = 15;
-
-      // // Create and style the tooltip html element
-      // const toolTip = document.createElement('div');
-      // toolTip.style = `width: 96px; height: 80px; position: absolute; display: none; padding: 8px; box-sizing: border-box; font-size: 12px; text-align: left; z-index: 1000; top: 12px; left: 12px; pointer-events: none; border: 1px solid; border-radius: 2px;font-family: -apple-system, BlinkMacSystemFont, 'Trebuchet MS', Roboto, Ubuntu, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;`;
-      // toolTip.style.background = 'white';
-      // toolTip.style.color = 'black';
-      // toolTip.style.borderColor = '#2962FF';
-      // container.appendChild(toolTip);
-      // chart.subscribeCrosshairMove(param => {
-      //     if (
-      //         param.point === undefined ||
-      //         !param.time ||
-      //         param.point.x < 0 ||
-      //         param.point.y < 0
-      //     ) {
-      //         toolTip.style.display = 'none';
-      //     } else {
-      //         toolTip.style.display = 'block';
-      //         const data = param.seriesData.get(candlestickSeries);
-      //         const price = candlestickSeries.value !== undefined ? data.value : data.close;
-      //         toolTip.innerHTML = `<div>${price.toFixed(2)}</div>`;
-
-      //         // Position tooltip according to mouse cursor position
-      //         toolTip.style.left = param.point.x + 'px';
-      //         toolTip.style.top = param.point.y + 'px';
-      //     }
-      // });
 
       let minimumPrice = data[0].low;
       let maximumPrice = data[0].high;
@@ -206,7 +207,6 @@ export const ChartComponent: React.FC<ChartProps> = ({
     },
     [seriesesData]
   );
-  //lineSeries.applyOptions({ color: intervalColors[interval] });
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
@@ -229,19 +229,9 @@ export const ChartComponent: React.FC<ChartProps> = ({
       rightPriceScale: {
         scaleMargins: {
           top: 0.17, // leave some space for the legend
-          bottom: 0.1,
+          bottom: 0,
         },
       },
-
-      // // hide the grid lines
-      // grid: {
-      //     vertLines: {
-      //         visible: false,
-      //     },
-      //     horzLines: {
-      //         visible: false,
-      //     },
-      // },
     });
 
     chart.timeScale().fitContent();
@@ -308,13 +298,68 @@ export const ChartComponent: React.FC<ChartProps> = ({
 
       if (param.time) {
         const data = param.seriesData.get(histogramSeries);
-        const volume = data?.value ?? 0;
+        const volume = data && "value" in data ? data.value : 0;
         volumeText = Math.round(volume).toLocaleString("ko-KR");
       }
 
       setLegendData({
         volume: volumeText,
       });
+
+      if (
+        !param.time ||
+        param.point === undefined ||
+        param.point.x < 0 ||
+        param.point.x > chartContainerRef.current!.clientWidth ||
+        param.point.y < 0 ||
+        param.point.y > chartContainerRef.current!.clientHeight
+      ) {
+        setTooltipVisible(false);
+        return;
+      }
+
+      const candleData = param.seriesData.get(candlestickSeries);
+      const volumeData = param.seriesData.get(histogramSeries);
+      const ma5Data = param.seriesData.get(ma5lineSeries);
+      const ma20Data = param.seriesData.get(ma20lineSeries);
+      const ma60Data = param.seriesData.get(ma60lineSeries);
+      const ma120Data = param.seriesData.get(ma120lineSeries);
+
+      if (candleData && volumeData) {
+        const tooltipWidth = 200; // 툴팁 예상 너비
+        const tooltipHeight = 400; // 툴팁 예상 높이
+        const margin = 10;
+
+        // x 위치 계산: 오른쪽 공간이 부족하면 왼쪽에 표시
+        let x = param.point.x + margin;
+        if (x + tooltipWidth > chartContainerRef.current!.clientWidth) {
+          x = param.point.x - tooltipWidth - margin;
+        }
+
+        //y 위치 계산: 아래 공간이 부족하면 위쪽으로 조정
+        let y = param.point.y + margin;
+        if (y + tooltipHeight > chartContainerRef.current!.clientHeight) {
+          y = chartContainerRef.current!.clientHeight - tooltipHeight - margin;
+        }
+        if (y < margin) {
+          y = margin;
+        }
+
+        setTooltipPosition({ x, y });
+        setTooltipData({
+          time: param.time as string,
+          open: (candleData as any).open,
+          high: (candleData as any).high,
+          low: (candleData as any).low,
+          close: (candleData as any).close,
+          volume: (volumeData as any).value,
+          ma5: (ma5Data as any)?.value ?? 0,
+          ma20: (ma20Data as any)?.value ?? 0,
+          ma60: (ma60Data as any)?.value ?? 0,
+          ma120: (ma120Data as any)?.value ?? 0,
+        });
+        setTooltipVisible(true);
+      }
     });
 
     const handleResize = () => {
@@ -342,6 +387,8 @@ export const ChartComponent: React.FC<ChartProps> = ({
       ma60SeriesRef.current = null;
       ma120SeriesRef.current = null;
       chartRef.current = null;
+      minLineRef.current = null;
+      maxLineRef.current = null;
     };
   }, []);
 
@@ -352,15 +399,271 @@ export const ChartComponent: React.FC<ChartProps> = ({
 
   return (
     <div>
-      <PeriodSelector value={selectedPeriod} onChange={setSelectedPeriod} />
+      <div className="px-6">
+        <PeriodSelector value={selectedPeriod} onChange={setSelectedPeriod} />
+      </div>
       <div className="relative">
-        <div className="absolute left-0 top-3 z-10 text-sm font-light bg-white/80">
+        <div className="absolute left-0 top-3 z-10 text-sm font-light bg-white/80 px-2">
           <span style={{ color: "#545454" }}>■ 5</span>{" "}
           <span style={{ color: "#FF4868" }}>■ 20</span>{" "}
           <span style={{ color: "#F1A626" }}>■ 60</span>{" "}
           <span style={{ color: "#40B27F" }}>■ 120</span>
         </div>
-        <div className="absolute left-0 bottom-[17dvh] z-10 text-sm font-light bg-white/80">
+        {tooltipVisible && tooltipData && (
+          <div
+            className="absolute z-20 bg-white border border-gray-200 rounded-lg shadow-lg p-4 min-w-[200px] pointer-events-none text-[14px]"
+            style={{
+              left: `${tooltipPosition.x}px`,
+              top: `${tooltipPosition.y}px`,
+            }}
+          >
+            <div className="text-base  text-[14px] mb-1 pb-1 border-b">
+              {formatDate(tooltipData.time)}
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 text-[14px]">종가</span>
+              <div className="text-right">
+                <span
+                  className={
+                    tooltipData.close >= tooltipData.open
+                      ? "text-red-600"
+                      : "text-blue-600"
+                  }
+                >
+                  {tooltipData.close.toLocaleString()}
+                </span>
+                <span
+                  className={`ml-2 text-xs ${
+                    tooltipData.close >= tooltipData.open
+                      ? "text-red-600"
+                      : "text-blue-600"
+                  }`}
+                >
+                  {calculateChange(tooltipData.close, tooltipData.open).percent}
+                  %
+                </span>
+              </div>
+            </div>
+            <div className="text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">시가</span>
+                <div className="text-right">
+                  <span
+                    className={
+                      tooltipData.open >= tooltipData.close
+                        ? "text-blue-600"
+                        : "text-red-600"
+                    }
+                  >
+                    {tooltipData.open.toLocaleString()}
+                  </span>
+                  <span
+                    className={`ml-2 text-xs ${
+                      tooltipData.open >= tooltipData.close
+                        ? "text-blue-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {
+                      calculateChange(tooltipData.open, tooltipData.close)
+                        .percent
+                    }
+                    %
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">고가</span>
+                <div className="text-right">
+                  <span
+                    className={
+                      tooltipData.high >= tooltipData.close
+                        ? "text-red-600"
+                        : "text-blue-600"
+                    }
+                  >
+                    {tooltipData.high.toLocaleString()}
+                  </span>
+                  <span
+                    className={`ml-2 text-xs ${
+                      tooltipData.high >= tooltipData.close
+                        ? "text-red-600"
+                        : "text-blue-600"
+                    }`}
+                  >
+                    {
+                      calculateChange(tooltipData.high, tooltipData.close)
+                        .percent
+                    }
+                    %
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">저가</span>
+                <div className="text-right">
+                  <span
+                    className={
+                      tooltipData.low >= tooltipData.close
+                        ? "text-red-600"
+                        : "text-blue-600"
+                    }
+                  >
+                    {tooltipData.low.toLocaleString()}
+                  </span>
+                  <span
+                    className={`ml-2 text-xs ${
+                      tooltipData.low >= tooltipData.close
+                        ? "text-red-600"
+                        : "text-blue-600"
+                    }`}
+                  >
+                    {
+                      calculateChange(tooltipData.low, tooltipData.close)
+                        .percent
+                    }
+                    %
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">거래량</span>
+                <div className="text-right">
+                  <span className="text-blue-600 font-medium">
+                    {Math.round(tooltipData.volume).toLocaleString()}
+                  </span>
+                  <span className="ml-2 text-xs text-blue-600">
+                    {
+                      calculateChange(tooltipData.volume, tooltipData.close)
+                        .percent
+                    }
+                    %
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-2 mt-1 border-t">
+                <div className="text-xs text-gray-500 mb-1.5">주가이동평균</div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">이평 5</span>
+                  <div className="text-right">
+                    <span
+                      className={
+                        tooltipData.ma5 >= tooltipData.close
+                          ? "text-red-600"
+                          : "text-blue-600"
+                      }
+                    >
+                      {tooltipData.ma5.toLocaleString()}
+                    </span>
+                    <span
+                      className={`ml-2 text-xs ${
+                        tooltipData.ma5 >= tooltipData.close
+                          ? "text-red-600"
+                          : "text-blue-600"
+                      }`}
+                    >
+                      {
+                        calculateChange(tooltipData.ma5, tooltipData.close)
+                          .percent
+                      }
+                      %
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">이평 20</span>
+                  <div className="text-right">
+                    <span
+                      className={
+                        tooltipData.ma20 >= tooltipData.close
+                          ? "text-red-600"
+                          : "text-blue-600"
+                      }
+                    >
+                      {tooltipData.ma20.toLocaleString()}
+                    </span>
+                    <span
+                      className={`ml-2 text-xs ${
+                        tooltipData.ma20 >= tooltipData.close
+                          ? "text-red-600"
+                          : "text-blue-600"
+                      }`}
+                    >
+                      {
+                        calculateChange(tooltipData.ma20, tooltipData.close)
+                          .percent
+                      }
+                      %
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">이평 60</span>
+                  <div className="text-right">
+                    <span
+                      className={
+                        tooltipData.ma60 >= tooltipData.close
+                          ? "text-blue-600"
+                          : "text-red-600"
+                      }
+                    >
+                      {tooltipData.ma60.toLocaleString()}
+                    </span>
+                    <span
+                      className={`ml-2 text-xs ${
+                        tooltipData.ma60 >= tooltipData.close
+                          ? "text-blue-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {
+                        calculateChange(tooltipData.ma60, tooltipData.close)
+                          .percent
+                      }
+                      %
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">이평 120</span>
+                  <div className="text-right">
+                    <span
+                      className={
+                        tooltipData.ma120 >= tooltipData.close
+                          ? "text-blue-600"
+                          : "text-red-600"
+                      }
+                    >
+                      {tooltipData.ma120.toLocaleString()}
+                    </span>
+                    <span
+                      className={`ml-2 text-xs ${
+                        tooltipData.ma120 >= tooltipData.close
+                          ? "text-blue-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {
+                        calculateChange(tooltipData.ma120, tooltipData.close)
+                          .percent
+                      }
+                      %
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="absolute left-0 bottom-[17dvh] z-10 text-sm font-light bg-white/80 px-2">
           {legendData.volume ? `거래량 ${legendData.volume}` : "거래량"}
         </div>
         <div

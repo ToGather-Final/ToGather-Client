@@ -1,8 +1,6 @@
 "use client";
 
 import { usePayTab } from "@/contexts/payTabContext";
-import { useStockTab } from "@/contexts/stockTabContext";
-import { useEffect } from "react";
 
 interface Tab {
   id: string;
