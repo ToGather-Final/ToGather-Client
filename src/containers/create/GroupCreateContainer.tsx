@@ -3,7 +3,10 @@
 import type React from "react"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
+import Select from "@/components/ui/select"
 import MainButton from "@/components/common/MainButton"
+import { createGroup, CreateGroupRequest } from "@/utils/api"
+import type { ApiErrorWithStatus } from "@/types/api/auth"
 
 interface GroupCreateContainerProps {
   onComplete: () => void
@@ -15,19 +18,132 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
     groupMemberId: "",
     initialInvestment: "",
     targetInvestment: "",
+    voteQuorum: "1", // 기본값: 1명
+    dissolutionQuorum: "1", // 기본값: 1명
   })
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 드롭다운 옵션 생성 함수
+  const generateQuorumOptions = (maxMembers: number) => {
+    const options = []
+    for (let i = 1; i <= maxMembers; i++) {
+      options.push({ value: i.toString(), label: `${i}명` })
+    }
+    return options
+  }
+
+  // 그룹 인원수에 따른 옵션 생성
+  const maxMembers = parseInt(formData.groupMemberId) || 1
+  const voteQuorumOptions = generateQuorumOptions(maxMembers)
+  const dissolutionQuorumOptions = generateQuorumOptions(maxMembers)
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // 페이 계좌 개설 화면으로 이동
-    onComplete()
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      // 입력값 검증
+      if (!formData.groupName.trim()) {
+        throw new Error("그룹명을 입력해주세요.")
+      }
+      if (!formData.groupMemberId.trim()) {
+        throw new Error("그룹 인원수를 입력해주세요.")
+      }
+      if (!formData.initialInvestment.trim()) {
+        throw new Error("초기 투자금을 입력해주세요.")
+      }
+      if (!formData.targetInvestment.trim()) {
+        throw new Error("목표 투자금을 입력해주세요.")
+      }
+
+      // 숫자 변환 및 검증
+      const maxMembers = parseInt(formData.groupMemberId)
+      const initialAmount = parseInt(formData.initialInvestment)
+      const goalAmount = parseInt(formData.targetInvestment)
+
+      if (isNaN(maxMembers) || maxMembers <= 0) {
+        throw new Error("그룹 인원수는 1명 이상이어야 합니다.")
+      }
+      if (isNaN(initialAmount) || initialAmount < 0) {
+        throw new Error("초기 투자금은 0원 이상이어야 합니다.")
+      }
+      if (isNaN(goalAmount) || goalAmount <= 0) {
+        throw new Error("목표 투자금은 0원보다 커야 합니다.")
+      }
+      if (initialAmount > goalAmount) {
+        throw new Error("초기 투자금은 목표 투자금보다 작거나 같아야 합니다.")
+      }
+
+      // 정족수 검증
+      const voteQuorum = parseInt(formData.voteQuorum)
+      const dissolutionQuorum = parseInt(formData.dissolutionQuorum)
+
+      if (voteQuorum > maxMembers) {
+        throw new Error("매매 정족수는 그룹 인원수를 초과할 수 없습니다.")
+      }
+      if (dissolutionQuorum > maxMembers) {
+        throw new Error("해체 정족수는 그룹 인원수를 초과할 수 없습니다.")
+      }
+
+      // API 요청 데이터 생성
+      const requestData: CreateGroupRequest = {
+        groupName: formData.groupName.trim(),
+        goalAmount,
+        initialAmount,
+        maxMembers,
+        voteQuorum,
+        dissolutionQuorum,
+      }
+
+      console.log("그룹 생성 시작:", requestData)
+      const result = await createGroup(requestData)
+      console.log("그룹 생성 완료:", result)
+
+      // 페이 계좌 개설 화면으로 이동
+      onComplete()
+    } catch (err) {
+      console.error("그룹 생성 실패:", err)
+      
+      let errorMessage = "그룹 생성에 실패했습니다. 다시 시도해주세요."
+      
+      if (err instanceof Error) {
+        errorMessage = err.message
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        errorMessage = (err as ApiErrorWithStatus).message
+      }
+      
+      setError(errorMessage)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }))
+    setFormData((prev) => {
+      const newData = {
+        ...prev,
+        [field]: value,
+      }
+
+      // 그룹 인원수가 변경되면 정족수도 조정
+      if (field === "groupMemberId") {
+        const newMaxMembers = parseInt(value) || 1
+        const currentVoteQuorum = parseInt(prev.voteQuorum) || 1
+        const currentDissolutionQuorum = parseInt(prev.dissolutionQuorum) || 1
+
+        // 현재 정족수가 새로운 최대 인원수를 초과하면 조정
+        if (currentVoteQuorum > newMaxMembers) {
+          newData.voteQuorum = newMaxMembers.toString()
+        }
+        if (currentDissolutionQuorum > newMaxMembers) {
+          newData.dissolutionQuorum = newMaxMembers.toString()
+        }
+      }
+
+      return newData
+    })
   }
 
   return (
@@ -106,35 +222,66 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
               required
             />
 
-            {/* Info Section */}
-            <div className="space-y-3 py-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-700">매매 규칙</span>
-                <button type="button" className="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center">
-                  <span className="text-xs text-gray-400">?</span>
-                </button>
+            {/* Rules Section */}
+            <div className="space-y-4 py-4">
+              {/* 매매 규칙 */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-700">매매 규칙</span>
+                  <button type="button" className="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center">
+                    <span className="text-xs text-gray-400">?</span>
+                  </button>
+                </div>
+                <div className="w-20">
+                  <Select
+                    options={voteQuorumOptions}
+                    value={formData.voteQuorum}
+                    onChange={(value) => handleInputChange("voteQuorum", value)}
+                    placeholder="선택"
+                    className="text-sm"
+                  />
+                </div>
               </div>
               
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-700">그룹 해체 규칙</span>
-                <button type="button" className="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center">
-                  <span className="text-xs text-gray-400">?</span>
-                </button>
+              {/* 그룹 해체 규칙 */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-700">그룹 해체 규칙</span>
+                  <button type="button" className="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center">
+                    <span className="text-xs text-gray-400">?</span>
+                  </button>
+                </div>
+                <div className="w-20">
+                  <Select
+                    options={dissolutionQuorumOptions}
+                    value={formData.dissolutionQuorum}
+                    onChange={(value) => handleInputChange("dissolutionQuorum", value)}
+                    placeholder="선택"
+                    className="text-sm"
+                  />
+                </div>
               </div>
 
               {/* Payment Info Box */}
-              <div className="rounded-3xl p-3 mt-4" style={{ backgroundColor: '#F5F5F5' }}>
+              {/* <div className="rounded-3xl p-3 mt-4" style={{ backgroundColor: '#F5F5F5' }}>
                 <p className="text-xs text-gray-800 text-center leading-relaxed">
                   페이 계좌 연결 완료
                   <br />
                   김지수 352-0880-1877-000
                 </p>
-              </div>
+              </div> */}
             </div>
 
+            {/* Error Message */}
+            {error && (
+              <div className="rounded-2xl bg-red-50 border border-red-200 p-4 mt-4">
+                <p className="text-sm text-red-600 text-center">{error}</p>
+              </div>
+            )}
+
             {/* Submit Button */}
-            <MainButton type="submit" className="mt-8">
-              그룹 만들기
+            <MainButton type="submit" className="mt-8" disabled={isLoading}>
+              {isLoading ? "그룹 생성 중..." : "그룹 만들기"}
             </MainButton>
           </form>
         </div>
