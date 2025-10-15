@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   createChart,
   ColorType,
@@ -14,12 +8,8 @@ import {
   ISeriesApi,
   Time,
   CandlestickSeries,
-  LineSeries,
-  HistogramSeries,
-  AreaSeries,
 } from "lightweight-charts";
 import { useRouter } from "next/navigation";
-import PeriodSelector from "./PeriodSelector";
 
 import "./chart-style.css";
 
@@ -38,33 +28,19 @@ interface ChartData {
 
 interface ChartProps {
   dayData: ChartData[];
-  weekData: ChartData[];
-  monthData: ChartData[];
-  yearData: ChartData[];
   stockCode?: string;
 }
 type PriceLineHandle = ReturnType<ISeriesApi<"Candlestick">["createPriceLine"]>;
-type Period = "일" | "주" | "월" | "년";
 
-export const SimpleChart: React.FC<ChartProps> = ({
-  dayData,
-  weekData,
-  monthData,
-  yearData,
-  stockCode,
-}) => {
+export const SimpleChart: React.FC<ChartProps> = ({ dayData, stockCode }) => {
   const router = useRouter();
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
 
-  const areaSeriesRef = useRef<ISeriesApi<"Area"> | null>(null);
-
-  const buttonsContainerRef = useRef<HTMLDivElement>(null);
+  const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
 
   const minLineRef = useRef<PriceLineHandle | null>(null);
   const maxLineRef = useRef<PriceLineHandle | null>(null);
-
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>("일");
 
   const handleChartClick = useCallback(() => {
     if (stockCode) {
@@ -72,69 +48,59 @@ export const SimpleChart: React.FC<ChartProps> = ({
     }
   }, [router, stockCode]);
 
-  const seriesesData = useMemo(
-    () =>
-      new Map<Period, ChartData[]>([
-        ["일", dayData],
-        ["주", weekData],
-        ["월", monthData],
-        ["년", yearData],
-      ]),
-    [dayData, weekData, monthData, yearData]
-  );
+  const setChartData = useCallback(() => {
+    if (!dayData || dayData.length === 0) return;
 
-  const setChartInterval = useCallback(
-    (interval: Period) => {
-      const data = seriesesData.get(interval);
-      if (!data) return;
+    candleSeriesRef.current?.setData(
+      dayData.map((d) => ({
+        time: d.time as Time,
+        open: d.open,
+        high: d.high,
+        low: d.low,
+        close: d.close,
+      }))
+    );
 
-      areaSeriesRef.current?.setData(
-        data.map((d) => ({ time: d.time as Time, value: d.trading_volume }))
-      );
-
-      let minimumPrice = data[0].trading_volume;
-      let maximumPrice = data[0].trading_volume;
-      for (let i = 1; i < data.length; i++) {
-        const price = data[i].trading_volume;
-        if (price > maximumPrice) {
-          maximumPrice = price;
-        }
-        if (price < minimumPrice) {
-          minimumPrice = price;
-        }
+    let minimumPrice = dayData[0].low;
+    let maximumPrice = dayData[0].high;
+    for (let i = 1; i < dayData.length; i++) {
+      const highPrice = dayData[i].high;
+      if (highPrice > maximumPrice) {
+        maximumPrice = highPrice;
       }
-      if (areaSeriesRef.current) {
-        if (minLineRef.current) {
-          areaSeriesRef.current.removePriceLine(minLineRef.current);
-          minLineRef.current = null;
-        }
-        if (maxLineRef.current) {
-          areaSeriesRef.current.removePriceLine(maxLineRef.current);
-          maxLineRef.current = null;
-        }
-
-        minLineRef.current = areaSeriesRef.current.createPriceLine({
-          price: minimumPrice,
-          color: "#2200ffff",
-          lineWidth: 1,
-          lineStyle: 2, // LineStyle.Dashed
-          axisLabelVisible: true,
-          //title: 'min price',
-        });
-
-        maxLineRef.current = areaSeriesRef.current.createPriceLine({
-          price: maximumPrice,
-          color: "#ef5350",
-          lineWidth: 1,
-          lineStyle: 2, // LineStyle.Dashed
-          axisLabelVisible: true,
-          //title: 'max price',
-        });
+      const lowPrice = dayData[i].low;
+      if (lowPrice < minimumPrice) {
+        minimumPrice = lowPrice;
       }
-    },
-    [seriesesData]
-  );
-  //lineSeries.applyOptions({ color: intervalColors[interval] });
+    }
+
+    if (candleSeriesRef.current) {
+      if (minLineRef.current) {
+        candleSeriesRef.current.removePriceLine(minLineRef.current);
+        minLineRef.current = null;
+      }
+      if (maxLineRef.current) {
+        candleSeriesRef.current.removePriceLine(maxLineRef.current);
+        maxLineRef.current = null;
+      }
+
+      minLineRef.current = candleSeriesRef.current.createPriceLine({
+        price: minimumPrice,
+        color: "#2200ffff",
+        lineWidth: 1,
+        lineStyle: 2, // LineStyle.Dashed
+        axisLabelVisible: true,
+      });
+
+      maxLineRef.current = candleSeriesRef.current.createPriceLine({
+        price: maximumPrice,
+        color: "#ef5350",
+        lineWidth: 1,
+        lineStyle: 2, // LineStyle.Dashed
+        axisLabelVisible: true,
+      });
+    }
+  }, [dayData]);
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
@@ -159,14 +125,16 @@ export const SimpleChart: React.FC<ChartProps> = ({
     });
     chartRef.current = chart;
 
-    const areaSeries = chart.addSeries(AreaSeries, {
-      lineWidth: 1,
-      lastValueVisible: false,
-      priceLineVisible: false,
+    const candlestickSeries = chart.addSeries(CandlestickSeries, {
+      upColor: "#ff0000ff",
+      downColor: "#2200ffff",
+      borderVisible: false,
+      wickUpColor: "#ADADAD",
+      wickDownColor: "#ADADAD",
     });
-    areaSeriesRef.current = areaSeries;
+    candleSeriesRef.current = candlestickSeries;
 
-    setChartInterval(selectedPeriod);
+    setChartData();
 
     const handleResize = () => {
       chart.applyOptions({
@@ -177,29 +145,27 @@ export const SimpleChart: React.FC<ChartProps> = ({
 
     return () => {
       if (minLineRef.current) {
-        areaSeries?.removePriceLine(minLineRef.current);
+        candlestickSeries?.removePriceLine(minLineRef.current);
         minLineRef.current = null;
       }
       if (maxLineRef.current) {
-        areaSeries?.removePriceLine(maxLineRef.current);
+        candlestickSeries?.removePriceLine(maxLineRef.current);
         maxLineRef.current = null;
       }
       window.removeEventListener("resize", handleResize);
       chart.remove();
-      areaSeriesRef.current = null;
+      candleSeriesRef.current = null;
       chartRef.current = null;
     };
-  }, []);
+  }, [setChartData]);
 
   useEffect(() => {
     if (!chartRef.current) return;
-    setChartInterval(selectedPeriod);
-  }, [selectedPeriod, seriesesData]);
+    setChartData();
+  }, [setChartData]);
 
   return (
     <div>
-      <div ref={buttonsContainerRef} className="mt-2 flex justify-center" />
-      <PeriodSelector value={selectedPeriod} onChange={setSelectedPeriod} />
       <div
         ref={chartContainerRef}
         className="w-full h-[calc(50dvh)] cursor-pointer"
