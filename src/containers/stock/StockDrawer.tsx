@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/drawer";
 import { SimpleChart } from "@/components/chart/SimpleChart";
 import { useRouter } from "next/navigation";
+import { baseUrl } from "@/constants/baseUrl";
+import useSWR from "swr";
+import { getStockDetail } from "@/services/chart/stock";
 
 // 일봉 (Day Data) - 매일 데이터
 const dayData = [
@@ -1215,198 +1218,6 @@ const dayData = [
   },
 ];
 
-// 주봉 (Week Data) - 주간 데이터 (보통 주말 종가 기준)
-const weekData = [
-  {
-    time: "2023-09-01",
-    open: 42.0,
-    high: 50.0,
-    low: 40.0,
-    close: 48.0,
-    ma_5: 45,
-    ma_20: 48,
-    ma_60: 52,
-    ma_120: 55,
-    trading_volume: 120000,
-  },
-  {
-    time: "2023-09-08",
-    open: 48.0,
-    high: 55.0,
-    low: 46.0,
-    close: 52.0,
-    ma_5: 47,
-    ma_20: 49,
-    ma_60: 53,
-    ma_120: 56,
-    trading_volume: 140000,
-  },
-  {
-    time: "2023-09-15",
-    open: 52.0,
-    high: 58.0,
-    low: 50.0,
-    close: 55.0,
-    ma_5: 50,
-    ma_20: 51,
-    ma_60: 54,
-    ma_120: 57,
-    trading_volume: 160000,
-  },
-  {
-    time: "2023-09-22",
-    open: 55.0,
-    high: 62.0,
-    low: 54.0,
-    close: 60.0,
-    ma_5: 53,
-    ma_20: 52,
-    ma_60: 55,
-    ma_120: 58,
-    trading_volume: 180000,
-  },
-  {
-    time: "2023-09-29",
-    open: 60.0,
-    high: 65.0,
-    low: 58.0,
-    close: 63.0,
-    ma_5: 56,
-    ma_20: 53,
-    ma_60: 56,
-    ma_120: 59,
-    trading_volume: 200000,
-  },
-];
-
-// 월봉 (Month Data)
-const monthData = [
-  {
-    time: "2023-05",
-    open: 35.0,
-    high: 45.0,
-    low: 32.0,
-    close: 40.0,
-    ma_5: 38,
-    ma_20: 42,
-    ma_60: 47,
-    ma_120: 52,
-    trading_volume: 400000,
-  },
-  {
-    time: "2023-06",
-    open: 40.0,
-    high: 50.0,
-    low: 38.0,
-    close: 48.0,
-    ma_5: 41,
-    ma_20: 43,
-    ma_60: 48,
-    ma_120: 53,
-    trading_volume: 420000,
-  },
-  {
-    time: "2023-07",
-    open: 48.0,
-    high: 55.0,
-    low: 46.0,
-    close: 52.0,
-    ma_5: 45,
-    ma_20: 44,
-    ma_60: 49,
-    ma_120: 54,
-    trading_volume: 450000,
-  },
-  {
-    time: "2023-08",
-    open: 52.0,
-    high: 60.0,
-    low: 50.0,
-    close: 58.0,
-    ma_5: 50,
-    ma_20: 45,
-    ma_60: 50,
-    ma_120: 55,
-    trading_volume: 480000,
-  },
-  {
-    time: "2023-09",
-    open: 58.0,
-    high: 65.0,
-    low: 56.0,
-    close: 62.0,
-    ma_5: 54,
-    ma_20: 46,
-    ma_60: 51,
-    ma_120: 56,
-    trading_volume: 500000,
-  },
-];
-
-// 연봉 (Year Data)
-const yearData = [
-  {
-    time: "2019",
-    open: 20.0,
-    high: 35.0,
-    low: 15.0,
-    close: 30.0,
-    ma_5: 22,
-    ma_20: 28,
-    ma_60: 35,
-    ma_120: 40,
-    trading_volume: 2000000,
-  },
-  {
-    time: "2020",
-    open: 30.0,
-    high: 45.0,
-    low: 25.0,
-    close: 40.0,
-    ma_5: 28,
-    ma_20: 30,
-    ma_60: 36,
-    ma_120: 42,
-    trading_volume: 2200000,
-  },
-  {
-    time: "2021",
-    open: 40.0,
-    high: 60.0,
-    low: 35.0,
-    close: 55.0,
-    ma_5: 35,
-    ma_20: 32,
-    ma_60: 37,
-    ma_120: 43,
-    trading_volume: 2500000,
-  },
-  {
-    time: "2022",
-    open: 55.0,
-    high: 70.0,
-    low: 50.0,
-    close: 65.0,
-    ma_5: 45,
-    ma_20: 34,
-    ma_60: 38,
-    ma_120: 44,
-    trading_volume: 2800000,
-  },
-  {
-    time: "2023",
-    open: 65.0,
-    high: 80.0,
-    low: 60.0,
-    close: 75.0,
-    ma_5: 55,
-    ma_20: 36,
-    ma_60: 39,
-    ma_120: 45,
-    trading_volume: 3000000,
-  },
-];
-
 const stockInfo = {
   name: "NAVER",
   trading_volume: 2629345,
@@ -1434,10 +1245,15 @@ export default function StockDrawer({ open, onOpenChange, stockCode }: props) {
     router.push(url);
   };
 
+  const { data, error, isLoading } = useSWR(
+    `${baseUrl}/trading/stocks/${stockCode}/detail`,
+    getStockDetail
+  );
+
   return (
-    <div className="max-w-[600px]">
+    <div>
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent>
+        <DrawerContent className="max-w-[var(--app-max-w)]">
           <DrawerHeader>
             <DrawerTitle asChild>
               <span className="text-[14px] font-bold px-4">
@@ -1475,13 +1291,7 @@ export default function StockDrawer({ open, onOpenChange, stockCode }: props) {
                 <div>{stockInfo.trading_volume.toLocaleString()}</div>
               </div>
             </div>
-            <SimpleChart
-              dayData={dayData}
-              weekData={weekData}
-              monthData={monthData}
-              yearData={yearData}
-              stockCode={stockCode}
-            />
+            <SimpleChart dayData={dayData} stockCode={stockCode} />
           </div>
 
           <div className="grid grid-cols-2 gap-[10px] px-[10px] mt-[10px]">

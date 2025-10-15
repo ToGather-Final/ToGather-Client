@@ -1420,7 +1420,7 @@ export default function ChartContainer() {
 
   return (
     <div>
-      <div className="flex justify-between py-2  px-5">
+      <div className="flex justify-between py-2  px-4">
         <div className="flex gap-[10px] items-center justify-start">
           <button
             onClick={() => window.history.back()}
@@ -1438,7 +1438,7 @@ export default function ChartContainer() {
         </button>
       </div>
 
-      <div className="px-8 ">
+      <div className="px-6 ">
         <div className="flex justify-start items-center text-[10px] gap-[10px] my-2">
           <div>{stockInfo.code}</div>
           <div>{stockInfo.area}</div>
@@ -1467,13 +1467,13 @@ export default function ChartContainer() {
             <div>{stockInfo.trading_volume.toLocaleString()}</div>
           </div>
         </div>
-        <ChartComponent
-          dayData={dayData}
-          weekData={weekData}
-          monthData={monthData}
-          yearData={yearData}
-        />
       </div>
+      <ChartComponent
+        dayData={dayData}
+        weekData={weekData}
+        monthData={monthData}
+        yearData={yearData}
+      />
     </div>
   );
 }
