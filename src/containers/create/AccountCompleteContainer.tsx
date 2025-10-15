@@ -5,11 +5,13 @@ import MainButton from "@/components/common/MainButton"
 interface AccountCompleteContainerProps {
   onCreateGroup: () => void
   onJoinGroup: () => void
+  userNickname: string
 }
 
 export default function AccountCompleteContainer({ 
   onCreateGroup, 
-  onJoinGroup 
+  onJoinGroup,
+  userNickname
 }: AccountCompleteContainerProps) {
   return (
     <div className="h-full bg-white relative overflow-hidden flex flex-col">
@@ -36,7 +38,7 @@ export default function AccountCompleteContainer({
             WebkitTextStroke: '0.4px #264989'
           }}
         >
-          지구님의
+          {userNickname}의
           <br />
           투자 계좌가
           <br />

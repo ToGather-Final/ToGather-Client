@@ -42,9 +42,9 @@ export default function AccountSetupContainer({ onComplete }: AccountSetupContai
       const accountId = await createInvestmentAccount(userId)
       console.log("투자 계좌 개설 완료:", accountId)
       
-      // 계좌 개설 완료 상태 업데이트
-      markAccountCreated()
-      console.log("계좌 개설 상태 업데이트 완료")
+        // 계좌 개설 완료 상태 업데이트
+        markAccountCreated(userId)
+        console.log("계좌 개설 상태 업데이트 완료")
       
       // 계좌 개설 완료 화면으로 이동
       onComplete()
