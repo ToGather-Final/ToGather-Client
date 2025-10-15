@@ -1,12 +1,12 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+interface GroupCompleteContainerProps {
+  onFinish?: () => void
+}
 
-export default function GroupCompletePage() {
-  const router = useRouter()
-
+export default function GroupCompleteContainer({ onFinish }: GroupCompleteContainerProps) {
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden flex flex-col">
+    <div className="h-full bg-white relative overflow-hidden flex flex-col">
       {/* Header */}
       <div className="p-6 relative z-10 flex-shrink-0">
         <img 
@@ -64,7 +64,7 @@ export default function GroupCompletePage() {
           <div className="text-center mb-6">
             <p className="text-sm text-gray-600 mb-2">코드 번호</p>
             <p 
-              className="text-5xl font-normal mb-6"
+              className="text-5xl font-medium mb-6"
               style={{ 
                 backgroundImage: 'linear-gradient(to right, #345699, #111D33)',
                 WebkitBackgroundClip: 'text',

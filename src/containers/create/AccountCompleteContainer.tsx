@@ -1,23 +1,18 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import MainButton from "@/components/common/MainButton"
 
-export default function AccountCompletePage() {
-  const router = useRouter()
+interface AccountCompleteContainerProps {
+  onCreateGroup: () => void
+  onJoinGroup: () => void
+}
 
-  const handleCreateGroup = () => {
-    // 그룹 생성하기로 이동
-    router.push("/group-create")
-  }
-
-  const handleJoinGroup = () => {
-    // 그룹 참여하기로 이동
-    router.push("/group-join")
-  }
-
+export default function AccountCompleteContainer({ 
+  onCreateGroup, 
+  onJoinGroup 
+}: AccountCompleteContainerProps) {
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden flex flex-col">
+    <div className="h-full bg-white relative overflow-hidden flex flex-col">
       {/* Header */}
       <div className="p-6 relative z-10">
         <img 
@@ -31,7 +26,7 @@ export default function AccountCompletePage() {
       <div className="flex-1 flex flex-col items-center justify-center px-8 relative z-10">
         {/* Title */}
         <h1 
-          className="text-4xl font-extrabold text-center mb-6 leading-tight"
+          className="text-4xl font-extrabold text-center mb-8 leading-tight"
           style={{ 
             backgroundImage: 'linear-gradient(to right, #264989, #6989D4)',
             WebkitBackgroundClip: 'text',
@@ -49,7 +44,7 @@ export default function AccountCompletePage() {
         </h1>
 
         {/* Account Image */}
-        <div className="mb-6">
+        <div className="mb-8">
           <img 
             src="/images/account-create.png"
             alt="Account Created"
@@ -59,10 +54,10 @@ export default function AccountCompletePage() {
 
         {/* Buttons */}
         <div className="w-full max-w-sm space-y-4">
-          <MainButton onClick={handleCreateGroup}>
+          <MainButton onClick={onCreateGroup}>
             그룹 생성하기
           </MainButton>
-          <MainButton onClick={handleJoinGroup}>
+          <MainButton onClick={onJoinGroup}>
             그룹 참여하기
           </MainButton>
         </div>

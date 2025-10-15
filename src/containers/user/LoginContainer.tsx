@@ -5,32 +5,132 @@ import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import BackgroundCoins from "@/components/common/BackgroundCoins"
 import MainButton from "@/components/common/MainButton"
+import { login } from "@/utils/api"
+import { getDeviceId } from "@/utils/deviceId"
+import { saveTokens } from "@/utils/token"
+import { checkUserStatus } from "@/utils/userStatus"
+import { LoginRequest, ApiErrorWithStatus } from "@/types/api/auth"
 
 export default function LoginFlow() {
   const [formData, setFormData] = useState({
     loginId: "",
     loginPassword: "",
   })
+  
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+    // 에러 메시지 초기화
+    if (error) setError(null)
   }
 
-  const handleLogin = () => {
-    // Mock login logic
-    console.log("Login attempt:", formData)
-    // 로그임 성공하면 여기서 로직 추가가
-    // 예를 들면 router.push("/group")
+  const validateForm = (): boolean => {
+    if (!formData.loginId.trim()) {
+      setError("아이디를 입력해주세요.")
+      return false
+    }
+    if (!formData.loginPassword.trim()) {
+      setError("비밀번호를 입력해주세요.")
+      return false
+    }
+    return true
+  }
+
+  const handleLogin = async () => {
+    if (!validateForm()) return
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const loginData: LoginRequest = {
+        username: formData.loginId,
+        password: formData.loginPassword,
+      }
+
+      const deviceId = getDeviceId()
+      const response = await login(loginData, deviceId)
+      
+      // 토큰 저장
+      saveTokens(response.accessToken, response.refreshToken, response.userId)
+      
+      // 사용자 상태 확인 후 적절한 페이지로 리다이렉트
+      try {
+        const userStatus = await checkUserStatus(response.userId)
+        console.log("로그인 후 사용자 상태:", userStatus)
+        
+        switch (userStatus.nextStep) {
+          case 'account-create':
+            router.push("/account-create")
+            break
+          case 'group-create':
+          case 'group-join':
+            // 그룹 생성/참여 선택 페이지로 이동 (추후 구현)
+            router.push("/group-create")
+            break
+          case 'group':
+            router.push("/group")
+            break
+          default:
+            router.push("/account-create")
+        }
+      } catch (error) {
+        console.error("사용자 상태 확인 실패:", error)
+        // 에러 시 기본적으로 계좌 개설 페이지로 이동
+        router.push("/account-create")
+      }
+    } catch (err) {
+      console.error("Login error:", err)
+      
+      // API 에러 타입 체크
+      const isApiError = (error: unknown): error is ApiErrorWithStatus => {
+        return (
+          typeof error === 'object' &&
+          error !== null &&
+          'code' in error &&
+          'message' in error &&
+          'path' in error &&
+          'timestamp' in error &&
+          'status' in error
+        )
+      }
+      
+      if (isApiError(err)) {
+        console.error("Login error code:", err.code)
+        console.error("Login error message:", err.message)
+        console.error("Login error path:", err.path)
+        console.error("Login error timestamp:", err.timestamp)
+        console.error("Login error status:", err.status)
+        
+        if (err.status === 401) {
+          setError("아이디 또는 비밀번호가 일치하지 않습니다.")
+        } else if (err.status === 400) {
+          setError("X-Device-Id 헤더 누락 또는 잘못된 요청입니다.")
+        } else if (err.status === 500) {
+          setError("서버에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
+        } else if (err.code === 'NETWORK_ERROR') {
+          setError("서버에 연결할 수 없습니다.")
+        } else {
+          setError(err.message)
+        }
+      } else {
+        setError("로그인에 실패했습니다. 다시 시도해주세요.")
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="h-full bg-white relative overflow-hidden">
       {/* Background coins */}
       <BackgroundCoins />
 
       {/* Main content */}
-      <div className="flex flex-col items-center justify-center min-h-screen px-8 relative z-10">
+      <div className="flex flex-col items-center justify-center h-full px-8 relative z-10">
         {/* Logo */}
         <div className="mb-8">
           <img 
@@ -49,6 +149,7 @@ export default function LoginFlow() {
             value={formData.loginId}
             onChange={(e) => handleInputChange("loginId", e.target.value)}
             className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
+            disabled={isLoading}
           />
           <Input
             type="password"
@@ -56,10 +157,18 @@ export default function LoginFlow() {
             value={formData.loginPassword}
             onChange={(e) => handleInputChange("loginPassword", e.target.value)}
             className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
+            disabled={isLoading}
           />
 
-          <MainButton onClick={handleLogin} className="mt-8">
-            로그인
+          {/* 에러 메시지 */}
+          {error && (
+            <div className="text-red-500 text-sm text-center mt-2">
+              {error}
+            </div>
+          )}
+
+          <MainButton onClick={handleLogin} className="mt-8" disabled={isLoading}>
+            {isLoading ? "로그인 중..." : "로그인"}
           </MainButton>
 
           <div className="text-center mt-6">

@@ -1,6 +1,6 @@
 // 서버가 주는 제안 한 건(DTO) 모양
 export type ProposalDTO = {
-  proposalId : number;  // 제안 아이디
+  proposalId: string;  // 제안 아이디 (UUID)
   proposalName: string; // 제안 이름
   proposerName: string; // 제안자 이름
   category: ProposalCategory; // 제안 카테고리 (매매/페이)
@@ -8,7 +8,7 @@ export type ProposalDTO = {
   payload: ProposalPayload; // 제안의 실제 내용 (JSON)
   status: ProposalStatus; // 제안 상태 (OPEN, APPROVED, REJECTED)
   date: string; // 제안 날짜
-  closeDate: string; // 투표 마감 날짜
+  closeAt: string; // 투표 마감 날짜 (API에서는 closeAt)
   agreeCount: number; // 찬성한 사람 수
   disagreeCount: number; // 반대한 사람 수
   myVote: "AGREE" | "DISAGREE" | "NEUTRAL"; // 투표 했는지 안 했는지

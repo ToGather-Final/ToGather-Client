@@ -7,9 +7,10 @@ import MainButton from "@/components/common/MainButton"
 
 interface WelcomeContainerProps {
   onComplete: () => void
+  nickname: string
 }
 
-export default function WelcomeContainer({ onComplete }: WelcomeContainerProps) {
+export default function WelcomeContainer({ onComplete, nickname }: WelcomeContainerProps) {
   const [windowDimensions, setWindowDimensions] = useState({ width: 0, height: 0 })
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export default function WelcomeContainer({ onComplete }: WelcomeContainerProps) 
   }, [])
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="h-full bg-white relative overflow-hidden">
       {/* Confetti canvas - 배경 레이어 */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <canvas 
@@ -63,7 +64,7 @@ export default function WelcomeContainer({ onComplete }: WelcomeContainerProps) 
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col items-center justify-center min-h-screen px-8 relative z-10">
+      <div className="flex flex-col items-center justify-center h-full px-8 relative z-10">
         {/* Logo */}
         <div className="mb-8">
           <img 
@@ -76,7 +77,7 @@ export default function WelcomeContainer({ onComplete }: WelcomeContainerProps) 
         {/* Welcome Message */}
         <div className="text-center mb-20">
           <h1 className="text-4xl font-extrabold mb-8 leading-tight" style={{ color: '#6592FD' }}>
-            지구님
+            {nickname}님
             <br />
             환영합니다
           </h1>
