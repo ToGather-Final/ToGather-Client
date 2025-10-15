@@ -111,7 +111,7 @@ export const SimpleChart: React.FC<ChartProps> = ({ dayData, stockCode }) => {
 
       maxLineRef.current = candleSeriesRef.current.createPriceLine({
         price: maximumPrice,
-        color: "#ef5350",
+        color: "#ff0000ff",
         lineWidth: 1,
         lineStyle: 2, // LineStyle.Dashed
         axisLabelVisible: true,
@@ -140,6 +140,7 @@ export const SimpleChart: React.FC<ChartProps> = ({ dayData, stockCode }) => {
     chart.timeScale().applyOptions({
       barSpacing: 5,
     });
+
     chartRef.current = chart;
 
     const candlestickSeries = chart.addSeries(CandlestickSeries, {
@@ -148,6 +149,11 @@ export const SimpleChart: React.FC<ChartProps> = ({ dayData, stockCode }) => {
       borderVisible: false,
       wickUpColor: "#ADADAD",
       wickDownColor: "#ADADAD",
+      priceFormat: {
+        type: "price",
+        precision: 0,
+        minMove: 1,
+      },
     });
     candleSeriesRef.current = candlestickSeries;
 

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import ChargeModal from "@/components/pay/ChargeModal";
 import { usePayTab } from "@/contexts/payTabContext";
@@ -41,6 +41,11 @@ export default function PayContainer() {
   const accountNo = "937702-00-058937";
   const payMoney = 210000;
 
+  // 터치 이벤트를 위한 ref와 상태
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const handleChargeConfirm = (data: {
     amount: string;
     dueDate: string;
@@ -50,8 +55,40 @@ export default function PayContainer() {
     setIsChargeModalOpen(false);
   };
 
+  // 터치 시작 이벤트 핸들러
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  // 터치 종료 이벤트 핸들러
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].clientX;
+    handleSwipe();
+  };
+
+  // 스와이프 처리 함수
+  const handleSwipe = () => {
+    const swipeThreshold = 50; // 최소 스와이프 거리
+    const swipeDistance = touchEndX.current - touchStartX.current;
+
+    if (Math.abs(swipeDistance) > swipeThreshold) {
+      if (swipeDistance > 0 && payTab === "QR") {
+        // 오른쪽으로 스와이프 (바코드로 보기)
+        setPayTab("BARCODE");
+      } else if (swipeDistance < 0 && payTab === "BARCODE") {
+        // 왼쪽으로 스와이프 (QR로 보기)
+        setPayTab("QR");
+      }
+    }
+  };
+
   return (
-    <div className="h-full">
+    <div
+      ref={containerRef}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className="h-full touch-pan-y"
+    >
       {/* 바코드 탭 화면 */}
       {payTab === "BARCODE" && (
         <div className="h-full ">
