@@ -26,16 +26,30 @@ export default function StockListContainer() {
 
   console.log(data);
 
-  if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Failed to load</div>;
 
   // API 응답이 Response<Stock[]> 형태이므로 data.data를 사용
-  const stockList = data?.data || [];
+  const allStocks = data?.data || [];
+
+  // 탭에 따라 필터링된 주식 목록
+  const getFilteredStocks = () => {
+    switch (stockTab) {
+      case "STOCK":
+        return allStocks.filter((stock: Stock) => stock.prdtTypeCd === "300");
+      case "ETF":
+        return allStocks.filter((stock: Stock) => stock.prdtTypeCd === "500");
+      case "MY":
+      default:
+        return allStocks; // 보유종목은 모든 종목 표시 (또는 실제 보유 종목만 필터링)
+    }
+  };
+
+  const stockList = getFilteredStocks();
 
   const uptabs = [
-    { id: "MY", label: "보유주식" },
-    { id: "DOMESTIC", label: "국내주식" },
-    { id: "OVERSEAS", label: "해외주식" },
+    { id: "MY", label: "보유종목" },
+    { id: "STOCK", label: "주식" },
+    { id: "ETF", label: "ETF" },
   ];
 
   // 터치 시작 이벤트 핸들러
@@ -70,61 +84,93 @@ export default function StockListContainer() {
   //주식 코드만 넘겨주는 것도 생각해보기
   return (
     <MenuTab tabs={uptabs} activeTab={stockTab} onTabChange={setStockTab}>
-      <div
-        ref={containerRef}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        className="touch-pan-y"
-      >
-        <ul>
-          {stockList.map((stock: Stock, idx: number) => (
-            <li
-              key={`${stock.stockCode}-${idx}`}
-              className="flex justify-between p-5 border-b-[1px]"
-              role="button"
-              onClick={() => {
-                setOpen(true);
-                setSelected(stock);
-              }}
-            >
-              <div className="flex items-center gap-[15px]">
-                <img
-                  src={stock.stockImage}
-                  alt="stock"
-                  className="h-[35px] w-[35px] rounded-full object-cover"
-                />
-                <div className="">
-                  <div className="font-bold">{stock.stockName}</div>
-                  <div className="flex gap-[7px] text-[#686868] text-[12px]">
-                    {stockTab === "MY" ? (
-                      <div>{0}주</div>
-                    ) : (
-                      <div>{stock.country}</div>
-                    )}
-                    <div>{stock.stockCode}</div>
+      {isLoading ? (
+        <div className="flex items-center justify-center h-64 text-center text-gray-500">
+          Loading...
+        </div>
+      ) : (
+        <div>
+          <div
+            ref={containerRef}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            className="touch-pan-y"
+          >
+            <ul>
+              {stockList.map((stock: Stock, idx: number) => (
+                <li
+                  key={`${stock.stockCode}-${idx}`}
+                  className="flex justify-between p-5 border-b-[1px]"
+                  role="button"
+                  onClick={() => {
+                    setOpen(true);
+                    setSelected(stock);
+                  }}
+                >
+                  <div className="flex items-center gap-[15px]">
+                    <img
+                      src={stock.stockImage}
+                      alt="stock"
+                      className="h-[35px] w-[35px] rounded-full object-cover"
+                    />
+                    <div className="">
+                      <div className="font-bold">{stock.stockName}</div>
+                      <div className="flex gap-[7px] text-[#686868] text-[12px]">
+                        {stockTab === "MY" ? (
+                          <div>{0}주</div>
+                        ) : (
+                          <div>{stock.country}</div>
+                        )}
+                        <div>{stock.stockCode}</div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div className="flex flex-col items-end">
-                <div className="font-bold">
-                  {stock.currentPrice.toLocaleString()}원
-                </div>
-                <div className="flex gap-[5px]">
-                  <div className="text-[12px]">
-                    {Math.abs(stock.changeAmount).toLocaleString()}
+                  <div className="flex flex-col items-end">
+                    <div className="font-bold">
+                      {stock.currentPrice.toLocaleString()}원
+                    </div>
+                    <div className="flex gap-[5px]">
+                      <div
+                        className={`text-[12px] font-bold ${
+                          stock.changeAmount > 0
+                            ? "text-red-500"
+                            : stock.changeAmount < 0
+                            ? "text-blue-500"
+                            : "text-black"
+                        }`}
+                      >
+                        {stock.changeAmount > 0
+                          ? "▲"
+                          : stock.changeAmount < 0
+                          ? "▼"
+                          : ""}
+                        {Math.abs(stock.changeAmount).toLocaleString()}
+                      </div>
+                      <div
+                        className={`text-[12px] font-bold ${
+                          stock.changeAmount > 0
+                            ? "text-red-500"
+                            : stock.changeAmount < 0
+                            ? "text-blue-500"
+                            : "text-black"
+                        }`}
+                      >
+                        ({stock.changeAmount > 0 ? "+" : ""}
+                        {stock.changeRate}%)
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-[12px]">({stock.changeRate}%)</div>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <StockDrawer
-        open={open}
-        onOpenChange={setOpen}
-        stockCode={selected?.stockCode}
-      ></StockDrawer>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <StockDrawer
+            open={open}
+            onOpenChange={setOpen}
+            stockCode={selected?.stockCode}
+          ></StockDrawer>
+        </div>
+      )}
     </MenuTab>
   );
 }
