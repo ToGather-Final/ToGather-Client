@@ -6,3 +6,11 @@ export { signup, login, logout } from './api/auth'
 
 // 트레이딩 관련 API (trading-service)
 export { createInvestmentAccount } from './api/trading'
+
+// 유저 관련 API (user-service)
+export { getMyInfo } from './api/user'
+export type { UserInfo } from './api/user'
+
+// 그룹 관련 API (group-service)
+export { createGroup } from './api/group'
+export type { CreateGroupRequest, CreateGroupResponse, GroupInfo } from '@/types/api/group'
