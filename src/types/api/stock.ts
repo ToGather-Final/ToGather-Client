@@ -8,6 +8,7 @@ export interface Stock {
   changeAmount: number; //=increase
   changeRate: number; //=percent
   enabled: boolean;
+  prdtTypeCd: string; //=prdtTypeCd
 }
 //   stockId: string;
 //   area?: string; //krx //   "country": "KR",
