@@ -194,3 +194,31 @@ body {
 ::-webkit-scrollbar {
   display: none;
 }
+
+/* 그라디언트 페이드 스타일 */
+.overflow-scroll-gradient {
+  position: relative;
+}
+
+.overflow-scroll-gradient::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 25px;
+  background: linear-gradient(transparent, white);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.overflow-scroll-gradient-scroller {
+  overflow-y: auto;
+  background: white;
+  max-height: calc(100vh - 200px); /* 적절한 높이 설정 */
+  padding: 0;
+  line-height: 1.2;
+}
+/* 사용법
+<div className="overflow-scroll-gradient">
+<div className="overflow-scroll-gradient-scroller"> */

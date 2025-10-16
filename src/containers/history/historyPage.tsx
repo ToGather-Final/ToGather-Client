@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { cn } from "@/lib/utils"
+import { useState, useRef } from "react";
+import { cn } from "@/lib/utils";
 import {
   type HistoryDTO,
   HistoryType,
@@ -11,9 +11,9 @@ import {
   type CashDepositCompletedPayloadDTO,
   type VoteCreatedPayloadDTO,
   GoalAchievedPayloadDTO,
-} from "@/types/api/history"
-import HistoryCard from "@/components/history/HistoryCard"
-import HistoryCalendar from "@/components/history/HistoryCalendar"
+} from "@/types/api/history";
+import HistoryCard from "@/components/history/HistoryCard";
+import HistoryCalendar from "@/components/history/HistoryCalendar";
 
 // Mock data for demonstration
 const mockHistoryData: HistoryDTO[] = [
@@ -144,26 +144,61 @@ const mockHistoryData: HistoryDTO[] = [
       accountBalance: 7702160,
     } as TradeExecutedPayloadDTO,
   },
-]
-
-
+];
 
 export default function HistoryPage() {
-  const [viewMode, setViewMode] = useState<"list" | "calendar">("list")
-  const [selectedDate, setSelectedDate] = useState(new Date()) // 오늘 날짜
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
+  const [selectedDate, setSelectedDate] = useState(new Date()); // 오늘 날짜
+
+  // 터치 이벤트를 위한 ref와 상태
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const filteredHistoryForDate = mockHistoryData.filter((item) => {
-    const itemDate = new Date(item.date.replace(/\./g, "/"))
+    const itemDate = new Date(item.date.replace(/\./g, "/"));
     return (
       itemDate.getDate() === selectedDate.getDate() &&
       itemDate.getMonth() === selectedDate.getMonth() &&
       itemDate.getFullYear() === selectedDate.getFullYear()
-    )
-  })
+    );
+  });
+
+  // 터치 시작 이벤트 핸들러
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  // 터치 종료 이벤트 핸들러
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].clientX;
+    handleSwipe();
+  };
+
+  // 스와이프 처리 함수
+  const handleSwipe = () => {
+    const swipeThreshold = 50; // 최소 스와이프 거리
+    const swipeDistance = touchEndX.current - touchStartX.current;
+
+    if (Math.abs(swipeDistance) > swipeThreshold) {
+      if (swipeDistance > 0 && viewMode === "calendar") {
+        // 오른쪽으로 스와이프 (리스트로 보기)
+        setViewMode("list");
+      } else if (swipeDistance < 0 && viewMode === "list") {
+        // 왼쪽으로 스와이프 (캘린더로 보기)
+        setViewMode("calendar");
+      }
+    }
+  };
 
   return (
     <div className="bg-white p-4">
-      <div className="max-w-md mx-auto">
+      <div
+        ref={containerRef}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className="touch-pan-y max-w-md mx-auto"
+      >
         {/* Tab buttons */}
         <div className="flex w-full gap-2 justify-center mb-6">
           <button
@@ -201,7 +236,11 @@ export default function HistoryPage() {
           /* Calendar view */
           <div className="space-y-4">
             <div className="bg-white rounded-3xl border border-gray-200 px-4 pt-4 pb-2">
-              <HistoryCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} historyData={mockHistoryData} />
+              <HistoryCalendar
+                selectedDate={selectedDate}
+                onDateSelect={setSelectedDate}
+                historyData={mockHistoryData}
+              />
             </div>
 
             {/* Divider */}
@@ -210,7 +249,8 @@ export default function HistoryPage() {
             {/* Selected date history */}
             <div>
               <h3 className="text-lg font-semibold mb-2">
-                {selectedDate.getFullYear()}년 {selectedDate.getMonth() + 1}월 {selectedDate.getDate()}일
+                {selectedDate.getFullYear()}년 {selectedDate.getMonth() + 1}월{" "}
+                {selectedDate.getDate()}일
               </h3>
               <div className="space-y-3">
                 {filteredHistoryForDate.length > 0 ? (
@@ -218,7 +258,9 @@ export default function HistoryPage() {
                     <HistoryCard key={item.id} item={item} />
                   ))
                 ) : (
-                  <div className="text-center text-gray-500 py-8">해당 날짜에 기록이 없습니다.</div>
+                  <div className="text-center text-gray-500 py-8">
+                    해당 날짜에 기록이 없습니다.
+                  </div>
                 )}
               </div>
             </div>
@@ -226,5 +268,5 @@ export default function HistoryPage() {
         )}
       </div>
     </div>
-  )
+  );
 }
