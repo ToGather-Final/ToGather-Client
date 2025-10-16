@@ -58,9 +58,15 @@ export default function StockDrawer({ open, onOpenChange, stockCode }: props) {
       <div>
         <Drawer open={open} onOpenChange={onOpenChange}>
           <DrawerContent className="max-w-[var(--app-max-w)]">
-            <div className="p-8 text-center text-red-500">
+            <DrawerHeader>
+              <DrawerTitle>종목 정보</DrawerTitle>
+              <DrawerDescription>
+                데이터를 불러올 수 없습니다.
+              </DrawerDescription>
+            </DrawerHeader>
+            {/* <div className="p-8 text-center text-red-500">
               데이터를 불러올 수 없습니다.
-            </div>
+            </div> */}
           </DrawerContent>
         </Drawer>
       </div>
@@ -99,18 +105,28 @@ export default function StockDrawer({ open, onOpenChange, stockCode }: props) {
             <div className="flex justify-between items-center">
               <div
                 className={`flex items-center font-bold gap-[10px] text-[10px] ${
-                  stockInfo.changeAmount >= 0 ? "text-red-600" : "text-blue-600"
+                  stockInfo.changeAmount > 0
+                    ? "text-red-600"
+                    : stockInfo.changeAmount < 0
+                    ? "text-blue-600"
+                    : "text-black"
                 }`}
               >
                 <div className="text-[20px]">
                   {stockInfo.currentPrice.toLocaleString()}
                 </div>
                 <div className="flex items-center">
-                  <div>{stockInfo.changeAmount >= 0 ? "▲" : "▼"}</div>
+                  <div>
+                    {stockInfo.changeAmount > 0
+                      ? "▲"
+                      : stockInfo.changeAmount < 0
+                      ? "▼"
+                      : ""}
+                  </div>
                   <div>{Math.abs(stockInfo.changeAmount).toLocaleString()}</div>
                 </div>
                 <div>
-                  {stockInfo.changeAmount >= 0 ? "+" : ""}
+                  {stockInfo.changeAmount > 0 ? "+" : ""}
                   {stockInfo.changeRate}%
                 </div>
               </div>
