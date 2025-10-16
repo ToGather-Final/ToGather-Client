@@ -245,6 +245,11 @@ export const ChartComponent: React.FC<ChartProps> = ({
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
+      priceFormat: {
+        type: "price",
+        precision: 0,
+        minMove: 1,
+      },
     });
     ma5SeriesRef.current = ma5lineSeries;
     const ma20lineSeries = chart.addSeries(LineSeries, {
@@ -252,6 +257,11 @@ export const ChartComponent: React.FC<ChartProps> = ({
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
+      priceFormat: {
+        type: "price",
+        precision: 0,
+        minMove: 1,
+      },
     });
     ma20SeriesRef.current = ma20lineSeries;
     const ma60lineSeries = chart.addSeries(LineSeries, {
@@ -259,6 +269,11 @@ export const ChartComponent: React.FC<ChartProps> = ({
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
+      priceFormat: {
+        type: "price",
+        precision: 0,
+        minMove: 1,
+      },
     });
     ma60SeriesRef.current = ma60lineSeries;
     const ma120lineSeries = chart.addSeries(LineSeries, {
@@ -266,6 +281,11 @@ export const ChartComponent: React.FC<ChartProps> = ({
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
+      priceFormat: {
+        type: "price",
+        precision: 0,
+        minMove: 1,
+      },
     });
     ma120SeriesRef.current = ma120lineSeries;
 
@@ -275,6 +295,11 @@ export const ChartComponent: React.FC<ChartProps> = ({
       borderVisible: false,
       wickUpColor: "#ADADAD",
       wickDownColor: "#ADADAD",
+      priceFormat: {
+        type: "price",
+        precision: 0,
+        minMove: 1,
+      },
     });
     candleSeriesRef.current = candlestickSeries;
 
