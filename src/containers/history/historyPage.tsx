@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { cn } from "@/lib/utils"
 import {
   type HistoryDTO,
@@ -145,9 +145,7 @@ const mockHistoryData: HistoryDTO[] = [
       accountBalance: 7702160,
     } as TradeExecutedPayloadDTO,
   },
-]
-
-
+];
 
 export default function HistoryPage() {
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list")
@@ -181,12 +179,44 @@ export default function HistoryPage() {
       itemDate.getDate() === selectedDate.getDate() &&
       itemDate.getMonth() === selectedDate.getMonth() &&
       itemDate.getFullYear() === selectedDate.getFullYear()
-    )
-  })
+    );
+  });
+
+  // 터치 시작 이벤트 핸들러
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  // 터치 종료 이벤트 핸들러
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].clientX;
+    handleSwipe();
+  };
+
+  // 스와이프 처리 함수
+  const handleSwipe = () => {
+    const swipeThreshold = 50; // 최소 스와이프 거리
+    const swipeDistance = touchEndX.current - touchStartX.current;
+
+    if (Math.abs(swipeDistance) > swipeThreshold) {
+      if (swipeDistance > 0 && viewMode === "calendar") {
+        // 오른쪽으로 스와이프 (리스트로 보기)
+        setViewMode("list");
+      } else if (swipeDistance < 0 && viewMode === "list") {
+        // 왼쪽으로 스와이프 (캘린더로 보기)
+        setViewMode("calendar");
+      }
+    }
+  };
 
   return (
     <div className="bg-white p-4">
-      <div className="max-w-md mx-auto">
+      <div
+        ref={containerRef}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className="touch-pan-y max-w-md mx-auto"
+      >
         {/* Tab buttons */}
         <div className="flex w-full gap-2 justify-center mb-6">
           <button
@@ -248,7 +278,8 @@ export default function HistoryPage() {
             {/* Selected date history */}
             <div>
               <h3 className="text-lg font-semibold mb-2">
-                {selectedDate.getFullYear()}년 {selectedDate.getMonth() + 1}월 {selectedDate.getDate()}일
+                {selectedDate.getFullYear()}년 {selectedDate.getMonth() + 1}월{" "}
+                {selectedDate.getDate()}일
               </h3>
               <div className="space-y-3">
                 {filteredHistoryForDate.length > 0 ? (
@@ -266,5 +297,5 @@ export default function HistoryPage() {
         )}
       </div>
     </div>
-  )
+  );
 }
