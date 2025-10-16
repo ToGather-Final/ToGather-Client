@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import MainButton from "@/components/common/MainButton"
 import { markGroupJoined } from "@/utils/userStatus"
+import { getUserId } from "@/utils/token"
 
 export default function GroupJoinFlow() {
   const router = useRouter()
@@ -36,8 +37,11 @@ export default function GroupJoinFlow() {
 
   const handleRulesConfirm = () => {
     // 그룹 참여 완료 상태 업데이트
-    markGroupJoined()
-    console.log("그룹 참여 상태 업데이트 완료")
+    const userId = getUserId()
+    if (userId) {
+      markGroupJoined(userId)
+      console.log("그룹 참여 상태 업데이트 완료")
+    }
     
     // 그룹 메인 페이지로 이동
     router.push("/group")

@@ -1,7 +1,7 @@
 // API Gateway 설정
 // 모든 서비스 요청을 API Gateway로 통일
 
-export const API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:8000/api'
+export const API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api'
 
 // 서비스별 엔드포인트 (API Gateway 경로)
 export const API_ENDPOINTS = {

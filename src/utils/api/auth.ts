@@ -381,12 +381,27 @@ export async function login(data: LoginRequest, deviceId: string): Promise<Login
 // 로그아웃 API 호출
 export async function logout(): Promise<void> {
   try {
+    // 로그아웃 전에 userId 가져오기
+    const { getUserId } = require('@/utils/token')
+    const userId = getUserId()
+    
     await apiCall<void>(API_ENDPOINTS.AUTH.LOGOUT, {
       method: 'POST',
     })
-  } finally {
+    
     // API 호출 성공/실패와 관계없이 로컬 상태 초기화
     clearTokens()
-    resetUserStatus()
+    if (userId) {
+      resetUserStatus(userId)
+    }
+  } catch (error) {
+    // 에러가 발생해도 로컬 상태는 초기화
+    const { getUserId } = require('@/utils/token')
+    const userId = getUserId()
+    clearTokens()
+    if (userId) {
+      resetUserStatus(userId)
+    }
+    throw error
   }
 }
