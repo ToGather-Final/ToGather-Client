@@ -33,7 +33,7 @@ export enum HistoryCategory {
   
   // 2) 서버가 주는 히스토리 아이템(DTO)
   export type HistoryDTO = {
-    id: number;
+    id: string;  // 서버에서는 string으로 옴옴
     category: HistoryCategory;
     type: HistoryType;
     title: string;           // 카드 타이틀
@@ -53,14 +53,14 @@ export enum HistoryCategory {
   
   // 투표 올라옴
   export type VoteCreatedPayloadDTO = {
-    proposalId: number;
+    proposalId: string;  // 서버에서는 string으로 옴
     proposalName: string;
     proposerName: string;
   };
   
   // 투표 가결
   export type VoteApprovedPayloadDTO = {
-    proposalId: number;
+    proposalId: string;  // 서버에서는 string으로 옴
     scheduledAt: string;    // 실행 예정 시각
 
     // 무엇을 / 어떻게
@@ -75,7 +75,7 @@ export enum HistoryCategory {
   
   // 투표 부결
   export type VoteRejectedPayloadDTO = {
-    proposalId: number;
+    proposalId: string;  // 서버에서는 string으로 옴
     proposalName: string;
   };
   
