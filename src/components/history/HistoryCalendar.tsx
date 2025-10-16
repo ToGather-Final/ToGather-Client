@@ -10,7 +10,7 @@ interface HistoryCalendarProps {
 }
 
 export default function HistoryCalendar({ selectedDate, onDateSelect, historyData = [] }: HistoryCalendarProps) {
-  const [currentMonth, setCurrentMonth] = useState(new Date(2025, 8)) // September 2025
+  const [currentMonth, setCurrentMonth] = useState(new Date()) // 현재 날짜
 
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()

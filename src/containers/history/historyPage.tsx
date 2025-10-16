@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { cn } from "@/lib/utils";
+import { useState, useEffect, useRef } from "react"
+import { cn } from "@/lib/utils"
 import {
   type HistoryDTO,
   HistoryType,
@@ -11,14 +11,15 @@ import {
   type CashDepositCompletedPayloadDTO,
   type VoteCreatedPayloadDTO,
   GoalAchievedPayloadDTO,
-} from "@/types/api/history";
-import HistoryCard from "@/components/history/HistoryCard";
-import HistoryCalendar from "@/components/history/HistoryCalendar";
+} from "@/types/api/history"
+import HistoryCard from "@/components/history/HistoryCard"
+import HistoryCalendar from "@/components/history/HistoryCalendar"
+import { getHistory } from "@/utils/api/history"
 
 // Mock data for demonstration
 const mockHistoryData: HistoryDTO[] = [
   {
-    id: 1,
+    id: "1",
     category: HistoryCategory.TRADE,
     type: HistoryType.TRADE_EXECUTED,
     title: "테슬라 1주 58000원 매도 완료",
@@ -32,13 +33,13 @@ const mockHistoryData: HistoryDTO[] = [
     } as TradeExecutedPayloadDTO,
   },
   {
-    id: 2,
+    id: "2",
     category: HistoryCategory.VOTE,
     type: HistoryType.VOTE_APPROVED,
     title: "투표 가결",
     date: "2025-09-14",
     payload: {
-      proposalId: 1,
+      proposalId: "1",
       scheduledAt: "2025년 9월 15일 오전 9시",
       side: "SELL",
       stockName: "테슬라",
@@ -47,7 +48,7 @@ const mockHistoryData: HistoryDTO[] = [
     } as VoteApprovedPayloadDTO,
   },
   {
-    id: 3,
+    id: "3",
     category: HistoryCategory.CASH,
     type: HistoryType.CASH_DEPOSIT_COMPLETED,
     title: "예수금 충전 완료",
@@ -59,19 +60,19 @@ const mockHistoryData: HistoryDTO[] = [
     } as CashDepositCompletedPayloadDTO,
   },
   {
-    id: 4,
+    id: "4",
     category: HistoryCategory.VOTE,
     type: HistoryType.VOTE_CREATED,
     title: "테슬라 1주 58000원 매도 제안",
     date: "2025-09-14",
     payload: {
-      proposalId: 1,
+      proposalId: "1",
       proposalName: "테슬라 1주 58000원 매도 제안",
       proposerName: "정다영",
     } as VoteCreatedPayloadDTO,
   },
   {
-    id: 5,
+    id: "5",
     category: HistoryCategory.CASH,
     type: HistoryType.CASH_DEPOSIT_COMPLETED,
     title: "예수금 충전 완료",
@@ -83,19 +84,19 @@ const mockHistoryData: HistoryDTO[] = [
     } as CashDepositCompletedPayloadDTO,
   },
   {
-    id: 6,
+    id: "6",
     category: HistoryCategory.VOTE,
     type: HistoryType.VOTE_REJECTED,
     title: "투표 부결",
     date: "2025-09-13",
     payload: {
-      proposalId: 2,
+      proposalId: "2",
       proposalName: "아마존 2주 매수 제안",
       proposerName: "김지수",
     } as VoteCreatedPayloadDTO,
   },
   {
-    id: 7,
+    id: "7",
     category: HistoryCategory.TRADE,
     type: HistoryType.TRADE_FAILED,
     title: "삼성전자 5주 매도 실패",
@@ -109,7 +110,7 @@ const mockHistoryData: HistoryDTO[] = [
     } as TradeExecutedPayloadDTO,
   },
   {
-    id: 8,
+    id: "8",
     category: HistoryCategory.PAY,
     type: HistoryType.PAY_CHARGE_COMPLETED,
     title: "페이 충전 완료",
@@ -121,7 +122,7 @@ const mockHistoryData: HistoryDTO[] = [
     } as CashDepositCompletedPayloadDTO,
   },
   {
-    id: 9,
+    id: "9",
     category: HistoryCategory.GOAL,
     type: HistoryType.GOAL_ACHIEVED,
     title: "목표 달성",
@@ -131,7 +132,7 @@ const mockHistoryData: HistoryDTO[] = [
     } as GoalAchievedPayloadDTO,
   },
   {
-    id: 10,
+    id: "10",
     category: HistoryCategory.TRADE,
     type: HistoryType.TRADE_EXECUTED,
     title: "엔비디아 2주 49200원 매수 완료",
@@ -147,16 +148,33 @@ const mockHistoryData: HistoryDTO[] = [
 ];
 
 export default function HistoryPage() {
-  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
-  const [selectedDate, setSelectedDate] = useState(new Date()); // 오늘 날짜
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list")
+  const [selectedDate, setSelectedDate] = useState(new Date()) // 오늘 날짜
+  const [historyData, setHistoryData] = useState<HistoryDTO[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // 터치 이벤트를 위한 ref와 상태
-  const touchStartX = useRef<number>(0);
-  const touchEndX = useRef<number>(0);
-  const containerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        setLoading(true)
+        const response = await getHistory()
+        setHistoryData(response.items)
+      } catch (err) {
+        console.error("히스토리 조회 실패:", err)
+        setError("히스토리를 불러오는데 실패했습니다.")
+        // 에러 발생 시 더미 데이터 사용
+        setHistoryData(mockHistoryData)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  const filteredHistoryForDate = mockHistoryData.filter((item) => {
-    const itemDate = new Date(item.date.replace(/\./g, "/"));
+    fetchHistory()
+  }, [])
+
+  const filteredHistoryForDate = historyData.filter((item) => {
+    const itemDate = new Date(item.date.replace(/\./g, "/"))
     return (
       itemDate.getDate() === selectedDate.getDate() &&
       itemDate.getMonth() === selectedDate.getMonth() &&
@@ -225,22 +243,33 @@ export default function HistoryPage() {
           </button>
         </div>
 
-        {viewMode === "list" ? (
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="text-gray-500">히스토리를 불러오는 중...</div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-8">
+            <div className="text-red-500 mb-2">{error}</div>
+            <div className="text-gray-500">더미 데이터를 표시합니다.</div>
+          </div>
+        ) : viewMode === "list" ? (
           /* List view */
           <div className="space-y-3">
-            {mockHistoryData.map((item) => (
-              <HistoryCard key={item.id} item={item} />
-            ))}
+            {historyData.length > 0 ? (
+              historyData.map((item) => (
+                <HistoryCard key={item.id} item={item} />
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <div className="text-gray-500">표시할 히스토리가 없습니다.</div>
+              </div>
+            )}
           </div>
         ) : (
           /* Calendar view */
           <div className="space-y-4">
             <div className="bg-white rounded-3xl border border-gray-200 px-4 pt-4 pb-2">
-              <HistoryCalendar
-                selectedDate={selectedDate}
-                onDateSelect={setSelectedDate}
-                historyData={mockHistoryData}
-              />
+              <HistoryCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} historyData={historyData} />
             </div>
 
             {/* Divider */}
@@ -259,7 +288,7 @@ export default function HistoryPage() {
                   ))
                 ) : (
                   <div className="text-center text-gray-500 py-8">
-                    해당 날짜에 기록이 없습니다.
+                    {historyData.length > 0 ? "해당 날짜에 기록이 없습니다." : "표시할 히스토리가 없습니다."}
                   </div>
                 )}
               </div>
