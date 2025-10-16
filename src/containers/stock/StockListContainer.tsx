@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import StockDrawer from "./StockDrawer";
 import MenuTab from "@/components/tab/MenuTab";
-import { getStockList } from "@/services/chart/stock";
+import { getMyStockList, getStockList } from "@/services/chart/stock";
 import { Stock } from "@/types/api/stock";
 import { Response } from "@/types/api/response";
 import { baseUrl } from "@/constants/baseUrl";
@@ -24,6 +24,12 @@ export default function StockListContainer() {
     getStockList
   );
 
+  const {
+    data: myStockData,
+    error: myStockError,
+    isLoading: myStockLoading,
+  } = useSWR(`${baseUrl}/trading/portfolio/stocks`, getMyStockList);
+
   console.log(data);
 
   if (error) return <div>Failed to load</div>;
@@ -40,7 +46,7 @@ export default function StockListContainer() {
         return allStocks.filter((stock: Stock) => stock.prdtTypeCd === "500");
       case "MY":
       default:
-        return allStocks; // 보유종목은 모든 종목 표시 (또는 실제 보유 종목만 필터링)
+        return myStockData?.data || []; // 실제 보유 종목 데이터 사용
     }
   };
 
@@ -84,7 +90,7 @@ export default function StockListContainer() {
   //주식 코드만 넘겨주는 것도 생각해보기
   return (
     <MenuTab tabs={uptabs} activeTab={stockTab} onTabChange={setStockTab}>
-      {isLoading ? (
+      {isLoading || (stockTab === "MY" && myStockLoading) ? (
         <div className="flex items-center justify-center h-64 text-center text-gray-500">
           Loading...
         </div>
@@ -116,7 +122,7 @@ export default function StockListContainer() {
                     <div className="">
                       <div className="font-bold">{stock.stockName}</div>
                       <div className="flex gap-[7px] text-[#686868] text-[12px]">
-                        {stockTab === "MY" ? (
+                        {stockTab === "M" ? (
                           <div>{0}주</div>
                         ) : (
                           <div>{stock.country}</div>
