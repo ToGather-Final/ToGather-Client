@@ -1,6 +1,7 @@
 import { baseUrl } from "@/constants/baseUrl";
 import { Stock, StockDetail } from "@/types/api/stock";
 import { Response } from "@/types/api/response";
+import { getAuthHeaders } from "@/utils/token";
 
 // export const getStockList = async () => {
 //   const res = await fetch(`${baseUrl}/trading/stocks`, {
@@ -22,4 +23,16 @@ export const getStockList = (url: string): Promise<Response<Stock[]>> =>
   fetch(url).then((res) => res.json());
 
 export const getStockDetail = (url: string): Promise<Response<StockDetail>> =>
+  fetch(url).then((res) => res.json());
+
+export const getMyStockList = (url: string): Promise<Response<Stock[]>> =>
+  fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+  }).then((res) => res.json());
+
+export const getStockChart = (url: string): Promise<Response<StockDetail>> =>
   fetch(url).then((res) => res.json());
