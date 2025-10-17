@@ -154,6 +154,10 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // 터치 이벤트를 위한 ref와 상태
+  const touchStartX = useRef<number>(0)
+  const touchEndX = useRef<number>(0)
+  const containerRef = useRef<HTMLDivElement>(null)
   // 터치 이벤트를 위한 ref
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
@@ -189,13 +193,17 @@ export default function HistoryPage() {
 
   // 터치 시작 이벤트 핸들러
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
+    if (e.touches && e.touches.length > 0) {
+      touchStartX.current = e.touches[0].clientX;
+    }
   };
 
   // 터치 종료 이벤트 핸들러
   const handleTouchEnd = (e: React.TouchEvent) => {
-    touchEndX.current = e.changedTouches[0].clientX;
-    handleSwipe();
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      touchEndX.current = e.changedTouches[0].clientX;
+      handleSwipe();
+    }
   };
 
   // 스와이프 처리 함수
