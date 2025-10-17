@@ -20,41 +20,10 @@ import {
 import PeriodSelector from "./PeriodSelector";
 
 import "./chart-style.css";
+import { ChartProps, StockChartData } from "@/types/api/stock";
 
-interface ChartData {
-  time: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  ma_5: number;
-  ma_20: number;
-  ma_60: number;
-  ma_120: number;
-  trading_volume: number;
-}
-
-interface ChartProps {
-  dayData: ChartData[];
-  weekData: ChartData[];
-  monthData: ChartData[];
-  yearData: ChartData[];
-}
 type PriceLineHandle = ReturnType<ISeriesApi<"Candlestick">["createPriceLine"]>;
 type Period = "일" | "주" | "월" | "년";
-
-interface TooltipData {
-  time: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
-  ma5: number;
-  ma20: number;
-  ma60: number;
-  ma120: number;
-}
 
 export const ChartComponent: React.FC<ChartProps> = ({
   dayData,
@@ -69,7 +38,7 @@ export const ChartComponent: React.FC<ChartProps> = ({
   const ma5SeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
   const ma20SeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
   const ma60SeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
-  const ma120SeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
+  const ma10SeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
 
   const histogramSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
 
@@ -80,13 +49,13 @@ export const ChartComponent: React.FC<ChartProps> = ({
   const [legendData, setLegendData] = useState({
     volume: "",
   });
-  const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
+  const [tooltipData, setTooltipData] = useState<StockChartData | null>(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   const seriesesData = useMemo(
     () =>
-      new Map<Period, ChartData[]>([
+      new Map<Period, StockChartData[]>([
         ["일", dayData],
         ["주", weekData],
         ["월", monthData],
@@ -97,6 +66,13 @@ export const ChartComponent: React.FC<ChartProps> = ({
 
   // 날짜 형식 변환 함수
   const formatTimeForChart = (timeStr: string): Time => {
+    // yyyymmdd 형식인 경우 (API에서 오는 형식)
+    if (/^\d{8}$/.test(timeStr)) {
+      const year = timeStr.substring(0, 4);
+      const month = timeStr.substring(4, 6);
+      const day = timeStr.substring(6, 8);
+      return `${year}-${month}-${day}` as Time;
+    }
     // yyyy-mm 형식인 경우 (월 데이터)
     if (/^\d{4}-\d{2}$/.test(timeStr)) {
       return `${timeStr}-01` as Time; // yyyy-mm-01로 변환
@@ -144,8 +120,8 @@ export const ChartComponent: React.FC<ChartProps> = ({
       ma60SeriesRef.current?.setData(
         data.map((d) => ({ time: formatTimeForChart(d.time), value: d.ma_60 }))
       );
-      ma120SeriesRef.current?.setData(
-        data.map((d) => ({ time: formatTimeForChart(d.time), value: d.ma_120 }))
+      ma10SeriesRef.current?.setData(
+        data.map((d) => ({ time: formatTimeForChart(d.time), value: d.ma_10 }))
       );
 
       candleSeriesRef.current?.setData(
@@ -253,7 +229,7 @@ export const ChartComponent: React.FC<ChartProps> = ({
     });
     ma5SeriesRef.current = ma5lineSeries;
     const ma20lineSeries = chart.addSeries(LineSeries, {
-      color: "#FF4868",
+      color: "#F1A626",
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
@@ -265,18 +241,6 @@ export const ChartComponent: React.FC<ChartProps> = ({
     });
     ma20SeriesRef.current = ma20lineSeries;
     const ma60lineSeries = chart.addSeries(LineSeries, {
-      color: "#F1A626",
-      lineWidth: 1,
-      lastValueVisible: false,
-      priceLineVisible: false,
-      priceFormat: {
-        type: "price",
-        precision: 0,
-        minMove: 1,
-      },
-    });
-    ma60SeriesRef.current = ma60lineSeries;
-    const ma120lineSeries = chart.addSeries(LineSeries, {
       color: "#40B27F",
       lineWidth: 1,
       lastValueVisible: false,
@@ -287,7 +251,19 @@ export const ChartComponent: React.FC<ChartProps> = ({
         minMove: 1,
       },
     });
-    ma120SeriesRef.current = ma120lineSeries;
+    ma60SeriesRef.current = ma60lineSeries;
+    const ma10lineSeries = chart.addSeries(LineSeries, {
+      color: "#FF4868",
+      lineWidth: 1,
+      lastValueVisible: false,
+      priceLineVisible: false,
+      priceFormat: {
+        type: "price",
+        precision: 0,
+        minMove: 1,
+      },
+    });
+    ma10SeriesRef.current = ma10lineSeries;
 
     const candlestickSeries = chart.addSeries(CandlestickSeries, {
       upColor: "#ff0000ff",
@@ -348,7 +324,7 @@ export const ChartComponent: React.FC<ChartProps> = ({
       const ma5Data = param.seriesData.get(ma5lineSeries);
       const ma20Data = param.seriesData.get(ma20lineSeries);
       const ma60Data = param.seriesData.get(ma60lineSeries);
-      const ma120Data = param.seriesData.get(ma120lineSeries);
+      const ma10Data = param.seriesData.get(ma10lineSeries);
 
       if (candleData && volumeData) {
         const tooltipWidth = 200; // 툴팁 예상 너비
@@ -377,11 +353,11 @@ export const ChartComponent: React.FC<ChartProps> = ({
           high: (candleData as any).high,
           low: (candleData as any).low,
           close: (candleData as any).close,
-          volume: (volumeData as any).value,
-          ma5: (ma5Data as any)?.value ?? 0,
-          ma20: (ma20Data as any)?.value ?? 0,
-          ma60: (ma60Data as any)?.value ?? 0,
-          ma120: (ma120Data as any)?.value ?? 0,
+          trading_volume: (volumeData as any).value,
+          ma_5: (ma5Data as any)?.value ?? 0,
+          ma_20: (ma20Data as any)?.value ?? 0,
+          ma_60: (ma60Data as any)?.value ?? 0,
+          ma_10: (ma10Data as any)?.value ?? 0,
         });
         setTooltipVisible(true);
       }
@@ -410,7 +386,7 @@ export const ChartComponent: React.FC<ChartProps> = ({
       ma5SeriesRef.current = null;
       ma20SeriesRef.current = null;
       ma60SeriesRef.current = null;
-      ma120SeriesRef.current = null;
+      ma10SeriesRef.current = null;
       chartRef.current = null;
       minLineRef.current = null;
       maxLineRef.current = null;
@@ -430,9 +406,9 @@ export const ChartComponent: React.FC<ChartProps> = ({
       <div className="relative">
         <div className="absolute left-0 top-3 z-10 text-sm font-light bg-white/80 px-2">
           <span style={{ color: "#545454" }}>■ 5</span>{" "}
-          <span style={{ color: "#FF4868" }}>■ 20</span>{" "}
-          <span style={{ color: "#F1A626" }}>■ 60</span>{" "}
-          <span style={{ color: "#40B27F" }}>■ 120</span>
+          <span style={{ color: "#FF4868" }}>■ 10</span>{" "}
+          <span style={{ color: "#F1A626" }}>■ 20</span>{" "}
+          <span style={{ color: "#40B27F" }}>■ 60</span>
         </div>
         {tooltipVisible && tooltipData && (
           <div
@@ -558,12 +534,14 @@ export const ChartComponent: React.FC<ChartProps> = ({
                 <span className="text-gray-600">거래량</span>
                 <div className="text-right">
                   <span className="text-blue-600 font-medium">
-                    {Math.round(tooltipData.volume).toLocaleString()}
+                    {Math.round(tooltipData.trading_volume).toLocaleString()}
                   </span>
                   <span className="ml-2 text-xs text-blue-600">
                     {
-                      calculateChange(tooltipData.volume, tooltipData.close)
-                        .percent
+                      calculateChange(
+                        tooltipData.trading_volume,
+                        tooltipData.close
+                      ).percent
                     }
                     %
                   </span>
@@ -578,22 +556,22 @@ export const ChartComponent: React.FC<ChartProps> = ({
                   <div className="text-right">
                     <span
                       className={
-                        tooltipData.ma5 >= tooltipData.close
+                        tooltipData.ma_5 >= tooltipData.close
                           ? "text-red-600"
                           : "text-blue-600"
                       }
                     >
-                      {tooltipData.ma5.toLocaleString()}
+                      {tooltipData.ma_5.toLocaleString()}
                     </span>
                     <span
                       className={`ml-2 text-xs ${
-                        tooltipData.ma5 >= tooltipData.close
+                        tooltipData.ma_5 >= tooltipData.close
                           ? "text-red-600"
                           : "text-blue-600"
                       }`}
                     >
                       {
-                        calculateChange(tooltipData.ma5, tooltipData.close)
+                        calculateChange(tooltipData.ma_5, tooltipData.close)
                           .percent
                       }
                       %
@@ -606,22 +584,22 @@ export const ChartComponent: React.FC<ChartProps> = ({
                   <div className="text-right">
                     <span
                       className={
-                        tooltipData.ma20 >= tooltipData.close
+                        tooltipData.ma_20 >= tooltipData.close
                           ? "text-red-600"
                           : "text-blue-600"
                       }
                     >
-                      {tooltipData.ma20.toLocaleString()}
+                      {tooltipData.ma_20.toLocaleString()}
                     </span>
                     <span
                       className={`ml-2 text-xs ${
-                        tooltipData.ma20 >= tooltipData.close
+                        tooltipData.ma_20 >= tooltipData.close
                           ? "text-red-600"
                           : "text-blue-600"
                       }`}
                     >
                       {
-                        calculateChange(tooltipData.ma20, tooltipData.close)
+                        calculateChange(tooltipData.ma_20, tooltipData.close)
                           .percent
                       }
                       %
@@ -634,22 +612,22 @@ export const ChartComponent: React.FC<ChartProps> = ({
                   <div className="text-right">
                     <span
                       className={
-                        tooltipData.ma60 >= tooltipData.close
+                        tooltipData.ma_60 >= tooltipData.close
                           ? "text-blue-600"
                           : "text-red-600"
                       }
                     >
-                      {tooltipData.ma60.toLocaleString()}
+                      {tooltipData.ma_60.toLocaleString()}
                     </span>
                     <span
                       className={`ml-2 text-xs ${
-                        tooltipData.ma60 >= tooltipData.close
+                        tooltipData.ma_60 >= tooltipData.close
                           ? "text-blue-600"
                           : "text-red-600"
                       }`}
                     >
                       {
-                        calculateChange(tooltipData.ma60, tooltipData.close)
+                        calculateChange(tooltipData.ma_60, tooltipData.close)
                           .percent
                       }
                       %
@@ -658,26 +636,26 @@ export const ChartComponent: React.FC<ChartProps> = ({
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">이평 120</span>
+                  <span className="text-gray-600">이평 10</span>
                   <div className="text-right">
                     <span
                       className={
-                        tooltipData.ma120 >= tooltipData.close
+                        tooltipData.ma_10 >= tooltipData.close
                           ? "text-blue-600"
                           : "text-red-600"
                       }
                     >
-                      {tooltipData.ma120.toLocaleString()}
+                      {tooltipData.ma_10.toLocaleString()}
                     </span>
                     <span
                       className={`ml-2 text-xs ${
-                        tooltipData.ma120 >= tooltipData.close
+                        tooltipData.ma_10 >= tooltipData.close
                           ? "text-blue-600"
                           : "text-red-600"
                       }`}
                     >
                       {
-                        calculateChange(tooltipData.ma120, tooltipData.close)
+                        calculateChange(tooltipData.ma_10, tooltipData.close)
                           .percent
                       }
                       %

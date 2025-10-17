@@ -8,6 +8,7 @@ export interface Stock {
   changeAmount: number; //=increase
   changeRate: number; //=percent
   enabled: boolean;
+  prdtTypeCd: string; //=prdtTypeCd
 }
 //   stockId: string;
 //   area?: string; //krx //   "country": "KR",
@@ -21,6 +22,26 @@ export interface SimpleChartData {
   low: number;
   close: number;
   trading_volume: number; //trading_volume
+}
+
+export interface StockChartData {
+  time: string; //time
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  ma_5: number;
+  ma_10: number;
+  ma_20: number;
+  ma_60: number;
+  trading_volume: number; //trading_volume
+}
+
+export interface ChartProps {
+  dayData: StockChartData[];
+  weekData: StockChartData[];
+  monthData: StockChartData[];
+  yearData: StockChartData[];
 }
 
 export interface StockDetail {
@@ -38,7 +59,7 @@ export interface StockDetail {
   openPrice: number;
   prevClosePrice: number;
   marketCap: number | null;
-  chartData: SimpleChartData[];
+  chartData: SimpleChartData[] | StockChartData[];
   resistanceLine: number;
   supportLine: number;
 }
