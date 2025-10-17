@@ -23,6 +23,7 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({})
 
   // 드롭다운 옵션 생성 함수
   const generateQuorumOptions = (maxMembers: number) => {
@@ -120,7 +121,50 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
     }
   }
 
+  // 입력값 유효성 검사 함수
+  const validateField = (field: string, value: string): string | null => {
+    switch (field) {
+      case "groupMemberId":
+        if (!value.trim()) return "그룹 인원수를 입력해주세요."
+        const memberCount = parseInt(value)
+        if (isNaN(memberCount) || memberCount <= 0) {
+          return "그룹 인원수는 1명 이상의 숫자여야 합니다."
+        }
+        if (memberCount > 100) {
+          return "그룹 인원수는 100명 이하여야 합니다."
+        }
+        return null
+      
+      case "initialInvestment":
+        if (!value.trim()) return "초기 투자금을 입력해주세요."
+        const initialAmount = parseInt(value)
+        if (isNaN(initialAmount) || initialAmount < 0) {
+          return "초기 투자금은 0원 이상의 숫자여야 합니다."
+        }
+        return null
+      
+      case "targetInvestment":
+        if (!value.trim()) return "목표 투자금을 입력해주세요."
+        const goalAmount = parseInt(value)
+        if (isNaN(goalAmount) || goalAmount <= 0) {
+          return "목표 투자금은 0원보다 큰 숫자여야 합니다."
+        }
+        return null
+      
+      default:
+        return null
+    }
+  }
+
   const handleInputChange = (field: string, value: string) => {
+    // 유효성 검사
+    const fieldError = validateField(field, value)
+    
+    setFieldErrors(prev => ({
+      ...prev,
+      [field]: fieldError || ""
+    }))
+
     setFormData((prev) => {
       const newData = {
         ...prev,
@@ -144,6 +188,33 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
 
       return newData
     })
+  }
+
+  // 폼 유효성 검사
+  const isFormValid = () => {
+    const requiredFields = ["groupName", "groupMemberId", "initialInvestment", "targetInvestment"]
+    
+    // 필수 필드가 모두 채워져 있는지 확인
+    const allFieldsFilled = requiredFields.every(field => {
+      const value = formData[field as keyof typeof formData]
+      return value && value.trim() !== ""
+    })
+    
+    // 필드별 오류가 없는지 확인
+    const noFieldErrors = Object.values(fieldErrors).every(error => !error)
+    
+    // 숫자 필드 유효성 검사
+    const memberCount = parseInt(formData.groupMemberId)
+    const initialAmount = parseInt(formData.initialInvestment)
+    const goalAmount = parseInt(formData.targetInvestment)
+    
+    const numericValidation = 
+      !isNaN(memberCount) && memberCount > 0 && memberCount <= 100 &&
+      !isNaN(initialAmount) && initialAmount >= 0 &&
+      !isNaN(goalAmount) && goalAmount > 0 &&
+      initialAmount <= goalAmount
+    
+    return allFieldsFilled && noFieldErrors && numericValidation
   }
 
   return (
@@ -196,31 +267,65 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
             />
 
             {/* Group Member ID Input */}
-            <Input
-              placeholder="그룹인원"
-              value={formData.groupMemberId}
-              onChange={(e) => handleInputChange("groupMemberId", e.target.value)}
-              className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
-              required
-            />
+            <div>
+              <Input
+                placeholder="그룹인원"
+                value={formData.groupMemberId}
+                onChange={(e) => handleInputChange("groupMemberId", e.target.value)}
+                className={`h-13 rounded-2xl text-lg placeholder:text-gray-400 bg-white ${
+                  fieldErrors.groupMemberId 
+                    ? "border-red-300 focus:border-red-500" 
+                    : "border-gray-200"
+                }`}
+                required
+                type="number"
+                min="1"
+                max="100"
+              />
+              {fieldErrors.groupMemberId && (
+                <p className="text-sm text-red-500 mt-1 ml-2">{fieldErrors.groupMemberId}</p>
+              )}
+            </div>
 
             {/* Initial Investment Input */}
-            <Input
-              placeholder="초기 투자금(원당)"
-              value={formData.initialInvestment}
-              onChange={(e) => handleInputChange("initialInvestment", e.target.value)}
-              className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
-              required
-            />
+            <div>
+              <Input
+                placeholder="초기 투자금(원당)"
+                value={formData.initialInvestment}
+                onChange={(e) => handleInputChange("initialInvestment", e.target.value)}
+                className={`h-13 rounded-2xl text-lg placeholder:text-gray-400 bg-white ${
+                  fieldErrors.initialInvestment 
+                    ? "border-red-300 focus:border-red-500" 
+                    : "border-gray-200"
+                }`}
+                required
+                type="number"
+                min="0"
+              />
+              {fieldErrors.initialInvestment && (
+                <p className="text-sm text-red-500 mt-1 ml-2">{fieldErrors.initialInvestment}</p>
+              )}
+            </div>
 
             {/* Target Investment Input */}
-            <Input
-              placeholder="목표 투자금(원상)"
-              value={formData.targetInvestment}
-              onChange={(e) => handleInputChange("targetInvestment", e.target.value)}
-              className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
-              required
-            />
+            <div>
+              <Input
+                placeholder="목표 투자금(원상)"
+                value={formData.targetInvestment}
+                onChange={(e) => handleInputChange("targetInvestment", e.target.value)}
+                className={`h-13 rounded-2xl text-lg placeholder:text-gray-400 bg-white ${
+                  fieldErrors.targetInvestment 
+                    ? "border-red-300 focus:border-red-500" 
+                    : "border-gray-200"
+                }`}
+                required
+                type="number"
+                min="1"
+              />
+              {fieldErrors.targetInvestment && (
+                <p className="text-sm text-red-500 mt-1 ml-2">{fieldErrors.targetInvestment}</p>
+              )}
+            </div>
 
             {/* Rules Section */}
             <div className="space-y-4 py-4">
@@ -280,7 +385,11 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
             )}
 
             {/* Submit Button */}
-            <MainButton type="submit" className="mt-8" disabled={isLoading}>
+            <MainButton 
+              type="submit" 
+              className="mt-8" 
+              disabled={isLoading || !isFormValid()}
+            >
               {isLoading ? "그룹 생성 중..." : "그룹 만들기"}
             </MainButton>
           </form>
