@@ -54,6 +54,7 @@ export default function AccountCompleteContainer({
             src="/images/account-create.webp"
             alt="Account Created"
             fill
+            priority
             className="object-contain"
           />
         </div>

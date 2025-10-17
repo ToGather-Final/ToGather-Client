@@ -6,6 +6,16 @@ WORKDIR /app
 ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 
+# 🚀 Sharp 빌드를 위한 필수 라이브러리 설치
+RUN apk add --no-cache \
+    libc6-compat \
+    vips-dev \
+    build-base \
+    gcc \
+    g++ \
+    make \
+    python3
+
 # pnpm 설치
 RUN npm install -g pnpm
 
@@ -18,11 +28,16 @@ RUN pnpm install --frozen-lockfile
 # 소스 코드 복사
 COPY . .
 
-# Next.js 빌드 (pnpm 사용으로 통일)
+# Next.js 빌드
 RUN pnpm run build
 
 FROM node:18-alpine AS runner
 WORKDIR /app
+
+# 🚀 Sharp 런타임 의존성 설치 (빌드 도구는 불필요)
+RUN apk add --no-cache \
+    libc6-compat \
+    vips
 
 ENV NODE_ENV=production
 
@@ -30,6 +45,9 @@ ENV NODE_ENV=production
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
+
+# 🚀 Builder에서 빌드된 Sharp 복사 (재설치 불필요!)
+COPY --from=builder /app/node_modules/.pnpm/sharp@*/node_modules/sharp ./node_modules/sharp
 
 # 포트 노출
 EXPOSE 3000

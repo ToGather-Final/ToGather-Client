@@ -59,6 +59,7 @@ export default function GroupCompleteContainer({ onFinish }: GroupCompleteContai
             src="/images/group-create.webp"
             alt="Group Created"
             fill
+            priority
             className="object-contain"
           />
         </div>

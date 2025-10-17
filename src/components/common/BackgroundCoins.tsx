@@ -14,6 +14,7 @@ export default function BackgroundCoins({ className = "" }: BackgroundCoinsProps
           alt="Star coin" 
           width={144}
           height={144}
+          priority
           className="w-full h-full object-contain drop-shadow-lg"
         />
       </div>
@@ -25,17 +26,19 @@ export default function BackgroundCoins({ className = "" }: BackgroundCoinsProps
           alt="Smile coin" 
           width={160}
           height={160}
+          priority
           className="w-full h-full object-contain drop-shadow-lg"
         />
       </div>
 
-      {/* Heart coin bottom right */}
+      {/* Heart coin bottom right - LCP 이미지 */}
       <div className="absolute -bottom-6 -right-4 w-56 h-56 transform -rotate-32 z-0">
         <Image 
           src="/images/heart_coin.webp" 
           alt="Heart coin" 
           width={224}
           height={224}
+          priority
           className="w-full h-full object-contain drop-shadow-lg"
         />
       </div>

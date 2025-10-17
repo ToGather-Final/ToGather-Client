@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import MainButton from "@/components/common/MainButton"
 import { markGroupJoined } from "@/utils/userStatus"
@@ -124,9 +125,11 @@ export default function GroupJoinFlow() {
       <div className="h-full bg-white relative overflow-hidden flex flex-col">
         {/* Header */}
         <div className="p-6 relative z-10 flex-shrink-0">
-          <img 
-            src="/images/logo-blue.png"
+          <Image 
+            src="/images/logo-blue.webp"
             alt="ToGather Logo"
+            width={32}
+            height={32}
             className="h-8 w-8 object-contain"
           />
         </div>
@@ -158,11 +161,13 @@ export default function GroupJoinFlow() {
           </div>
 
           {/* Group Image */}
-          <div className="w-full">
-            <img 
-              src="/images/group-create.png"
+          <div className="w-full relative h-[400px]">
+            <Image 
+              src="/images/group-create.webp"
               alt="Group"
-              className="w-full h-auto object-contain"
+              fill
+              priority
+              className="object-contain"
             />
           </div>
         </div>
