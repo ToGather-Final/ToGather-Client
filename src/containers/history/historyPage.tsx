@@ -158,6 +158,10 @@ export default function HistoryPage() {
   const touchStartX = useRef<number>(0)
   const touchEndX = useRef<number>(0)
   const containerRef = useRef<HTMLDivElement>(null)
+  // 터치 이벤트를 위한 ref
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchHistory = async () => {
