@@ -15,8 +15,6 @@ export default function QRScannerContainer({ onDetected, once = true }: Props) {
   const scannerRef = useRef<QrScanner | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
-  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
-  const [deviceId, setDeviceId] = useState<string | undefined>(undefined);
   const [torchOn, setTorchOn] = useState(false);
   const handledRef = useRef(false); // once 모드 중복 방지
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
@@ -37,30 +35,9 @@ export default function QRScannerContainer({ onDetected, once = true }: Props) {
     return err?.message ?? "카메라를 시작할 수 없습니다.";
   };
 
-  // 장치 목록 로딩
-  useEffect(() => {
-    (async () => {
-      try {
-        const hasCam = await QrScanner.hasCamera();
-        if (!hasCam) {
-          setErrorMsg("카메라가 없습니다.");
-          return;
-        }
-        const all = await navigator.mediaDevices.enumerateDevices();
-        const cams = all.filter((d) => d.kind === "videoinput");
-        setDevices(cams);
-        // 후면 카메라를 우선 선택
-        const back = cams.find((d) => /back|rear|environment/i.test(d.label));
-        setDeviceId(back?.deviceId ?? cams[0]?.deviceId);
-      } catch (e: any) {
-        setErrorMsg(explainError(e));
-      }
-    })();
-  }, []);
-
   // 스캐너 시작/정지
   useEffect(() => {
-    if (!videoRef.current || !deviceId) return;
+    if (!videoRef.current) return;
 
     // 기존 스캐너 정리
     scannerRef.current?.destroy();
@@ -69,6 +46,7 @@ export default function QRScannerContainer({ onDetected, once = true }: Props) {
     handledRef.current = false;
     setErrorMsg(null);
 
+    // test/page.tsx와 같은 방식으로 QrScanner 생성
     const scanner = new QrScanner(
       videoRef.current,
       (res) => {
@@ -100,8 +78,16 @@ export default function QRScannerContainer({ onDetected, once = true }: Props) {
       }
     );
 
-    scanner.start().catch((e) => {
-      setErrorMsg(explainError(e));
+    // test/page.tsx와 같은 방식으로 카메라 확인 후 시작
+    QrScanner.hasCamera().then((hasCamera) => {
+      if (!hasCamera) {
+        setErrorMsg("카메라가 없습니다.");
+        return;
+      }
+
+      scanner.start().catch((e) => {
+        setErrorMsg(explainError(e));
+      });
     });
 
     scannerRef.current = scanner;
@@ -110,7 +96,7 @@ export default function QRScannerContainer({ onDetected, once = true }: Props) {
       scanner.destroy();
       scannerRef.current = null;
     };
-  }, [deviceId, once, onDetected]);
+  }, [once, onDetected]);
 
   // 토치 토글 (지원 기기 한정)
   const toggleTorch = async () => {
@@ -170,20 +156,6 @@ export default function QRScannerContainer({ onDetected, once = true }: Props) {
 
         {/* 우측 상단 컨트롤(클릭 가능) */}
         <div className="absolute right-2 top-2 flex gap-2">
-          {devices.length > 1 && (
-            <select
-              className="pointer-events-auto bg-primary  text-white text-sm px-2 py-1 rounded"
-              value={deviceId}
-              onChange={(e) => setDeviceId(e.target.value)}
-              aria-label="카메라 선택"
-            >
-              {devices.map((d, i) => (
-                <option key={d.deviceId || i} value={d.deviceId}>
-                  {d.label || `Camera ${i + 1}`}
-                </option>
-              ))}
-            </select>
-          )}
           <button
             type="button"
             className="pointer-events-auto bg-primary text-white text-sm px-2 py-1 rounded"
