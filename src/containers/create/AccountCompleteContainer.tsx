@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import MainButton from "@/components/common/MainButton"
 
 interface AccountCompleteContainerProps {
@@ -17,9 +18,11 @@ export default function AccountCompleteContainer({
     <div className="h-full bg-white relative overflow-hidden flex flex-col">
       {/* Header */}
       <div className="p-6 relative z-10">
-        <img 
-          src="/images/logo-blue.png"
+        <Image 
+          src="/images/logo-blue.webp"
           alt="ToGather Logo"
+          width={32}
+          height={32}
           className="h-8 w-8 object-contain"
         />
       </div>
@@ -46,11 +49,12 @@ export default function AccountCompleteContainer({
         </h1>
 
         {/* Account Image */}
-        <div className="mb-8">
-          <img 
-            src="/images/account-create.png"
+        <div className="mb-8 relative w-80 h-80">
+          <Image 
+            src="/images/account-create.webp"
             alt="Account Created"
-            className="w-80 h-auto object-contain"
+            fill
+            className="object-contain"
           />
         </div>
 

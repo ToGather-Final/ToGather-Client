@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Image from "next/image"
 // @ts-ignore
 import confetti from "canvas-confetti"
 import MainButton from "@/components/common/MainButton"
@@ -67,9 +68,12 @@ export default function WelcomeContainer({ onComplete, nickname }: WelcomeContai
       <div className="flex flex-col items-center justify-center h-full px-8 relative z-10">
         {/* Logo */}
         <div className="mb-8">
-          <img 
-            src="/images/logo-blue.png"
+          <Image 
+            src="/images/logo-blue.webp"
             alt="ToGather Logo"
+            width={64}
+            height={64}
+            priority
             className="h-16 w-16 object-contain"
           />
         </div>

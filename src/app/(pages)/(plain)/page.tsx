@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import BackgroundCoins from "@/components/common/BackgroundCoins"
 import MainButton from "@/components/common/MainButton"
 
@@ -60,17 +61,23 @@ export default function ToGatherApp() {
               }`}
             >
               {/* White logo */}
-              <img 
-                src="/images/logo-white.png"
+              <Image 
+                src="/images/logo-white.webp"
                 alt="ToGather Logo"
+                width={64}
+                height={64}
+                priority
                 className={`h-16 w-16 object-contain transition-opacity duration-800 ${
                   showAnimation ? "opacity-0" : "opacity-100"
                 }`}
               />
               {/* Blue logo */}
-              <img 
-                src="/images/logo-blue.png"
+              <Image 
+                src="/images/logo-blue.webp"
                 alt="ToGather Logo"
+                width={64}
+                height={64}
+                priority
                 className={`h-16 w-16 object-contain absolute top-0 left-0 transition-opacity duration-800 ${
                   showAnimation ? "opacity-100" : "opacity-0"
                 }`}
@@ -102,9 +109,12 @@ export default function ToGatherApp() {
         <div className="flex flex-col items-center justify-center h-full px-8">
           {/* Logo */}
           <div className="mb-8">
-            <img 
-              src="/images/logo-blue.png"
+            <Image 
+              src="/images/logo-blue.webp"
               alt="ToGather Logo"
+              width={64}
+              height={64}
+              priority
               className="h-16 w-16 object-contain"
             />
           </div>
