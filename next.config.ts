@@ -16,6 +16,13 @@ const nextConfig: NextConfig = {
     // Docker 환경 최적화
     poweredByHeader: false,
     generateEtags: true, // ETag 활성화로 캐싱 개선
+    
+    // 컴파일러 최적화
+    compiler: {
+        removeConsole: process.env.NODE_ENV === 'production' ? {
+            exclude: ['error', 'warn'],
+        } : false,
+    },
 };
 
 export default nextConfig;

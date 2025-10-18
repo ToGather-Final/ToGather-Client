@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import AppShell from "../components/layout/AppShell";
@@ -48,6 +48,13 @@ export const metadata: Metadata = {
   description: "모임 투자 웹앱",
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#6592FD',
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -56,7 +63,7 @@ export default function RootLayout({
   return (
     <html lang="ko" className={`${pretendard.variable}`}>
       <head>
-        {/* Preload critical font */}
+        {/* Preload critical resources */}
         <link
           rel="preload"
           href="/fonts/PretendardVariable.woff2"
@@ -64,7 +71,8 @@ export default function RootLayout({
           type="font/woff2"
           crossOrigin="anonymous"
         />
-        {/* Preconnect to external domains if any */}
+        {/* DNS Prefetch for faster external resource loading */}
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
       </head>
       <GroupIdProvider>
         <body className={pretendard.className}>{children}</body>
