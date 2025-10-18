@@ -69,6 +69,10 @@ export default function LoginFlow() {
           case 'account-complete':
             router.push("/account-create") // AccountCreateFlow에서 complete 상태로 처리
             break
+          case 'group-created':
+            // 그룹 생성 완료 화면으로 이동
+            router.push("/group-create-complete")
+            break
           case 'group-create':
           case 'group-join':
             // 그룹 생성/참여 선택 페이지로 이동 (추후 구현)
