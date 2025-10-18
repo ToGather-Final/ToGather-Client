@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Pencil } from "lucide-react";
@@ -136,6 +136,7 @@ export default function PortfolioContainer() {
   const [isDepositCompleteModalOpen, setIsDepositCompleteModalOpen] =
     useState(false);
   const [goalAmount, setGoalAmount] = useState(dummyPortfolio.goal);
+
 
   // 목표 달성률 계산 (최대 100%)
   const goalAchievementRate = Math.min(
