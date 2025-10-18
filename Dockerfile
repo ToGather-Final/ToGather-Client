@@ -28,8 +28,15 @@ RUN pnpm install --frozen-lockfile
 # 소스 코드 복사
 COPY . .
 
-# Next.js 빌드
+# Next.js 빌드 (React 19 + Next.js 15 최적화)
 RUN pnpm run build
+
+# 🚀 빌드 최적화: 불필요한 파일 제거
+RUN find .next -name "*.map" -delete && \
+    find .next -name "*.d.ts" -delete && \
+    find .next -name "*.tsbuildinfo" -delete && \
+    find .next -name "*.log" -delete && \
+    rm -rf .next/cache
 
 FROM node:18-alpine AS runner
 WORKDIR /app
@@ -40,6 +47,11 @@ RUN apk add --no-cache \
     vips
 
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# 🚀 Node.js 성능 최적화 (Kubernetes 환경에 최적화)
+ENV NODE_OPTIONS="--max-old-space-size=512 --max-semi-space-size=128"
+ENV NODE_NO_WARNINGS=1
 
 # 필요한 파일들만 복사 (standalone 모드)
 COPY --from=builder /app/.next/standalone ./
@@ -48,6 +60,13 @@ COPY --from=builder /app/public ./public
 
 # 🚀 Builder에서 빌드된 Sharp 복사 (재설치 불필요!)
 COPY --from=builder /app/node_modules/.pnpm/sharp@*/node_modules/sharp ./node_modules/sharp
+
+# 🚀 보안 및 성능 최적화
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
 
 # 포트 노출
 EXPOSE 3000
