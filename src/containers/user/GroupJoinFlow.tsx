@@ -3,13 +3,21 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import MainButton from "@/components/common/MainButton"
+import GroupWaitingContainer from "./GroupWaitingContainer"
+import { joinGroup } from "@/utils/api"
 import { markGroupJoined } from "@/utils/userStatus"
 import { getUserId } from "@/utils/token"
+import type { ApiErrorWithStatus } from "@/types/api/auth"
 
 export default function GroupJoinFlow() {
   const router = useRouter()
-  const [step, setStep] = useState<"code" | "loading" | "rules">("code")
+  const [step, setStep] = useState<"code" | "loading" | "waiting">("code")
   const [code, setCode] = useState(["", "", "", ""])
+  const [groupInfo, setGroupInfo] = useState<{
+    groupId: string
+    groupName: string
+  } | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const handleCodeChange = (index: number, value: string) => {
     if (value.length <= 1) {
@@ -25,27 +33,51 @@ export default function GroupJoinFlow() {
     }
   }
 
-  const handleCodeSubmit = () => {
-    // 코드 입력 완료 후 로딩 화면으로
+  const handleCodeSubmit = async () => {
+    const codeString = code.join("")
+    if (codeString.length !== 4) {
+      setError("4자리 코드를 모두 입력해주세요.")
+      return
+    }
+
     setStep("loading")
-    
-    // 2초 후 규칙 화면으로 전환
-    setTimeout(() => {
-      setStep("rules")
-    }, 2000)
+    setError(null)
+
+    try {
+      console.log("그룹 참여 API 호출:", codeString)
+      const result = await joinGroup(codeString)
+      console.log("그룹 참여 성공:", result)
+      
+      // 그룹 참여 완료 상태 업데이트
+      const userId = getUserId()
+      if (userId) {
+        markGroupJoined(userId)
+        console.log("그룹 참여 상태 업데이트 완료")
+      }
+      
+      // 그룹 정보 저장하고 대기 화면으로 이동
+      setGroupInfo({
+        groupId: result.groupId,
+        groupName: result.groupName
+      })
+      setStep("waiting")
+      
+    } catch (err) {
+      console.error("그룹 참여 실패:", err)
+      
+      let errorMessage = "그룹 참여에 실패했습니다. 다시 시도해주세요."
+      
+      if (err instanceof Error) {
+        errorMessage = err.message
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        errorMessage = (err as ApiErrorWithStatus).message
+      }
+      
+      setError(errorMessage)
+      setStep("code")
+    }
   }
 
-  const handleRulesConfirm = () => {
-    // 그룹 참여 완료 상태 업데이트
-    const userId = getUserId()
-    if (userId) {
-      markGroupJoined(userId)
-      console.log("그룹 참여 상태 업데이트 완료")
-    }
-    
-    // 그룹 메인 페이지로 이동
-    router.push("/group")
-  }
 
   // Step 1: 코드 입력 화면
   if (step === "code") {
@@ -103,6 +135,13 @@ export default function GroupJoinFlow() {
               />
             ))}
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="w-full max-w-sm mb-4">
+              <p className="text-sm text-red-500 text-center">{error}</p>
+            </div>
+          )}
 
           {/* Submit Button */}
           <div className="w-full max-w-sm">
@@ -170,114 +209,13 @@ export default function GroupJoinFlow() {
     )
   }
 
-  // Step 3: 그룹 규칙 화면
-  if (step === "rules") {
+  // Step 3: 대기 화면
+  if (step === "waiting" && groupInfo) {
     return (
-      <div className="h-full bg-white relative overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="p-6 relative z-10 flex-shrink-0">
-          <img 
-            src="/images/logo-blue.png"
-            alt="ToGather Logo"
-            className="h-8 w-8 object-contain"
-          />
-        </div>
-
-        {/* Main content */}
-        <div className="flex-1 px-8 py-4 relative z-10 overflow-y-auto">
-          {/* Title */}
-          <h1 
-            className="text-3xl font-extrabold text-center mb-2"
-            style={{ 
-              backgroundImage: 'linear-gradient(to right, #4078FF, #6989D4)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              fontWeight: 900,
-              WebkitTextStroke: '0.4px #4078FF'
-            }}
-          >
-            그룹 규칙
-          </h1>
-
-          <p 
-            className="text-base font-semibold text-center mb-6"
-            style={{ 
-              backgroundImage: 'linear-gradient(to right, #234085, #6989D4)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
-            }}
-          >
-            우리 그룹의 매매 규칙이에요
-          </p>
-
-          {/* Rules Sections */}
-          <div className="space-y-4 mb-6">
-            {/* 그룹 생성 및 참여 */}
-            <div className="flex items-start gap-2">
-              <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-white text-xs">✓</span>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-gray-900 mb-1">그룹 생성 및 참여</p>
-                <ul className="text-xs text-gray-700 space-y-0.5 list-disc pl-4">
-                  <li>그룹장은 모임 이름, 인원, 초기 투자금을 설정합니다.</li>
-                  <li>참여자는 모임 코드를 통해서만 참여할 수 있습니다.</li>
-                </ul>
-              </div>
-            </div>
-
-            {/* 매매 방식 */}
-            <div className="flex items-start gap-2">
-              <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-white text-xs">✓</span>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-gray-900 mb-1">매매 방식</p>
-                <ul className="text-xs text-gray-700 space-y-0.5 list-disc pl-4">
-                  <li>매매가 발생하면, 과 그룹원 수 각 그룹원 4) 발급 각각의 즉시 모임 통장에서 그룹장의 개인 통장으로 이동합니다.</li>
-                  <li>각 모임 투자 결과 수익금은 통합 관리됩니다.</li>
-                </ul>
-              </div>
-            </div>
-
-            {/* 매미 규칙 */}
-            <div className="flex items-start gap-2">
-              <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-white text-xs">!</span>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-gray-900 mb-1">매미 규칙</p>
-                <ul className="text-xs text-gray-700 space-y-0.5 list-disc pl-4">
-                  <li>매미 완성일 승인은 그룹원의 과반수입니다.</li>
-                  <li>승인이 완성되면, 과 그룹원 수 각 매매에 수 각 모임 매매 금액은 즉시 모임 통장에서 그룹장의 개인통장으로 이동합니다.</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* Agreement Checkbox */}
-          <div className="flex items-start gap-3 py-4">
-            <input
-              type="checkbox"
-              id="rules-agreement"
-              className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              required
-            />
-            <label htmlFor="rules-agreement" className="text-sm text-gray-700 leading-relaxed">
-              본 규칙에 동의하신겁니까?
-            </label>
-          </div>
-
-          {/* Submit Button */}
-          <div className="mt-6">
-            <MainButton onClick={handleRulesConfirm}>
-              확인
-            </MainButton>
-          </div>
-        </div>
-      </div>
+      <GroupWaitingContainer 
+        groupId={groupInfo.groupId}
+        groupName={groupInfo.groupName}
+      />
     )
   }
 

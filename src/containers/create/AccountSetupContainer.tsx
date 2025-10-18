@@ -7,7 +7,7 @@ import MainButton from "@/components/common/MainButton"
 import { createInvestmentAccount } from "@/utils/api"
 import { getUserId } from "@/utils/token"
 import { markAccountCreated } from "@/utils/userStatus"
-import { ApiErrorWithStatus } from "@/types/api/auth"
+import type { ApiErrorWithStatus } from "@/types/api/auth"
 
 interface AccountSetupContainerProps {
   onComplete: () => void

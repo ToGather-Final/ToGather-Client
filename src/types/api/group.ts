@@ -13,6 +13,29 @@ export interface CreateGroupRequest {
 // 그룹 생성 응답
 export interface CreateGroupResponse {
   groupId: string
+  invitationCode: string
+}
+
+// 페이 계좌 개설 요청
+export interface CreatePayAccountRequest {
+  name: string
+  englishLastName: string
+  englishFirstName: string
+  agreeToTerms: boolean
+}
+
+// 그룹 상태 확인 응답
+export interface GroupStatusResponse {
+  status: string
+  currentMembers: number
+  maxMembers: number
+  isFull: boolean
+}
+
+// 그룹 참여 응답
+export interface JoinGroupResponse {
+  groupId: string
+  groupName: string
 }
 
 // 그룹 정보

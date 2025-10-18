@@ -9,7 +9,7 @@ import { createGroup, CreateGroupRequest } from "@/utils/api"
 import type { ApiErrorWithStatus } from "@/types/api/auth"
 
 interface GroupCreateContainerProps {
-  onComplete: () => void
+  onComplete: (groupId: string, groupName: string, invitationCode: string) => void
 }
 
 export default function GroupCreateContainer({ onComplete }: GroupCreateContainerProps) {
@@ -98,12 +98,21 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
         dissolutionQuorum,
       }
 
-      console.log("그룹 생성 시작:", requestData)
+      console.log("=== 그룹 생성 데이터 디버깅 ===")
+      console.log("formData:", formData)
+      console.log("파싱된 값들:")
+      console.log("  maxMembers:", maxMembers, "(원본:", formData.groupMemberId, ")")
+      console.log("  initialAmount:", initialAmount, "(원본:", formData.initialInvestment, ")")
+      console.log("  goalAmount:", goalAmount, "(원본:", formData.targetInvestment, ")")
+      console.log("  voteQuorum:", voteQuorum, "(원본:", formData.voteQuorum, ")")
+      console.log("  dissolutionQuorum:", dissolutionQuorum, "(원본:", formData.dissolutionQuorum, ")")
+      console.log("최종 requestData:", requestData)
+      console.log("===============================")
       const result = await createGroup(requestData)
       console.log("그룹 생성 완료:", result)
 
-      // 페이 계좌 개설 화면으로 이동
-      onComplete()
+      // 페이 계좌 개설 화면으로 이동 (그룹 정보 전달)
+      onComplete(result.groupId, formData.groupName.trim(), result.invitationCode)
     } catch (err) {
       console.error("그룹 생성 실패:", err)
       
