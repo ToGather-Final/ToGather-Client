@@ -3,6 +3,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { getUserId } from '@/utils/token';
 
 interface NotificationData {
   type: string;
@@ -21,7 +22,7 @@ interface UseNotificationReturn {
 export function useNotification(): UseNotificationReturn {
   const [isConnected, setIsConnected] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
-  const [eventSource, setEventSource] = useState<EventSource | null>(null);
+  const [eventSource, setEventSource] = useState<any>(null);
   const router = useRouter();
 
   // 알림 카운트 초기화
@@ -30,7 +31,7 @@ export function useNotification(): UseNotificationReturn {
   }, []);
 
   useEffect(() => {
-    const connectSSE = () => {
+    const connectSSE = async () => {
       try {
         // 기존 연결이 있다면 종료
         if (eventSource) {
@@ -44,19 +45,94 @@ export function useNotification(): UseNotificationReturn {
           return;
         }
 
-        // SSE 연결 생성
-        const es = new EventSource('/api/notification/stream', {
+        // SSE 연결 생성 (Next.js API 라우트를 통해 프록시)
+        const streamUrl = '/api/notification/stream';
+        
+        console.log('🔔 스트림 URL:', streamUrl);
+        
+        // EventSource는 커스텀 헤더를 지원하지 않으므로 Next.js API 라우트 사용
+        const token = localStorage.getItem('togather_access_token');
+        
+        console.log('🔔 토큰 존재 여부:', !!token);
+        console.log('🔔 토큰 값:', token ? token.substring(0, 20) + '...' : 'null');
+        
+        if (!token) {
+          console.error('🔔 토큰이 없습니다. 로그인을 다시 시도해주세요.');
+          return;
+        }
+        
+        // fetch API를 사용하여 SSE 구현 (Authorization 헤더 지원)
+        const authUrl = streamUrl;
+        console.log('🔔 최종 SSE URL:', authUrl);
+        
+        // fetch로 SSE 요청 (Authorization 헤더 포함)
+        const response = await fetch(authUrl, {
+          method: 'GET',
           headers: {
-            'X-User-Id': userId
-          }
-        } as any);
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error(`SSE connection failed: ${response.status}`);
+        }
+        
+        // ReadableStream을 EventSource처럼 사용
+        const reader = response.body?.getReader();
+        if (!reader) {
+          throw new Error('No response body');
+        }
+        
+        const es = {
+          close: () => reader.cancel(),
+          addEventListener: (event: string, callback: (event: any) => void) => {
+            // SSE 이벤트 처리 - 완전히 새로운 방식
+            const pump = async () => {
+              try {
+                const { done, value } = await reader.read();
+                if (done) return;
+                
+                const text = new TextDecoder().decode(value);
+                console.log('🔔 SSE 원본 데이터:', text);
+                
+                // SSE 데이터가 있으면 무조건 알림 처리
+                if (text.includes('event:history-notification') || text.includes('data:')) {
+                  console.log('🔔 알림 데이터 감지 - 히스토리 알림 표시');
+                  
+                  // 알림 카운트 증가
+                  setNotificationCount(prev => prev + 1);
+                  
+                  // 브라우저 알림 표시
+                  if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification('ToGather 알림', {
+                      body: '새로운 소식이 있습니다!',
+                      icon: '/logo_blue.png'
+                    });
+                  }
+                  
+                  // 토스트 알림 표시
+                  showToast('새로운 소식이 있습니다!');
+                  
+                  console.log('🔔 히스토리 알림 처리 완료');
+                }
+                
+                pump();
+              } catch (error) {
+                console.error('SSE 읽기 오류:', error);
+              }
+            };
+            pump();
+          },
+          onopen: null as (() => void) | null,
+          onerror: null as ((error: any) => void) | null,
+        };
 
         // 연결 성공
-        es.onopen = () => {
-          console.log('🔔 알림 스트림 연결 성공');
-          setIsConnected(true);
-          setEventSource(es);
-        };
+        console.log('🔔 알림 스트림 연결 성공');
+        setIsConnected(true);
+        setEventSource(es);
 
         // 히스토리 알림 수신
         es.addEventListener('history-notification', (event) => {
@@ -97,8 +173,10 @@ export function useNotification(): UseNotificationReturn {
           }
         });
 
-        // 연결 오류
-        es.onerror = (error) => {
+        // 연결 오류 처리
+        try {
+          // SSE 이벤트 처리 로직
+        } catch (error) {
           console.error('🔔 알림 스트림 연결 오류:', error);
           setIsConnected(false);
           
@@ -106,7 +184,7 @@ export function useNotification(): UseNotificationReturn {
           setTimeout(() => {
             connectSSE();
           }, 3000);
-        };
+        }
 
         // 페이지 언마운트 시 연결 해제
         return () => {
@@ -127,18 +205,28 @@ export function useNotification(): UseNotificationReturn {
       }
     };
 
-    // 브라우저 알림 권한 요청 (개선된 버전)
+    // 브라우저 알림 권한 요청 (자동 요청)
     const requestNotificationPermission = async () => {
       if ('Notification' in window) {
         if (Notification.permission === 'default') {
+          console.log('🔔 브라우저 알림 권한을 요청합니다...');
           const permission = await Notification.requestPermission();
           console.log('🔔 알림 권한 상태:', permission);
           
           if (permission === 'granted') {
             console.log('🔔 브라우저 알림이 활성화되었습니다.');
+            // 테스트 알림 표시
+            new Notification('ToGather 알림', {
+              body: '알림이 성공적으로 활성화되었습니다!',
+              icon: '/logo_blue.png'
+            });
           } else if (permission === 'denied') {
             console.warn('🔔 브라우저 알림이 거부되었습니다. 브라우저 설정에서 허용해주세요.');
           }
+        } else if (Notification.permission === 'denied') {
+          console.warn('🔔 브라우저 알림이 거부되었습니다. 브라우저 설정에서 허용해주세요.');
+          // 사용자에게 알림 설정 안내
+          alert('브라우저 알림이 거부되었습니다.\n주소창 왼쪽의 자물쇠 아이콘을 클릭하여 알림을 허용해주세요.');
         } else {
           console.log('🔔 현재 알림 권한 상태:', Notification.permission);
         }
@@ -170,17 +258,17 @@ export function useNotification(): UseNotificationReturn {
   };
 }
 
-// 사용자 ID 가져오기 (토큰에서 추출)
+// 사용자 ID 가져오기 (token.ts의 getUserId 함수 사용)
 function getCurrentUserId(): string | null {
-  if (typeof window === 'undefined') return null;
-  
   try {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return null;
+    const userId = getUserId();
+    if (!userId) {
+      console.warn('🔔 localStorage에 userId가 없습니다.');
+      return null;
+    }
     
-    // JWT 토큰 디코딩 (간단한 방법)
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.sub || payload.userId;
+    console.log('🔔 사용자 ID 확인:', userId);
+    return userId;
   } catch (error) {
     console.error('사용자 ID 추출 실패:', error);
     return null;
