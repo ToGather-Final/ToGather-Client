@@ -143,6 +143,7 @@ export default function LoginFlow() {
             width={64}
             height={64}
             priority
+            fetchPriority="high"
             className="h-16 w-16 object-contain"
           />
         </div>

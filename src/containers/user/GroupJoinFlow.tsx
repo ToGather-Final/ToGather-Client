@@ -167,6 +167,7 @@ export default function GroupJoinFlow() {
               alt="Group"
               fill
               priority
+              fetchPriority="high"
               className="object-contain"
             />
           </div>

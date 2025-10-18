@@ -15,6 +15,7 @@ export default function BackgroundCoins({ className = "" }: BackgroundCoinsProps
           width={144}
           height={144}
           priority
+          fetchPriority="high"
           className="w-full h-full object-contain drop-shadow-lg"
         />
       </div>
@@ -27,6 +28,7 @@ export default function BackgroundCoins({ className = "" }: BackgroundCoinsProps
           width={160}
           height={160}
           priority
+          fetchPriority="high"
           className="w-full h-full object-contain drop-shadow-lg"
         />
       </div>
@@ -39,6 +41,7 @@ export default function BackgroundCoins({ className = "" }: BackgroundCoinsProps
           width={224}
           height={224}
           priority
+          fetchPriority="high"
           className="w-full h-full object-contain drop-shadow-lg"
         />
       </div>

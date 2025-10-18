@@ -55,6 +55,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={`${pretendard.variable}`}>
+      <head>
+        {/* Preload critical font */}
+        <link
+          rel="preload"
+          href="/fonts/PretendardVariable.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        {/* Preconnect to external domains if any */}
+      </head>
       <GroupIdProvider>
         <body className={pretendard.className}>{children}</body>
       </GroupIdProvider>

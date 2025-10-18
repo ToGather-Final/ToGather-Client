@@ -60,6 +60,7 @@ export default function GroupCompleteContainer({ onFinish }: GroupCompleteContai
             alt="Group Created"
             fill
             priority
+            fetchPriority="high"
             className="object-contain"
           />
         </div>

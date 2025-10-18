@@ -55,6 +55,7 @@ export default function AccountCompleteContainer({
             alt="Account Created"
             fill
             priority
+            fetchPriority="high"
             className="object-contain"
           />
         </div>

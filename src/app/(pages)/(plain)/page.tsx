@@ -67,6 +67,7 @@ export default function ToGatherApp() {
                 width={64}
                 height={64}
                 priority
+                fetchPriority="high"
                 className={`h-16 w-16 object-contain transition-opacity duration-800 ${
                   showAnimation ? "opacity-0" : "opacity-100"
                 }`}
@@ -78,6 +79,7 @@ export default function ToGatherApp() {
                 width={64}
                 height={64}
                 priority
+                fetchPriority="high"
                 className={`h-16 w-16 object-contain absolute top-0 left-0 transition-opacity duration-800 ${
                   showAnimation ? "opacity-100" : "opacity-0"
                 }`}
@@ -115,6 +117,7 @@ export default function ToGatherApp() {
               width={64}
               height={64}
               priority
+              fetchPriority="high"
               className="h-16 w-16 object-contain"
             />
           </div>
