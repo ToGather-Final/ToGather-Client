@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
     eslint: {
         ignoreDuringBuilds: true,
     },
+    // 🚀 CDN 최적화: 정적 자산을 CloudFront + S3로 분리
+    assetPrefix: process.env.NODE_ENV === 'production' 
+        ? 'https://d36ue99r8i68ow.cloudfront.net' 
+        : '',
     images: {
         formats: ['image/avif', 'image/webp'],
         deviceSizes: [640, 750, 828, 1080, 1200],
