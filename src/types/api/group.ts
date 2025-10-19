@@ -51,3 +51,13 @@ export interface GroupInfo {
   createdAt: string
 }
 
+// 그룹 멤버 응답 (배열로 직접 반환)
+export type GroupMemberResponse = GroupMember[]
+
+// 그룹 멤버 정보
+export interface GroupMember {
+  userId: string
+  nickname: string
+  role: string
+}
+

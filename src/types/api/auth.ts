@@ -17,6 +17,21 @@ export interface LoginResponse {
   accessToken: string
   refreshToken: string
   userId: string
+  username: string
+  nickname: string
+  groups: GroupInfo[]
+}
+
+// 그룹 정보 타입
+export interface GroupInfo {
+  groupId: string
+  groupName: string
+  groupCode: string
+  status: 'WAITING' | 'ACTIVE' | 'COMPLETED'
+  currentMembers: number
+  maxMembers: number
+  isFull: boolean
+  isOwner: boolean
 }
 
 // API 에러 응답 타입 (백엔드 응답)

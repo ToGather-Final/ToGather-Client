@@ -39,7 +39,7 @@ const formatKoreanDate = (isoDateString: string) => {
     
     return `${year}년 ${month}월 ${day}일 ${hours}시 ${minutes}분`;
   } catch (error) {
-    console.error('날짜 포맷팅 오류:', error);
+    // console.error('날짜 포맷팅 오류:', error);
     return isoDateString; // 오류 시 원본 반환
   }
 };
@@ -63,7 +63,7 @@ const formatSimpleDate = (dateString: string) => {
     
     return `${year}-${month}-${day}`;
   } catch (error) {
-    console.error('날짜 포맷팅 오류:', error);
+    // console.error('날짜 포맷팅 오류:', error);
     return dateString; // 오류 시 원본 반환
   }
 };

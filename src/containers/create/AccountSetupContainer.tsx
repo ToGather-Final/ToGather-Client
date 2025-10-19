@@ -35,23 +35,23 @@ export default function AccountSetupContainer({ onComplete }: AccountSetupContai
 
       // 토큰 상태 확인
       const accessToken = localStorage.getItem('togather_access_token')
-      console.log("현재 Access Token:", accessToken ? `${accessToken.substring(0, 20)}...` : '없음')
-      console.log("사용자 ID:", userId)
+      // console.log("현재 Access Token:", accessToken ? `${accessToken.substring(0, 20)}...` : '없음')
+      // console.log("사용자 ID:", userId)
 
-      console.log("투자 계좌 개설 시작...")
+      // console.log("투자 계좌 개설 시작...")
       const accountId = await createInvestmentAccount(userId)
-      console.log("투자 계좌 개설 완료:", accountId)
+      // console.log("투자 계좌 개설 완료:", accountId)
       
         // 계좌 개설 완료 상태 업데이트
         markAccountCreated(userId)
-        console.log("계좌 개설 상태 업데이트 완료")
+        // console.log("계좌 개설 상태 업데이트 완료")
       
       // 계좌 개설 완료 화면으로 이동
       onComplete()
     } catch (error) {
-      console.error("투자 계좌 개설 실패:", error)
-      console.error("에러 타입:", typeof error)
-      console.error("에러 구조:", JSON.stringify(error, null, 2))
+      // console.error("투자 계좌 개설 실패:", error)
+      // console.error("에러 타입:", typeof error)
+      // console.error("에러 구조:", JSON.stringify(error, null, 2))
       
       let errorMessage = "투자 계좌 개설에 실패했습니다. 다시 시도해주세요."
       

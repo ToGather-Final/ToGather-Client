@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, CreditCard } from "lucide-react";
+import { ChevronDown, CreditCard, Crown } from "lucide-react";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import Modal from "@/components/common/Modal";
 import { DialogTitle } from "../ui/dialog";
 import { Copy, Check } from "lucide-react";
+import { useGroupId } from "@/contexts/groupIdContext";
+import { getGroupMembers } from "@/utils/api/group";
+import { GroupMember } from "@/types/api/group";
 
 export default function Header() {
   const pathname = usePathname();
@@ -18,6 +21,12 @@ export default function Header() {
   const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // 그룹 관련 상태
+  const { groupId } = useGroupId();
+  const [groupMembers, setGroupMembers] = useState<GroupMember[]>([]);
+  const [isMembersLoading, setIsMembersLoading] = useState(false);
+  const [membersError, setMembersError] = useState<string | null>(null);
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
@@ -35,6 +44,43 @@ export default function Header() {
       document.removeEventListener("pointerdown", handleClickOutside);
     };
   }, []);
+
+  // 그룹 멤버 조회 함수
+  const fetchGroupMembers = async () => {
+    if (!groupId) {
+      // console.log("Header - groupId가 없어서 그룹 멤버 조회를 건너뜀");
+      return;
+    }
+
+    setIsMembersLoading(true);
+    setMembersError(null);
+
+    try {
+      // console.log("Header - 그룹 멤버 조회 시작:", groupId);
+      const response = await getGroupMembers(groupId);
+      // 방장을 맨 위로 정렬
+      const sortedMembers = (response || []).sort((a, b) => {
+        if (a.role === 'OWNER') return -1; // OWNER를 맨 위로
+        if (b.role === 'OWNER') return 1;
+        return 0; // 그 외는 원래 순서 유지
+      });
+      setGroupMembers(sortedMembers);
+      // console.log("Header - 그룹 멤버 조회 성공:", sortedMembers);
+    } catch (error) {
+      // console.error("Header - 그룹 멤버 조회 실패:", error);
+      setMembersError("그룹 멤버를 불러오는데 실패했습니다.");
+      setGroupMembers([]);
+    } finally {
+      setIsMembersLoading(false);
+    }
+  };
+
+  // 그룹 멤버 모달이 열릴 때 멤버 조회
+  useEffect(() => {
+    if (isMemberModalOpen && groupId) {
+      fetchGroupMembers();
+    }
+  }, [isMemberModalOpen, groupId]);
 
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -62,7 +108,7 @@ export default function Header() {
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000); // 2초 후 복사 상태 초기화
     } catch (err) {
-      console.error("복사 실패:", err);
+      // console.error("복사 실패:", err);
     }
   };
 
@@ -177,17 +223,40 @@ export default function Header() {
             그룹원
           </DialogTitle>
           <div className="max-h-[50dvh] overflow-y-auto">
-            <p className="text-lg text-gray-700">
-              지구
-              <br />
-              카리나팬
-              <br />
-              차니차니
-              <br />
-              이브이조아
-              <br />
-              룰루랄라
-            </p>
+            {isMembersLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="ml-2 text-gray-600">로딩 중...</span>
+              </div>
+            ) : membersError ? (
+              <div className="text-red-600 py-4">
+                <p>{membersError}</p>
+                <button
+                  onClick={fetchGroupMembers}
+                  className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  다시 시도
+                </button>
+              </div>
+            ) : groupMembers.length > 0 ? (
+              <div className="text-lg text-gray-700">
+                {groupMembers.map((member, index) => (
+                  <div key={member.userId} className="py-1 flex items-center justify-center">
+                    {member.role === "OWNER" && (
+                      <Crown className="w-5 h-5 text-yellow-500 mr-2" fill="currentColor" />
+                    )}
+                    <span>{member.nickname}</span>
+                    {member.role === "OWNER" && (
+                      <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                        그룹장
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 py-4">그룹원이 없습니다.</p>
+            )}
           </div>
         </div>
       </Modal>

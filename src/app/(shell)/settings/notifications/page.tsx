@@ -55,7 +55,7 @@ export default function NotificationSettingsPage() {
       
       if (permission === 'granted') {
         setBrowserNotificationsEnabled(true);
-        console.log('🔔 브라우저 알림이 활성화되었습니다.');
+        // console.log('🔔 브라우저 알림이 활성화되었습니다.');
       }
     }
   };

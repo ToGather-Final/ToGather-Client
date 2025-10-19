@@ -247,6 +247,8 @@ export async function logout(): Promise<void> {
     clearTokens()
     if (userId) {
       resetUserStatus(userId)
+      // 현재 그룹 ID도 제거
+      localStorage.removeItem(`currentGroupId_${userId}`)
     }
   } catch (error) {
     // 에러가 발생해도 로컬 상태는 초기화
@@ -255,6 +257,8 @@ export async function logout(): Promise<void> {
     clearTokens()
     if (userId) {
       resetUserStatus(userId)
+      // 현재 그룹 ID도 제거
+      localStorage.removeItem(`currentGroupId_${userId}`)
     }
     throw error
   }

@@ -38,19 +38,19 @@ export default function PayAccountSetupContainer({ onComplete, groupId }: PayAcc
         throw new Error("영문 이름을 입력해주세요.")
       }
 
-      console.log("페이 계좌 개설 시작:", { groupId, formData })
+      // console.log("페이 계좌 개설 시작:", { groupId, formData })
       await createPayAccount(groupId, {
         name: formData.name.trim(),
         englishLastName: formData.englishLastName.trim(),
         englishFirstName: formData.englishFirstName.trim(),
         agreeToTerms: true
       })
-      console.log("페이 계좌 개설 완료")
+      // console.log("페이 계좌 개설 완료")
 
       // 그룹 생성 완료 화면으로 이동
       onComplete()
     } catch (err) {
-      console.error("페이 계좌 개설 실패:", err)
+      // console.error("페이 계좌 개설 실패:", err)
       
       let errorMessage = "페이 계좌 개설에 실패했습니다. 다시 시도해주세요."
       

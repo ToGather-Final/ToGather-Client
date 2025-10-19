@@ -1,19 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import { getGroupStatus } from "@/utils/api"
 import { useGroupId } from "@/contexts/groupIdContext"
+import { GroupInfo } from "@/types/api/auth"
 import type { ApiErrorWithStatus } from "@/types/api/auth"
 
-interface GroupWaitingContainerProps {
-  groupId: string
-  groupName: string
-}
-
-export default function GroupWaitingContainer({ groupId, groupName }: GroupWaitingContainerProps) {
+export default function GroupWaitingPage() {
   const router = useRouter()
+  const params = useParams()
   const { setGroupId } = useGroupId()
+  const [groupInfo, setGroupInfo] = useState<GroupInfo | null>(null)
   const [groupStatus, setGroupStatus] = useState<{
     currentMembers: number
     maxMembers: number
@@ -21,12 +19,46 @@ export default function GroupWaitingContainer({ groupId, groupName }: GroupWaiti
   } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  useEffect(() => {
+    // console.log("=== GroupWaitingPage useEffect 시작 ===")
+    const groupId = params.groupId as string
+    // console.log("GroupWaitingPage - groupId:", groupId)
+    
+    if (!groupId) {
+      // console.log("GroupWaitingPage - groupId 없음, 로그인 페이지로 이동")
+      router.push("/login")
+      return
+    }
+
+    // 로그인 응답에서 받은 그룹 정보 확인 (sessionStorage에서)
+    const loginGroupInfoStr = sessionStorage.getItem('loginGroupInfo')
+    if (loginGroupInfoStr) {
+      try {
+        const loginGroupInfo: GroupInfo = JSON.parse(loginGroupInfoStr)
+        // console.log("GroupWaitingPage - 로그인 응답에서 받은 그룹 정보:", loginGroupInfo)
+        
+        // 로그인 응답의 그룹 정보 사용
+        setGroupInfo(loginGroupInfo)
+        
+        // 사용 후 sessionStorage에서 제거
+        sessionStorage.removeItem('loginGroupInfo')
+        // console.log("GroupWaitingPage - 로그인 응답 그룹 정보 사용 완료")
+      } catch (error) {
+        // console.error("로그인 응답 그룹 정보 파싱 실패:", error)
+        sessionStorage.removeItem('loginGroupInfo')
+      }
+    }
+    // console.log("=== GroupWaitingPage useEffect 끝 ===")
+  }, [params.groupId, router])
+
   // 그룹 상태 폴링
   useEffect(() => {
+    if (!groupInfo) return
+
     const pollGroupStatus = async () => {
       try {
-        // console.log("그룹 상태 확인:", groupId)
-        const status = await getGroupStatus(groupId)
+        // console.log("그룹 상태 확인:", groupInfo.groupId)
+        const status = await getGroupStatus(groupInfo.groupId)
         // console.log("그룹 상태:", status)
         
         setGroupStatus({
@@ -38,13 +70,13 @@ export default function GroupWaitingContainer({ groupId, groupName }: GroupWaiti
         // 그룹이 꽉 찼으면 그룹 페이지로 이동
         if (status.isFull) {
           // console.log("그룹이 꽉 참 - 그룹 페이지로 이동")
-          // console.log("🔑 GroupWaitingContainer - setGroupId 호출:", groupId)
-          setGroupId(groupId)
-          // console.log("✅ GroupWaitingContainer - setGroupId 완료")
+          // console.log("🔑 GroupWaitingPage - setGroupId 호출:", groupInfo.groupId)
+          setGroupId(groupInfo.groupId)
+          // console.log("✅ GroupWaitingPage - setGroupId 완료")
           router.push("/group")
         }
       } catch (err) {
-        //  console.error("그룹 상태 확인 실패:", err)
+        // console.error("그룹 상태 확인 실패:", err)
         
         let errorMessage = "그룹 상태 확인에 실패했습니다."
         
@@ -65,12 +97,23 @@ export default function GroupWaitingContainer({ groupId, groupName }: GroupWaiti
     const interval = setInterval(pollGroupStatus, 3000)
 
     return () => clearInterval(interval)
-  }, [groupId, setGroupId, router])
+  }, [groupInfo, setGroupId, router])
 
   // 진행률 계산
   const progressPercentage = groupStatus 
     ? Math.min((groupStatus.currentMembers / groupStatus.maxMembers) * 100, 100)
     : 0
+
+  if (!groupInfo) {
+    return (
+      <div className="h-full bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">로딩 중...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="h-full bg-white relative overflow-hidden flex flex-col">
@@ -107,7 +150,7 @@ export default function GroupWaitingContainer({ groupId, groupName }: GroupWaiti
               backgroundClip: 'text'
             }}
           >
-            {groupName}에 입장하고 있어요
+            {groupInfo.groupName}에 입장하고 있어요
           </p>
         </div>
 
