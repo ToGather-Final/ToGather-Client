@@ -1,6 +1,6 @@
 import { getAuthHeaders, getRefreshToken, saveTokens, clearTokens } from '@/utils/token'
 import { getDeviceId } from '@/utils/deviceId'
-import { ApiErrorWithStatus } from '@/types/api/auth'
+import type { ApiErrorWithStatus } from '@/types/api/auth'
 import { API_GATEWAY_URL, API_ENDPOINTS } from './config'
 
 const BASE_URL = API_GATEWAY_URL

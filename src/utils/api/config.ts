@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
     CREATE: '/groups',
     JOIN: '/groups/invites/{code}/accept',
     INFO: '/groups/{groupId}',
+    STATUS: '/groups/{groupId}/status',
     RULES: '/groups/{groupId}/rules',
     MEMBERS: '/groups/{groupId}/members',
     PORTFOLIO: '/groups/{groupId}/potfolio',
@@ -60,9 +61,13 @@ export const API_ENDPOINTS = {
     USER_NICKNAME: '/users/{userId}/nickname',
   },
   
+  // 계좌 관련
+  ACCOUNT: {
+    CREATE_GROUP_PAY: '/pay/accounts/group-pay/{groupId}',
+  },
+  
   // 페이 관련
   PAY: {
-    CREATE_ACCOUNT: '/account/group-pay/{groupld}',
     PAYMENT: '/payments',
     HISTORY: '/payments/history',
     QR_RESOLVE: '/qr/resolve',
