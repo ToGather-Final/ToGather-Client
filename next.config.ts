@@ -41,6 +41,8 @@ const nextConfig: NextConfig = {
         },
         // Next.js 15.5.3에서 지원하는 최적화만 사용
         optimizePackageImports: ['lucide-react'],
+        // 🚀 빌드 최적화
+        optimizeCss: true
     },
     
     // 🚀 서버 외부 패키지 설정 (Next.js 15+)
