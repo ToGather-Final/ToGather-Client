@@ -46,17 +46,24 @@ export default function RealtimeContainer() {
 
   const [activeTab, setActiveTab] = useState("매수");
   const [currentPrice, setCurrentPrice] = useState(82500);
+  const [selectedPrice, setSelectedPrice] = useState<number | null>(null);
   const [quantity, setQuantity] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [reason, setReason] = useState("");
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+  const [isPriceAdjustModalOpen, setIsPriceAdjustModalOpen] = useState(false);
   const [orderType, setOrderType] = useState<"매수" | "매도">("매수");
+  const [adjustedPrice, setAdjustedPrice] = useState<number>(0);
+  const [adjustedPerPersonPrice, setAdjustedPerPersonPrice] =
+    useState<number>(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const GROUP_MEMBER_COUNT = 3; // 그룹원 수 하드코딩
 
   const handleConfirmYes = () => {
     console.log(`${orderType} 주문:`, {
-      price: currentPrice,
+      price: selectedPrice || currentPrice,
       quantity: parseInt(quantity),
       dueDate,
       reason,
@@ -71,83 +78,47 @@ export default function RealtimeContainer() {
     setQuantity("");
     setDueDate("");
     setReason("");
+    setSelectedPrice(null);
   };
 
-  // 주문 폼 공통 컴포넌트
-  const OrderForm = ({ type }: { type: "매수" | "매도" }) => {
-    const isBuy = type === "매수";
-    const buttonColor = isBuy
-      ? "bg-red-500 hover:bg-red-600"
-      : "bg-blue-500 hover:bg-blue-600";
-    const ringColor = isBuy ? "focus:ring-red-500" : "focus:ring-blue-500";
-    const maxQuantity = isBuy ? "최대 100주" : "최대 50주";
+  // 호가 항목 클릭 핸들러
+  const handlePriceClick = (price: number) => {
+    setSelectedPrice(price);
+  };
 
-    const handleSubmit = () => {
-      setOrderType(type);
+  // 인당 체결금액 계산 및 모달 처리
+  const handleOrderSubmit = () => {
+    // 입력값 검증
+    if (!quantity || isNaN(parseInt(quantity)) || parseInt(quantity) <= 0) {
+      alert("수량을 올바르게 입력해주세요.");
+      return;
+    }
+
+    const quantityNum = parseInt(quantity);
+    const totalPrice = (selectedPrice || currentPrice) * quantityNum;
+    const perPersonPrice = totalPrice / GROUP_MEMBER_COUNT;
+
+    // 정수인지 확인
+    if (Number.isInteger(perPersonPrice)) {
+      // case1: 정수이면 바로 확인 모달
+      setOrderType(activeTab as "매수" | "매도");
       setIsConfirmModalOpen(true);
-    };
+    } else {
+      // case2: 실수이면 반올림 후 조정 모달
+      const roundedPerPersonPrice = Math.round(perPersonPrice);
+      const adjustedTotalPrice = roundedPerPersonPrice * GROUP_MEMBER_COUNT;
 
-    return (
-      <div className="space-y-4">
-        <div>
-          <label className="block text-[14px] font-medium text-gray-700 mb-2">
-            {type} 수량 ({maxQuantity})
-            {/* 보유 금액/수량을 토대로 최대 개수 계산해서 표시 */}
-          </label>
-          <input
-            type="number"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            placeholder="수량"
-            className={`w-full px-2 py-1 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 ${ringColor} focus:border-transparent`}
-          />
-        </div>
+      setAdjustedPrice(adjustedTotalPrice);
+      setAdjustedPerPersonPrice(roundedPerPersonPrice);
+      setIsPriceAdjustModalOpen(true);
+    }
+  };
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            마감 일자
-          </label>
-          <input
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            className={`w-full px-2 py-1 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 ${ringColor} focus:border-transparent`}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {type} 제안 이유
-          </label>
-          <textarea
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            placeholder="이유를 입력해주세요."
-            rows={3}
-            className={`w-full px-2 py-1 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 ${ringColor} focus:border-transparent resize-none`}
-          />
-        </div>
-
-        <div className="flex justify-start bg-gray-50 items-center border border-[#e9e9e9] border-[2px] rounded-[10px] px-2 py-1">
-          <div className="text-[#686868] text-[12px]">
-            예상 주문 금액 (시장가) <br />
-            <span className="font-semibold text-[14px]">
-              {quantity
-                ? (currentPrice * parseInt(quantity)).toLocaleString()
-                : 0}
-              원
-            </span>
-          </div>
-        </div>
-
-        <button
-          className={`px-6 py-3 text-[14px] font-medium rounded-[10px] ease-in-out ${buttonColor} text-white shadow-md w-full transition-colors`}
-          onClick={handleSubmit}
-        >
-          {type} 제안
-        </button>
-      </div>
-    );
+  // 가격 조정 모달에서 확인 버튼 클릭
+  const handlePriceAdjustConfirm = () => {
+    setIsPriceAdjustModalOpen(false);
+    setOrderType(activeTab as "매수" | "매도");
+    setIsConfirmModalOpen(true);
   };
 
   // URL 쿼리 파라미터에서 탭 정보 읽기
@@ -159,6 +130,14 @@ export default function RealtimeContainer() {
       setActiveTab("매도");
     }
   }, [searchParams]);
+
+  // 탭 변경 시 폼 데이터 초기화
+  useEffect(() => {
+    setQuantity("");
+    setDueDate("");
+    setReason("");
+    setSelectedPrice(null);
+  }, [activeTab]);
 
   // 시장가를 정중앙에 위치시키는 스크롤
   useEffect(() => {
@@ -243,10 +222,11 @@ export default function RealtimeContainer() {
                 {asks.map((ask) => (
                   <div
                     key={`ask-${ask.price}`}
-                    className={`w-full px-4 py-2 text-sm flex items-center justify-between ${
+                    onClick={() => handlePriceClick(ask.price)}
+                    className={`w-full px-4 py-2 text-sm flex items-center justify-between cursor-pointer ${
                       ask.price === currentPrice
                         ? "border-2 border-[#686868] font-bold"
-                        : "hover:bg-gray-50"
+                        : "hover:bg-[#e9e9e9]"
                     }`}
                   >
                     <span className="text-red-600 font-medium">
@@ -263,10 +243,11 @@ export default function RealtimeContainer() {
                 {bids.map((bid) => (
                   <div
                     key={`bid-${bid.price}`}
-                    className={`w-full px-4 py-2 text-sm flex items-center justify-between ${
+                    onClick={() => handlePriceClick(bid.price)}
+                    className={`w-full px-4 py-2 text-sm flex items-center justify-between cursor-pointer ${
                       bid.price === currentPrice
-                        ? "bg-yellow-100 border-2 border-yellow-400 font-bold"
-                        : "hover:bg-gray-50"
+                        ? "border-2 border-[#686868] font-bold"
+                        : "hover:bg-[#e9e9e9]"
                     }`}
                   >
                     <span className="text-blue-600 font-medium">
@@ -282,7 +263,108 @@ export default function RealtimeContainer() {
           </div>
           <div>
             <div className="bg-white py-4">
-              <OrderForm type={activeTab as "매수" | "매도"} />
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[14px] font-medium text-gray-700 mb-2">
+                    수량 ({activeTab === "매수" ? "최대 100주" : "최대 50주"})
+                    {/* 보유 금액/수량을 토대로 최대 개수 계산해서 표시 */}
+                  </label>
+                  <input
+                    type="number"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    placeholder="수량"
+                    className={`w-full px-2 py-1 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 ${
+                      activeTab === "매수"
+                        ? "focus:ring-red-500"
+                        : "focus:ring-blue-500"
+                    } focus:border-transparent`}
+                  />
+                </div>
+                <div>
+                  {/* 단가 표시 */}
+                  <label className="block text-[14px] font-medium text-gray-700 mb-2">
+                    단가
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      value={selectedPrice || currentPrice}
+                      onChange={(e) =>
+                        setSelectedPrice(parseInt(e.target.value) || null)
+                      }
+                      placeholder="단가를 입력하거나 호가창에서 선택하세요"
+                      className={`flex-1 px-2 py-1 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 ${
+                        activeTab === "매수"
+                          ? "focus:ring-red-500"
+                          : "focus:ring-blue-500"
+                      } focus:border-transparent`}
+                    />
+                    <div className="text-[12px] text-gray-500 whitespace-nowrap">
+                      {selectedPrice ? "지정가" : "시장가"}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    마감 시간
+                  </label>
+                  <input
+                    type="time"
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    className={`w-full px-2 py-1 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 ${
+                      activeTab === "매수"
+                        ? "focus:ring-red-500"
+                        : "focus:ring-blue-500"
+                    } focus:border-transparent`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {activeTab} 제안 이유
+                  </label>
+                  <textarea
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder="이유를 입력해주세요."
+                    rows={3}
+                    className={`w-full px-2 py-1 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 ${
+                      activeTab === "매수"
+                        ? "focus:ring-red-500"
+                        : "focus:ring-blue-500"
+                    } focus:border-transparent resize-none`}
+                  />
+                </div>
+
+                <div className="flex justify-start bg-gray-50 items-center border border-[#e9e9e9] border-[2px] rounded-[10px] px-2 py-1">
+                  <div className="text-[#686868] text-[12px]">
+                    예상 주문 금액 ({selectedPrice ? "지정가" : "시장가"}){" "}
+                    <br />
+                    <span className="font-semibold text-[14px]">
+                      {quantity
+                        ? (
+                            (selectedPrice || currentPrice) * parseInt(quantity)
+                          ).toLocaleString()
+                        : 0}
+                      원
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  className={`px-6 py-3 text-[14px] font-medium rounded-[10px] ease-in-out ${
+                    activeTab === "매수"
+                      ? "bg-red-500 hover:bg-red-600"
+                      : "bg-blue-500 hover:bg-blue-600"
+                  } text-white shadow-md w-full transition-colors`}
+                  onClick={handleOrderSubmit}
+                >
+                  {activeTab} 제안
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -305,6 +387,61 @@ export default function RealtimeContainer() {
           </div>
         </div>
       </YesNoModal>
+
+      {/* 가격 조정 모달 */}
+      <Modal
+        isOpen={isPriceAdjustModalOpen}
+        onClose={() => setIsPriceAdjustModalOpen(false)}
+      >
+        <div className="text-center py-8">
+          <DialogTitle className="text-2xl font-bold text-gray-900 mb-4">
+            가격 조정 안내
+          </DialogTitle>
+          <div className="mb-6 space-y-4">
+            <p className="text-lg text-gray-700">
+              인당 체결금액이 정수가 되도록 반올림했습니다.
+            </p>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="text-sm text-gray-600 mb-2">조정된 정보</div>
+              <div className="text-lg font-semibold">
+                인당 체결금액:{" "}
+                {isNaN(adjustedPerPersonPrice)
+                  ? "0"
+                  : adjustedPerPersonPrice.toLocaleString()}
+                원
+              </div>
+              <div className="text-lg font-semibold">
+                총 체결금액:{" "}
+                {isNaN(adjustedPrice) ? "0" : adjustedPrice.toLocaleString()}원
+              </div>
+              <div className="text-sm text-gray-500 mt-2">
+                (그룹원 {GROUP_MEMBER_COUNT}명 ×{" "}
+                {isNaN(adjustedPerPersonPrice)
+                  ? "0"
+                  : adjustedPerPersonPrice.toLocaleString()}
+                원)
+              </div>
+            </div>
+            <p className="text-sm text-gray-600">
+              이 금액으로 {orderType} 제안을 진행하시겠습니까?
+            </p>
+          </div>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => setIsPriceAdjustModalOpen(false)}
+              className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+            >
+              취소
+            </button>
+            <button
+              onClick={handlePriceAdjustConfirm}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* 완료 모달 */}
       <Modal isOpen={isCompleteModalOpen} onClose={handleCompleteClose}>
