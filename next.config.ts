@@ -41,12 +41,18 @@ const nextConfig: NextConfig = {
         },
         // Next.js 15.5.3에서 지원하는 최적화만 사용
         optimizePackageImports: ['lucide-react'],
-        // 🚀 빌드 최적화
-        optimizeCss: true
+        // 🚀 CSS 최적화 (Next.js 15.5.3에서 불안정하므로 비활성화)
+        // optimizeCss: true  // critters 에러로 인해 비활성화
     },
     
     // 🚀 서버 외부 패키지 설정 (Next.js 15+)
     serverExternalPackages: ['sharp'],
+    
+    // 🚀 빌드 안정성 설정
+    outputFileTracingRoot: undefined, // 워크스페이스 루트 경고 해결
+    
+    // 🚀 CSS 최적화 설정 (Next.js 15.5.3에서 제거됨)
+    // swcMinify: true, // Next.js 15+에서 기본 활성화
     
     // 🚀 컴파일러 최적화
     compiler: {
