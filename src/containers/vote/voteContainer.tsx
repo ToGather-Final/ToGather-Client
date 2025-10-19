@@ -493,9 +493,9 @@ export default function VotingPage() {
                   {proposal.status === ProposalStatus.OPEN && (
                     <span className="text-xs">
                       <span className="text-blue-600 font-bold">
-                        {proposal.closeAt.includes('시') && proposal.closeAt.includes('분') 
+                        {proposal.closeAt && proposal.closeAt.includes('시') && proposal.closeAt.includes('분') 
                           ? proposal.closeAt.match(/\d+시 \d+분/)?.[0] || proposal.closeAt // "15시 39분" 패턴 추출
-                          : proposal.closeAt
+                          : proposal.closeAt || '시간 미정'
                         }
                       </span>
                       <span className="text-gray-500 font-normal">까지</span>
