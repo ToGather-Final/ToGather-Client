@@ -161,9 +161,11 @@ export default function GroupCompleteContainer({
     <div className="h-full bg-white relative overflow-hidden flex flex-col">
       {/* Header */}
       <div className="p-6 relative z-10 flex-shrink-0">
-        <img 
-          src="/images/logo-blue.png"
+        <Image 
+          src="/images/logo-blue.webp"
           alt="ToGather Logo"
+          width={32}
+          height={32}
           className="h-8 w-8 object-contain"
         />
       </div>
