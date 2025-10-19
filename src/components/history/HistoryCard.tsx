@@ -6,6 +6,7 @@ import {
   type VoteApprovedPayloadDTO,
   type TradeExecutedPayloadDTO,
   type CashDepositCompletedPayloadDTO,
+  type PayChargeCompletedPayloadDTO,
   type VoteCreatedPayloadDTO,
   type GoalAchievedPayloadDTO,
 } from "@/types/api/history";
@@ -80,7 +81,9 @@ const getHistoryIcon = (type: HistoryType) => {
       return <Coins className="w-5 h-5" />
     case HistoryType.PAY_CHARGE_COMPLETED: // 페이 충전 완료 - 달러 아이콘
       return <DollarSign className="w-5 h-5" />
-    case HistoryType.VOTE_CREATED: // 투표 제안 등록 - 투표 아이콘
+    case HistoryType.VOTE_CREATED_BUY: // 매수 투표 제안 - 투표 아이콘
+    case HistoryType.VOTE_CREATED_SELL: // 매도 투표 제안 - 투표 아이콘
+    case HistoryType.VOTE_CREATED_PAY: // 페이 충전 투표 제안 - 투표 아이콘
       return <Vote className="w-5 h-5" />
     case HistoryType.TRADE_FAILED: // 거래 실패 - 악수 아이콘 + 빨간 X 오버레이
       return (
@@ -116,15 +119,21 @@ const getHistoryDescription = (item: HistoryDTO) => {
     // 예수금 충전 완료
     case HistoryType.CASH_DEPOSIT_COMPLETED:
       const cashPayload = item.payload as CashDepositCompletedPayloadDTO
-      return `${cashPayload.depositorName} 님이 ${cashPayload.amount.toLocaleString()}원 충전 완료했습니다.\n계좌 잔액 ${cashPayload.accountBalance.toLocaleString()}원`
+      return `각자 ${cashPayload.amount.toLocaleString()}원씩 예수금 충전 완료했습니다.\n계좌 잔액 ${cashPayload.accountBalance.toLocaleString()}원`
     // 페이 충전 완료
     case HistoryType.PAY_CHARGE_COMPLETED:
-      const payPayload = item.payload as CashDepositCompletedPayloadDTO
-      return `${payPayload.depositorName} 님이 ${payPayload.amount.toLocaleString()}원 페이 충전 완료했습니다.\n계좌 잔액 ${payPayload.accountBalance.toLocaleString()}원`
+      const payChargePayload = item.payload as PayChargeCompletedPayloadDTO
+      return `각자 ${payChargePayload.amount.toLocaleString()}원씩 페이 충전 완료했습니다.\n계좌 잔액 ${payChargePayload.accountBalance.toLocaleString()}원`
     // 투표 제안 등록
-    case HistoryType.VOTE_CREATED:
-      const createdPayload = item.payload as VoteCreatedPayloadDTO
-      return `${createdPayload.proposerName}님이 매도 제안을 등록했습니다.`
+    case HistoryType.VOTE_CREATED_BUY:
+      const buyPayload = item.payload as VoteCreatedPayloadDTO
+      return `${buyPayload.proposerName}님이 매수 제안을 등록했습니다.`
+    case HistoryType.VOTE_CREATED_SELL:
+      const sellPayload = item.payload as VoteCreatedPayloadDTO
+      return `${sellPayload.proposerName}님이 매도 제안을 등록했습니다.`
+    case HistoryType.VOTE_CREATED_PAY:
+      const payVotePayload = item.payload as VoteCreatedPayloadDTO
+      return `${payVotePayload.proposerName}님이 페이 충전 제안을 등록했습니다.`
     // 거래 실패
     case HistoryType.TRADE_FAILED:
       const failedPayload = item.payload as TradeExecutedPayloadDTO
