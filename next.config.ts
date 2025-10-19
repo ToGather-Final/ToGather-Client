@@ -122,12 +122,20 @@ const nextConfig: NextConfig = {
             const cdnUrl = process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net';
             return [
                 {
+                    source: '/static/:path*',
+                    destination: `${cdnUrl}/_next/static/:path*`,
+                },
+                {
                     source: '/fonts/:path*',
                     destination: `${cdnUrl}/fonts/:path*`,
                 },
                 {
                     source: '/images/:path*',
                     destination: `${cdnUrl}/images/:path*`,
+                },
+                {
+                    source: '/favicon.ico',
+                    destination: `${cdnUrl}/favicon.ico`,
                 },
             ];
         }
