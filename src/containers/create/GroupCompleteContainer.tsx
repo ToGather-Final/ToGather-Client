@@ -1,5 +1,7 @@
 "use client"
 
+import Image from "next/image"
+
 interface GroupCompleteContainerProps {
   onFinish?: () => void
 }
@@ -9,9 +11,11 @@ export default function GroupCompleteContainer({ onFinish }: GroupCompleteContai
     <div className="h-full bg-white relative overflow-hidden flex flex-col">
       {/* Header */}
       <div className="p-6 relative z-10 flex-shrink-0">
-        <img 
-          src="/images/logo-blue.png"
+        <Image 
+          src="/images/logo-blue.webp"
           alt="ToGather Logo"
+          width={32}
+          height={32}
           className="h-8 w-8 object-contain"
         />
       </div>
@@ -50,11 +54,14 @@ export default function GroupCompleteContainer({ onFinish }: GroupCompleteContai
         </div>
 
         {/* Group Image - Full Width */}
-        <div className="w-full mb-4">
-          <img 
-            src="/images/group-create.png"
+        <div className="w-full mb-4 relative h-[400px]">
+          <Image 
+            src="/images/group-create.webp"
             alt="Group Created"
-            className="w-full h-auto object-contain"
+            fill
+            priority
+            fetchPriority="high"
+            className="object-contain"
           />
         </div>
 

@@ -72,7 +72,7 @@ export default function Header() {
                  bg-white border-b border-stone-200
                  flex items-center gap-3 px-4"
     >
-      <Image src="/logo.png" alt="logo" width={35} height={35} />
+      <Image src="/logo.webp" alt="logo" width={35} height={35} priority fetchPriority="high" />
       <div
         className="w-full flex justify-center items-center gap-1 relative"
         ref={dropdownRef}
