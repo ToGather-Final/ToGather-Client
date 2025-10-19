@@ -12,5 +12,5 @@ export { getMyInfo } from './api/user'
 export type { UserInfo } from './api/user'
 
 // 그룹 관련 API (group-service)
-export { createGroup } from './api/group'
-export type { CreateGroupRequest, CreateGroupResponse, GroupInfo } from '@/types/api/group'
+export { createGroup, createPayAccount, getGroupStatus, joinGroup } from './api/group'
+export type { CreateGroupRequest, CreateGroupResponse, CreatePayAccountRequest, GroupStatusResponse, GroupInfo, JoinGroupResponse } from '@/types/api/group'

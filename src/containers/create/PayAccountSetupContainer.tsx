@@ -4,22 +4,66 @@ import type React from "react"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import MainButton from "@/components/common/MainButton"
+import { createPayAccount } from "@/utils/api"
+import type { ApiErrorWithStatus } from "@/types/api/auth"
 
 interface PayAccountSetupContainerProps {
   onComplete: () => void
+  groupId: string
 }
 
-export default function PayAccountSetupContainer({ onComplete }: PayAccountSetupContainerProps) {
+export default function PayAccountSetupContainer({ onComplete, groupId }: PayAccountSetupContainerProps) {
   const [formData, setFormData] = useState({
     name: "",
     englishLastName: "",
     englishFirstName: "",
   })
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // 그룹 생성 완료 화면으로 이동
-    onComplete()
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      // 입력값 검증
+      if (!formData.name.trim()) {
+        throw new Error("이름을 입력해주세요.")
+      }
+      if (!formData.englishLastName.trim()) {
+        throw new Error("영문 성을 입력해주세요.")
+      }
+      if (!formData.englishFirstName.trim()) {
+        throw new Error("영문 이름을 입력해주세요.")
+      }
+
+      // console.log("페이 계좌 개설 시작:", { groupId, formData })
+      await createPayAccount(groupId, {
+        name: formData.name.trim(),
+        englishLastName: formData.englishLastName.trim(),
+        englishFirstName: formData.englishFirstName.trim(),
+        agreeToTerms: true
+      })
+      // console.log("페이 계좌 개설 완료")
+
+      // 그룹 생성 완료 화면으로 이동
+      onComplete()
+    } catch (err) {
+      // console.error("페이 계좌 개설 실패:", err)
+      
+      let errorMessage = "페이 계좌 개설에 실패했습니다. 다시 시도해주세요."
+      
+      if (err instanceof Error) {
+        errorMessage = err.message
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        errorMessage = (err as ApiErrorWithStatus).message
+      }
+      
+      setError(errorMessage)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -119,9 +163,20 @@ export default function PayAccountSetupContainer({ onComplete }: PayAccountSetup
               </label>
             </div>
 
+            {/* Error Message */}
+            {error && (
+              <div className="rounded-2xl bg-red-50 border border-red-200 p-4 mt-4">
+                <p className="text-sm text-red-600 text-center">{error}</p>
+              </div>
+            )}
+
             {/* Submit Button */}
-            <MainButton type="submit" className="mt-8">
-              계좌 개설하기
+            <MainButton 
+              type="submit" 
+              className="mt-8"
+              disabled={isLoading}
+            >
+              {isLoading ? "계좌 개설 중..." : "계좌 개설하기"}
             </MainButton>
           </form>
         </div>

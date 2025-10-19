@@ -63,3 +63,20 @@ export interface StockDetail {
   resistanceLine: number;
   supportLine: number;
 }
+
+export interface OrderBook {
+  stockCode: string;
+  stockName: string;
+  currentPrice: number;
+  changeAmount: number;
+  changeRate: number;
+  changeDirection: "up" | "down";
+  askPrices: Price[];
+  bidPrices: Price[];
+}
+
+export interface Price {
+  price: number;
+  quantity: number;
+  type: "ask" | "bid";
+}

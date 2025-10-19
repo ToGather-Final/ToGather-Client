@@ -11,20 +11,22 @@ export enum HistoryCategory {
   
   export enum HistoryType {
     // 투표
-    VOTE_CREATED = "VOTE_CREATED",     // 투표 올라옴 (매매/예수금/페이 충전)
-    VOTE_APPROVED = "VOTE_APPROVED",   // 투표 가결
-    VOTE_REJECTED = "VOTE_REJECTED",   // 투표 부결
-  
+    VOTE_CREATED_BUY = "VOTE_CREATED_BUY",     // 매수 투표 제안
+    VOTE_CREATED_SELL = "VOTE_CREATED_SELL",   // 매도 투표 제안
+    VOTE_CREATED_PAY = "VOTE_CREATED_PAY",     // 페이 충전 투표 제안
+    VOTE_APPROVED = "VOTE_APPROVED",           // 투표 가결
+    VOTE_REJECTED = "VOTE_REJECTED",           // 투표 부결
+
     // 매매
     TRADE_EXECUTED = "TRADE_EXECUTED", // 매도/매수 완료
     TRADE_FAILED = "TRADE_FAILED",     // 매도/매수 실패
-  
+
     // 예수금
     CASH_DEPOSIT_COMPLETED = "CASH_DEPOSIT_COMPLETED", // 예수금 충전 완료
-  
+
     // 페이
     PAY_CHARGE_COMPLETED = "PAY_CHARGE_COMPLETED", // 페이 충전 완료(모임통장으로 송금)
-  
+
     // 목표
     GOAL_ACHIEVED = "GOAL_ACHIEVED",            // 목표 달성
   }
@@ -97,7 +99,6 @@ export enum HistoryCategory {
   
   // 예수금 충전 완료
   export type CashDepositCompletedPayloadDTO = {
-    depositorName: string;   // 충전자
     amount: number;          // 금액
     accountBalance: number; // 이후 모임계좌잔액
   };

@@ -286,8 +286,31 @@ export default function VotingPage() {
       filtered = filtered.filter(
         (proposal) => proposal.category === ProposalCategory.TRADE
       );
+    } else if (activeTab === "PAY") {
+      filtered = filtered.filter(
+        (proposal) => proposal.category === ProposalCategory.PAY
+      );
+    }
+    // "ALL" 탭일 때는 모든 카테고리의 제안을 표시
 
-      // 2) 매매 드롭다운 필터
+    // 2) 드롭다운 필터 (전체 탭에서만 적용)
+    if (activeTab === "ALL") {
+      if (tradeDropdown === "매수") {
+        filtered = filtered.filter(
+          (proposal) => proposal.category === ProposalCategory.TRADE && proposal.action === ProposalAction.BUY
+        );
+      } else if (tradeDropdown === "매도") {
+        filtered = filtered.filter(
+          (proposal) => proposal.category === ProposalCategory.TRADE && proposal.action === ProposalAction.SELL
+        );
+      } else if (tradeDropdown === "예수금 충전") {
+        filtered = filtered.filter(
+          (proposal) => proposal.category === ProposalCategory.TRADE && proposal.action === ProposalAction.DEPOSIT
+        );
+      }
+      // "전체"일 때는 모든 제안을 표시 (이미 위에서 처리됨)
+    } else if (activeTab === "TRADE") {
+      // 매매 탭에서의 세부 필터
       if (tradeDropdown === "매수") {
         filtered = filtered.filter(
           (proposal) => proposal.action === ProposalAction.BUY
@@ -302,10 +325,6 @@ export default function VotingPage() {
         );
       }
       // "전체"일 때는 모든 매매 관련 제안을 표시
-    } else if (activeTab === "PAY") {
-      filtered = filtered.filter(
-        (proposal) => proposal.category === ProposalCategory.PAY
-      );
     }
 
     // 3) 정렬
@@ -384,7 +403,7 @@ export default function VotingPage() {
         </div>
       </div>
 
-      {activeTab === "TRADE" && (
+      {activeTab === "ALL" && (
         <div className="bg-white px-4 py-3">
           <div className="relative">
             <button
@@ -474,9 +493,9 @@ export default function VotingPage() {
                   {proposal.status === ProposalStatus.OPEN && (
                     <span className="text-xs">
                       <span className="text-blue-600 font-bold">
-                        {proposal.closeAt.includes('시') && proposal.closeAt.includes('분') 
+                        {proposal.closeAt && proposal.closeAt.includes('시') && proposal.closeAt.includes('분') 
                           ? proposal.closeAt.match(/\d+시 \d+분/)?.[0] || proposal.closeAt // "15시 39분" 패턴 추출
-                          : proposal.closeAt
+                          : proposal.closeAt || '시간 미정'
                         }
                       </span>
                       <span className="text-gray-500 font-normal">까지</span>

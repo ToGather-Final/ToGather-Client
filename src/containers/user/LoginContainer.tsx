@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import BackgroundCoins from "@/components/common/BackgroundCoins"
@@ -9,7 +10,8 @@ import { login } from "@/utils/api"
 import { getDeviceId } from "@/utils/deviceId"
 import { saveTokens } from "@/utils/token"
 import { checkUserStatus } from "@/utils/userStatus"
-import { LoginRequest, ApiErrorWithStatus } from "@/types/api/auth"
+import { LoginRequest, ApiErrorWithStatus, GroupInfo } from "@/types/api/auth"
+import { useGroupId } from "@/contexts/groupIdContext"
 
 export default function LoginFlow() {
   const [formData, setFormData] = useState({
@@ -20,6 +22,7 @@ export default function LoginFlow() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const { setGroupId } = useGroupId()
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -57,36 +60,75 @@ export default function LoginFlow() {
       // 토큰 저장
       saveTokens(response.accessToken, response.refreshToken, response.userId)
       
-      // 사용자 상태 확인 후 적절한 페이지로 리다이렉트
-      try {
-        const userStatus = await checkUserStatus(response.userId)
-        console.log("로그인 후 사용자 상태:", userStatus)
+      // 그룹 정보가 있는 경우 그룹 상태에 따른 분기 처리
+      if (response.groups && response.groups.length > 0) {
+        const userGroup = response.groups[0]
+        // console.log("로그인 후 그룹 정보:", userGroup)
         
-        switch (userStatus.nextStep) {
-          case 'account-create':
-            router.push("/account-create")
-            break
-          case 'account-complete':
-            router.push("/account-create") // AccountCreateFlow에서 complete 상태로 처리
-            break
-          case 'group-create':
-          case 'group-join':
-            // 그룹 생성/참여 선택 페이지로 이동 (추후 구현)
-            router.push("/group-create")
-            break
-          case 'group':
-            router.push("/group")
-            break
-          default:
-            router.push("/account-create")
+        // 그룹 정보가 있으면 항상 setGroupId 호출 (localStorage에 저장)
+        // console.log("🔑 LoginContainer - setGroupId 호출:", userGroup.groupId)
+        setGroupId(userGroup.groupId)
+        // console.log("✅ LoginContainer - setGroupId 완료")
+        
+        // 그룹이 꽉 찬 경우 (방장/일반 사용자 관계없이)
+        if (userGroup.isFull) {
+          // console.log("그룹이 꽉 참 - 메인 그룹 페이지로 이동")
+          router.push('/group')
+          return
         }
-      } catch (error) {
-        console.error("사용자 상태 확인 실패:", error)
-        // 에러 시 기본적으로 계좌 개설 페이지로 이동
-        router.push("/account-create")
+        
+        // 그룹이 꽉 차지 않은 경우
+        if (userGroup.isOwner) {
+          // 방장인 경우 → 그룹 완료 페이지로 이동
+          // console.log("👑 방장 - 그룹 완료 페이지로 이동")
+          // console.log("📝 LoginContainer - sessionStorage에 그룹 정보 저장:", userGroup)
+          // 그룹 정보를 sessionStorage에 저장
+          sessionStorage.setItem('loginGroupInfo', JSON.stringify(userGroup))
+          // console.log("✅ LoginContainer - sessionStorage 저장 완료, /group-create-complete로 이동")
+          router.push('/group-create-complete')
+        } else {
+          // 일반 사용자인 경우 → 그룹 대기 페이지로 이동
+          // console.log("일반 사용자 - 그룹 대기 페이지로 이동")
+          // 그룹 정보를 sessionStorage에 저장
+          sessionStorage.setItem('loginGroupInfo', JSON.stringify(userGroup))
+          router.push(`/group-waiting/${userGroup.groupId}`)
+        }
+      } else {
+        // 그룹이 없는 경우 → 기존 플로우 (계좌 개설 등)
+        try {
+          const userStatus = await checkUserStatus(response.userId)
+          // console.log("로그인 후 사용자 상태:", userStatus)
+          
+          switch (userStatus.nextStep) {
+            case 'account-create':
+              router.push("/account-create")
+              break
+            case 'account-complete':
+              router.push("/account-create") // AccountCreateFlow에서 complete 상태로 처리
+              break
+            case 'group-created':
+              // 그룹 생성 완료 화면으로 이동
+              router.push("/group-create-complete")
+              break
+            case 'group-create':
+            case 'group-join':
+              // 그룹 생성/참여 선택 페이지로 이동 (추후 구현)
+              router.push("/group-create")
+              break
+            case 'group':
+              router.push("/group")
+              break
+            default:
+              router.push("/account-create")
+          }
+        } catch (error) {
+          // console.error("사용자 상태 확인 실패:", error)
+          // 에러 시 기본적으로 계좌 개설 페이지로 이동
+          router.push("/account-create")
+        }
       }
     } catch (err) {
-      console.error("Login error:", err)
+      // console.error("Login error:", err)
       
       // API 에러 타입 체크
       const isApiError = (error: unknown): error is ApiErrorWithStatus => {
@@ -102,11 +144,11 @@ export default function LoginFlow() {
       }
       
       if (isApiError(err)) {
-        console.error("Login error code:", err.code)
-        console.error("Login error message:", err.message)
-        console.error("Login error path:", err.path)
-        console.error("Login error timestamp:", err.timestamp)
-        console.error("Login error status:", err.status)
+        // console.error("Login error code:", err.code)
+        // console.error("Login error message:", err.message)
+        // console.error("Login error path:", err.path)
+        // console.error("Login error timestamp:", err.timestamp)
+        // console.error("Login error status:", err.status)
         
         if (err.status === 401) {
           setError("아이디 또는 비밀번호가 일치하지 않습니다.")
@@ -136,9 +178,13 @@ export default function LoginFlow() {
       <div className="flex flex-col items-center justify-center h-full px-8 relative z-10">
         {/* Logo */}
         <div className="mb-8">
-          <img 
-            src="/images/logo-blue.png"
+          <Image 
+            src="/images/logo-blue.webp"
             alt="ToGather Logo"
+            width={64}
+            height={64}
+            priority
+            fetchPriority="high"
             className="h-16 w-16 object-contain"
           />
         </div>
