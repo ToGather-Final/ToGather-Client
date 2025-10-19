@@ -1,6 +1,6 @@
 import { getAuthHeaders } from '@/utils/token'
 import { API_GATEWAY_URL, API_ENDPOINTS } from './config'
-import { CreateGroupRequest, CreateGroupResponse, CreatePayAccountRequest, GroupStatusResponse, JoinGroupResponse } from '@/types/api/group'
+import { CreateGroupRequest, CreateGroupResponse, CreatePayAccountRequest, GroupStatusResponse, JoinGroupResponse, GroupMemberResponse } from '@/types/api/group'
 import type { ApiErrorWithStatus } from '@/types/api/auth'
 
 const BASE_URL = API_GATEWAY_URL
@@ -284,6 +284,77 @@ export async function joinGroup(code: string): Promise<JoinGroupResponse> {
   } catch (error) {
     console.error('Join Group API Error:', error)
     throw error
+  }
+}
+
+// 그룹 멤버 조회 API 호출
+export async function getGroupMembers(groupId: string): Promise<GroupMemberResponse> {
+  const url = `${BASE_URL}${API_ENDPOINTS.GROUP.MEMBERS.replace('{groupId}', groupId)}`
+  
+  const config: RequestInit = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(), // Authorization 헤더
+    },
+  }
+
+  try {
+    console.log('=== Get Group Members API Debug ===')
+    console.log('Request URL:', url)
+    console.log('===================================')
+    
+    const response = await fetch(url, config)
+    
+    console.log('Get Group Members API Response Status:', response.status)
+    
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('Get Group Members API Error:', errorText)
+      
+      let errorData: ApiErrorWithStatus
+      try {
+        const parsed = JSON.parse(errorText)
+        errorData = {
+          code: parsed.code || `HTTP_${response.status}`,
+          message: parsed.message || '그룹 멤버 조회에 실패했습니다.',
+          path: parsed.path || `/groups/${groupId}/members`,
+          timestamp: parsed.timestamp || new Date().toISOString(),
+          status: response.status,
+        }
+      } catch {
+        errorData = {
+          code: `HTTP_${response.status}`,
+          message: '그룹 멤버 조회에 실패했습니다.',
+          path: `/groups/${groupId}/members`,
+          timestamp: new Date().toISOString(),
+          status: response.status,
+        }
+      }
+      
+      throw errorData
+    }
+    
+    const result: GroupMemberResponse = await response.json()
+    console.log('그룹 멤버 조회 성공:', result)
+    
+    return result
+  } catch (error) {
+    console.error('Get Group Members API Error:', error)
+    
+    // ApiErrorWithStatus인 경우 그대로 throw
+    if (error && typeof error === 'object' && 'code' in error) {
+      throw error
+    }
+    
+    // 네트워크 에러 등
+    throw {
+      code: 'NETWORK_ERROR',
+      message: '그룹 멤버 조회 요청에 실패했습니다. 네트워크 연결을 확인해주세요.',
+      path: `/groups/${groupId}/members`,
+      timestamp: new Date().toISOString(),
+      status: 0,
+    } as ApiErrorWithStatus
   }
 }
 

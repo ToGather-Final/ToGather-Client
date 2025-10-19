@@ -33,7 +33,7 @@ export default function GroupCreateFlow() {
       markGroupJoined(userId)
       // 그룹 생성 완료 상태 저장
       markGroupCreated(userId, groupInfo.groupId, groupInfo.groupName, groupInfo.invitationCode)
-      console.log("그룹 참여 및 생성 완료 상태 업데이트 완료")
+      // console.log("그룹 참여 및 생성 완료 상태 업데이트 완료")
     }
     
     // 그룹 생성 완료 페이지로 이동

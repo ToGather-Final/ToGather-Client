@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('SSE 프록시 오류:', error);
+    // console.error('SSE 프록시 오류:', error);
     return new Response('SSE connection failed', { status: 500 });
   }
 }

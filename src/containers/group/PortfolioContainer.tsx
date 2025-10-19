@@ -9,6 +9,7 @@ import SetGoalModal from "@/components/group/goal/SetGoalModal";
 import GoalCompleteModal from "@/components/group/goal/GoalCompleteModal";
 import DepositProposalModal from "@/components/group/deposit/DepositProposalModal";
 import DepositCompleteModal from "@/components/group/deposit/DepositCompleteModal";
+import { useGroupId } from "@/contexts/groupIdContext";
 
 // utils/format.ts
 export const currency = new Intl.NumberFormat("ko-KR");
@@ -130,12 +131,23 @@ const options = {
 } as const;
 
 export default function PortfolioContainer() {
+  const { groupId } = useGroupId();
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isDepositCompleteModalOpen, setIsDepositCompleteModalOpen] =
     useState(false);
   const [goalAmount, setGoalAmount] = useState(dummyPortfolio.goal);
+
+  // useGroupId로 그룹 ID 받아오는지 확인
+  useEffect(() => {
+    // console.log("🎯 PortfolioContainer - useGroupId로 받은 groupId:", groupId);
+    if (groupId) {
+      // console.log("✅ PortfolioContainer - 그룹 ID 성공적으로 받아옴:", groupId);
+    } else {
+      // console.log("❌ PortfolioContainer - 그룹 ID를 받아오지 못함");
+    }
+  }, [groupId]);
 
 
   // 목표 달성률 계산 (최대 100%)
