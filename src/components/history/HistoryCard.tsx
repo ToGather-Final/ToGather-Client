@@ -27,6 +27,47 @@ const getKoreanParticle = (text: string) => {
   return '이';
 };
 
+// ISO 날짜를 한국어 형식으로 변환하는 함수
+const formatKoreanDate = (isoDateString: string) => {
+  try {
+    const date = new Date(isoDateString);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    
+    return `${year}년 ${month}월 ${day}일 ${hours}시 ${minutes}분`;
+  } catch (error) {
+    console.error('날짜 포맷팅 오류:', error);
+    return isoDateString; // 오류 시 원본 반환
+  }
+};
+
+// 주식 거래 정보를 포맷팅하는 함수
+const formatStockTradeInfo = (payload: VoteApprovedPayloadDTO) => {
+  const { stockName, shares, unitPrice, side } = payload;
+  const totalAmount = shares * unitPrice;
+  const sideKorean = side === "BUY" ? "매수" : "매도";
+  
+  return `${stockName} ${shares}주 ${totalAmount.toLocaleString()}원 ${sideKorean} 예정`;
+};
+
+// 날짜를 YYYY-MM-DD 형식으로 변환하는 함수
+const formatSimpleDate = (dateString: string) => {
+  try {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+  } catch (error) {
+    console.error('날짜 포맷팅 오류:', error);
+    return dateString; // 오류 시 원본 반환
+  }
+};
+
 const getHistoryIcon = (type: HistoryType) => {
   switch (type) {
     case HistoryType.TRADE_EXECUTED: // 매수/매도 거래 완료 - 악수 아이콘
@@ -64,7 +105,9 @@ const getHistoryDescription = (item: HistoryDTO) => {
     // 투표 가결
     case HistoryType.VOTE_APPROVED:
       const votePayload = item.payload as VoteApprovedPayloadDTO
-      return `${votePayload.scheduledAt}\n${votePayload.stockName} ${votePayload.shares}주 ${votePayload.unitPrice.toLocaleString()}원 ${votePayload.side === "BUY" ? "매수" : "매도"} 예정`
+      const formattedDate = formatKoreanDate(votePayload.scheduledAt)
+      const formattedTradeInfo = formatStockTradeInfo(votePayload)
+      return `${formattedDate}\n${formattedTradeInfo}`
     // 투표 부결
     case HistoryType.VOTE_REJECTED:
       const rejectedPayload = item.payload as VoteCreatedPayloadDTO
@@ -113,7 +156,7 @@ export default function HistoryCard({ item, className }: HistoryCardProps) {
         <p className="text-sm text-gray-600 whitespace-pre-line">{getHistoryDescription(item)}</p>
       </div>
       <div className="flex justify-end">
-        <div className="text-xs text-gray-400">{item.date}</div>
+        <div className="text-xs text-gray-400">{formatSimpleDate(item.date)}</div>
       </div>
     </Card>
   );

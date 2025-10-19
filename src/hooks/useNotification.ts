@@ -97,26 +97,39 @@ export function useNotification(): UseNotificationReturn {
                 const text = new TextDecoder().decode(value);
                 console.log('🔔 SSE 원본 데이터:', text);
                 
-                // SSE 데이터가 있으면 무조건 알림 처리
-                if (text.includes('event:history-notification') || text.includes('data:')) {
-                  console.log('🔔 알림 데이터 감지 - 히스토리 알림 표시');
-                  
-                  // 알림 카운트 증가
-                  setNotificationCount(prev => prev + 1);
-                  
-                  // 브라우저 알림 표시
-                  if ('Notification' in window && Notification.permission === 'granted') {
-                    new Notification('ToGather 알림', {
-                      body: '새로운 소식이 있습니다!',
-                      icon: '/logo_blue.png'
-                    });
-                  }
-                  
-                  // 토스트 알림 표시
-                  showToast('새로운 소식이 있습니다!');
-                  
-                  console.log('🔔 히스토리 알림 처리 완료');
-                }
+                 // SSE 데이터가 있으면 무조건 알림 처리
+                 if (text.includes('event:history-notification') || text.includes('data:')) {
+                   console.log('🔔 알림 데이터 감지 - 히스토리 알림 표시');
+                   
+                   // 백엔드에서 보내는 메시지를 그대로 사용
+                   let message = '📢 새로운 소식이 있습니다.';
+                   try {
+                     const dataMatch = text.match(/data:({.*})/);
+                     if (dataMatch) {
+                       const data = JSON.parse(dataMatch[1]);
+                       message = data.message || message;
+                       console.log('🔔 백엔드 메시지:', message);
+                     }
+                   } catch (error) {
+                     console.log('🔔 메시지 추출 실패, 기본 메시지 사용');
+                   }
+                   
+                   // 알림 카운트 증가
+                   setNotificationCount(prev => prev + 1);
+                   
+                   // 브라우저 알림 표시
+                   if ('Notification' in window && Notification.permission === 'granted') {
+                     new Notification('ToGather 알림', {
+                       body: message,
+                       icon: '/logo_blue.png'
+                     });
+                   }
+                   
+                   // 토스트 알림 표시
+                   showToast(message);
+                   
+                   console.log('🔔 히스토리 알림 처리 완료');
+                 }
                 
                 pump();
               } catch (error) {
