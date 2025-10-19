@@ -62,17 +62,13 @@ export enum HistoryCategory {
   
   // 투표 가결
   export type VoteApprovedPayloadDTO = {
-    proposalId: string;  // 서버에서는 string으로 옴
-    scheduledAt: string;    // 실행 예정 시각
-
-    // 무엇을 / 어떻게
-    side: TradeSide;   // "BUY" | "SELL"
-    stockName: string;      // 예: "테슬라"
-
-    // 몇 주 / 얼마에
-    shares: number;    // 예: 1
-    unitPrice: number; // 1주 가격 (원화 기준이면 KRW)
-    currency?: "KRW" | "USD";
+    proposalId: string;  // 제안 아이디
+    scheduledAt: string; // 실행 예정 시각
+    side: "BUY" | "SELL" | "PAY"; // 매수/매도/페이
+    stockName: string; // 주식 이름 또는 설명 메시지
+    shares: number; // 몇 주
+    unitPrice: number; // 1주 가격
+    currency: "KRW" | "USD"; // 원/달러
   };
   
   // 투표 부결

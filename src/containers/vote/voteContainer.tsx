@@ -12,110 +12,13 @@ import {
   ProposalStatus,
 } from "../../types/api/proposal";
 import { cn } from "@/lib/utils";
-import { getAuthHeaders, getRefreshToken, saveTokens, clearTokens } from "@/utils/token";
-import { getDeviceId } from "@/utils/deviceId";
-import { API_GATEWAY_URL, API_ENDPOINTS } from "@/utils/api/config";
-
-// 토큰 자동 갱신 함수
-async function refreshTokenIfNeeded(): Promise<boolean> {
-  const refreshToken = getRefreshToken()
-  const deviceId = getDeviceId()
-  
-  if (!refreshToken || !deviceId) {
-    console.log('Refresh token or device ID not found')
-    return false
-  }
-  
-  try {
-    console.log('Attempting to refresh token...')
-    const response = await fetch(`${API_GATEWAY_URL}${API_ENDPOINTS.AUTH.REFRESH}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Refresh-Token': refreshToken,
-        'X-Device-Id': deviceId,
-      },
-    })
-    
-    if (!response.ok) {
-      console.log('Token refresh failed:', response.status)
-      return false
-    }
-    
-    const newTokens = await response.json()
-    console.log('Token refreshed successfully')
-    
-    // 새로운 토큰 저장
-    saveTokens(newTokens.accessToken, newTokens.refreshToken, newTokens.userId)
-    return true
-  } catch (error) {
-    console.error('Token refresh error:', error)
-    return false
-  }
-}
+import { apiGet, apiPost } from "@/utils/api/client";
 
 // Vote Service API 호출 함수
 async function fetchProposals(): Promise<ProposalDTO[]> {
-  const API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL
-  
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/vote`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getAuthHeaders(), // Authorization 헤더 자동 추가
-      },
-    })
-
-    // 401 에러 시 토큰 갱신 시도
-    if (response.status === 401) {
-      console.log('401 Unauthorized - attempting token refresh...')
-      const refreshSuccess = await refreshTokenIfNeeded()
-      
-      if (refreshSuccess) {
-        // 토큰 갱신 성공 시 재시도
-        console.log('Retrying with refreshed token...')
-        const retryResponse = await fetch(`${API_GATEWAY_URL}/vote`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeaders(),
-          },
-        })
-        
-        if (!retryResponse.ok) {
-          throw new Error(`HTTP error! status: ${retryResponse.status}`)
-        }
-        
-        const retryData = await retryResponse.json()
-        console.log('Fetched proposals after refresh:', retryData)
-        
-        // API 응답을 ProposalDTO 형식으로 변환
-        return retryData.map((item: any) => ({
-          proposalId: item.proposalId,
-          proposalName: item.proposalName,
-          proposerName: item.proposerName,
-          category: item.category as ProposalCategory,
-          action: item.action as ProposalAction,
-          payload: typeof item.payload === 'string' ? JSON.parse(item.payload) : item.payload,
-          status: item.status as ProposalStatus,
-          createdAt: new Date(item.createdAt),
-          expiresAt: new Date(item.expiresAt),
-          agreeCount: item.agreeCount || 0,
-          disagreeCount: item.disagreeCount || 0,
-          userVote: item.userVote || null,
-        }))
-      } else {
-        throw new Error('Token refresh failed')
-      }
-    }
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    const data = await response.json()
-    console.log('Fetched proposals:', data)
+    const data = await apiGet<any[]>('/vote');
+    console.log('Fetched proposals:', data);
     
     // API 응답을 ProposalDTO 형식으로 변환
     return data.map((item: any) => ({
@@ -127,21 +30,21 @@ async function fetchProposals(): Promise<ProposalDTO[]> {
       payload: typeof item.payload === 'string' ? JSON.parse(item.payload) : item.payload,
       status: item.status as ProposalStatus,
       date: item.date,
-      closeAt: item.closeAt, // API에서는 closeAt 필드 사용
+      closeAt: item.closeAt,
       agreeCount: item.agreeCount,
       disagreeCount: item.disagreeCount,
       myVote: item.myVote,
-    }))
+    }));
   } catch (error) {
-    console.error('Failed to fetch proposals:', error)
+    console.error('Failed to fetch proposals:', error);
     // 에러 발생 시 빈 배열 반환
-    return []
+    return [];
   }
 }
 
 export default function VotingPage() {
-  const [activeTab, setActiveTab] = useState<"ALL" | "TRADE" | "PAY">("ALL");     // “전체/매매/페이” 중 어디를 보고 있는지
-  const [tradeDropdown, setTradeDropdown] = useState<string>("전체");             // 매매 탭일 때 “전체/매수/매도/예수금 충전”.
+  const [activeTab, setActiveTab] = useState<"ALL" | "TRADE" | "PAY">("ALL");     // "전체/매매/예수금 충전" 중 어디를 보고 있는지
+  const [tradeDropdown, setTradeDropdown] = useState<string>("전체");             // 매매 탭일 때 "전체/매수/매도".
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);                    // 드롭다운 열림 상태
   const [expandedProposals, setExpandedProposals] = useState<Set<string>>(        // 닫힌 제안 카드에서 “자세히 보기” 눌렀는지(펼쳐짐 상태)
     new Set()
@@ -204,58 +107,11 @@ export default function VotingPage() {
 
   // 투표 API 호출 함수
   const submitVote = async (proposalId: string, voteType: "AGREE" | "DISAGREE") => {
-    const API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL
-    
     try {
-      const response = await fetch(`${API_GATEWAY_URL}/vote/${proposalId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeaders(), // Authorization 헤더 자동 추가
-        },
-        body: JSON.stringify({
-          choice: voteType
-        }),
+      await apiPost(`/vote/${proposalId}`, {
+        choice: voteType
       });
-
-      // 401 에러 시 토큰 갱신 시도
-      if (response.status === 401) {
-        console.log('401 Unauthorized - attempting token refresh...')
-        const refreshSuccess = await refreshTokenIfNeeded()
-        
-        if (refreshSuccess) {
-          // 토큰 갱신 성공 시 재시도
-          console.log('Retrying vote with refreshed token...')
-          const retryResponse = await fetch(`${API_GATEWAY_URL}/vote/${proposalId}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...getAuthHeaders(),
-            },
-            body: JSON.stringify({
-              choice: voteType
-            }),
-          })
-          
-          if (!retryResponse.ok) {
-            throw new Error(`HTTP error! status: ${retryResponse.status}`)
-          }
-          
-          console.log('Vote submitted successfully after refresh')
-          
-          // 투표 성공 후 데이터 새로고침
-          const updatedProposals = await fetchProposals()
-          setProposals(updatedProposals)
-          return
-        } else {
-          throw new Error('Token refresh failed')
-        }
-      }
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
+      
       console.log('Vote submitted successfully');
       
       // 투표 성공 후 데이터 새로고침
@@ -293,24 +149,8 @@ export default function VotingPage() {
     }
     // "ALL" 탭일 때는 모든 카테고리의 제안을 표시
 
-    // 2) 드롭다운 필터 (전체 탭에서만 적용)
-    if (activeTab === "ALL") {
-      if (tradeDropdown === "매수") {
-        filtered = filtered.filter(
-          (proposal) => proposal.category === ProposalCategory.TRADE && proposal.action === ProposalAction.BUY
-        );
-      } else if (tradeDropdown === "매도") {
-        filtered = filtered.filter(
-          (proposal) => proposal.category === ProposalCategory.TRADE && proposal.action === ProposalAction.SELL
-        );
-      } else if (tradeDropdown === "예수금 충전") {
-        filtered = filtered.filter(
-          (proposal) => proposal.category === ProposalCategory.TRADE && proposal.action === ProposalAction.DEPOSIT
-        );
-      }
-      // "전체"일 때는 모든 제안을 표시 (이미 위에서 처리됨)
-    } else if (activeTab === "TRADE") {
-      // 매매 탭에서의 세부 필터
+    // 2) 드롭다운 필터 (매매 탭에서만 적용)
+    if (activeTab === "TRADE") {
       if (tradeDropdown === "매수") {
         filtered = filtered.filter(
           (proposal) => proposal.action === ProposalAction.BUY
@@ -318,10 +158,6 @@ export default function VotingPage() {
       } else if (tradeDropdown === "매도") {
         filtered = filtered.filter(
           (proposal) => proposal.action === ProposalAction.SELL
-        );
-      } else if (tradeDropdown === "예수금 충전") {
-        filtered = filtered.filter(
-          (proposal) => proposal.action === ProposalAction.DEPOSIT
         );
       }
       // "전체"일 때는 모든 매매 관련 제안을 표시
@@ -398,12 +234,12 @@ export default function VotingPage() {
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             )}
           >
-            페이
+            예수금 충전
           </button>
         </div>
       </div>
 
-      {activeTab === "ALL" && (
+      {activeTab === "TRADE" && (
         <div className="bg-white px-4 py-3">
           <div className="relative">
             <button
@@ -443,15 +279,6 @@ export default function VotingPage() {
                 >
                   매도
                 </button>
-                <button
-                  onClick={() => {
-                    setTradeDropdown("예수금 충전");
-                    setIsDropdownOpen(false);
-                  }}
-                  className="w-full px-3 py-2 text-sm text-left hover:bg-gray-50"
-                >
-                  예수금 충전
-                </button>
               </div>
             )}
           </div>
@@ -483,7 +310,7 @@ export default function VotingPage() {
           >
             <div className="px-5 py-4 relative">
               {proposal.status !== ProposalStatus.OPEN && (
-                 <div className="absolute top-4 left-5 z-10">
+                 <div className="absolute top-4 left-5 z-0">
                   {getStatusBadge(proposal.status)}
                 </div>
               )}
