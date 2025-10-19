@@ -6,6 +6,7 @@ import {
   type VoteApprovedPayloadDTO,
   type TradeExecutedPayloadDTO,
   type CashDepositCompletedPayloadDTO,
+  type PayChargeCompletedPayloadDTO,
   type VoteCreatedPayloadDTO,
   type GoalAchievedPayloadDTO,
 } from "@/types/api/history";
@@ -27,6 +28,47 @@ const getKoreanParticle = (text: string) => {
   return '이';
 };
 
+// ISO 날짜를 한국어 형식으로 변환하는 함수
+const formatKoreanDate = (isoDateString: string) => {
+  try {
+    const date = new Date(isoDateString);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    
+    return `${year}년 ${month}월 ${day}일 ${hours}시 ${minutes}분`;
+  } catch (error) {
+    // console.error('날짜 포맷팅 오류:', error);
+    return isoDateString; // 오류 시 원본 반환
+  }
+};
+
+// 주식 거래 정보를 포맷팅하는 함수
+const formatStockTradeInfo = (payload: VoteApprovedPayloadDTO) => {
+  const { stockName, shares, unitPrice, side } = payload;
+  const totalAmount = shares * unitPrice;
+  const sideKorean = side === "BUY" ? "매수" : "매도";
+  
+  return `${stockName} ${shares}주 ${totalAmount.toLocaleString()}원 ${sideKorean} 예정`;
+};
+
+// 날짜를 YYYY-MM-DD 형식으로 변환하는 함수
+const formatSimpleDate = (dateString: string) => {
+  try {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+  } catch (error) {
+    // console.error('날짜 포맷팅 오류:', error);
+    return dateString; // 오류 시 원본 반환
+  }
+};
+
 const getHistoryIcon = (type: HistoryType) => {
   switch (type) {
     case HistoryType.TRADE_EXECUTED: // 매수/매도 거래 완료 - 악수 아이콘
@@ -39,7 +81,9 @@ const getHistoryIcon = (type: HistoryType) => {
       return <Coins className="w-5 h-5" />
     case HistoryType.PAY_CHARGE_COMPLETED: // 페이 충전 완료 - 달러 아이콘
       return <DollarSign className="w-5 h-5" />
-    case HistoryType.VOTE_CREATED: // 투표 제안 등록 - 투표 아이콘
+    case HistoryType.VOTE_CREATED_BUY: // 매수 투표 제안 - 투표 아이콘
+    case HistoryType.VOTE_CREATED_SELL: // 매도 투표 제안 - 투표 아이콘
+    case HistoryType.VOTE_CREATED_PAY: // 페이 충전 투표 제안 - 투표 아이콘
       return <Vote className="w-5 h-5" />
     case HistoryType.TRADE_FAILED: // 거래 실패 - 악수 아이콘 + 빨간 X 오버레이
       return (
@@ -64,7 +108,9 @@ const getHistoryDescription = (item: HistoryDTO) => {
     // 투표 가결
     case HistoryType.VOTE_APPROVED:
       const votePayload = item.payload as VoteApprovedPayloadDTO
-      return `${votePayload.scheduledAt}\n${votePayload.stockName} ${votePayload.shares}주 ${votePayload.unitPrice.toLocaleString()}원 ${votePayload.side === "BUY" ? "매수" : "매도"} 예정`
+      const formattedDate = formatKoreanDate(votePayload.scheduledAt)
+      const formattedTradeInfo = formatStockTradeInfo(votePayload)
+      return `${formattedDate}\n${formattedTradeInfo}`
     // 투표 부결
     case HistoryType.VOTE_REJECTED:
       const rejectedPayload = item.payload as VoteCreatedPayloadDTO
@@ -73,15 +119,21 @@ const getHistoryDescription = (item: HistoryDTO) => {
     // 예수금 충전 완료
     case HistoryType.CASH_DEPOSIT_COMPLETED:
       const cashPayload = item.payload as CashDepositCompletedPayloadDTO
-      return `${cashPayload.depositorName} 님이 ${cashPayload.amount.toLocaleString()}원 충전 완료했습니다.\n계좌 잔액 ${cashPayload.accountBalance.toLocaleString()}원`
+      return `각자 ${cashPayload.amount.toLocaleString()}원씩 예수금 충전 완료했습니다.\n계좌 잔액 ${cashPayload.accountBalance.toLocaleString()}원`
     // 페이 충전 완료
     case HistoryType.PAY_CHARGE_COMPLETED:
-      const payPayload = item.payload as CashDepositCompletedPayloadDTO
-      return `${payPayload.depositorName} 님이 ${payPayload.amount.toLocaleString()}원 페이 충전 완료했습니다.\n계좌 잔액 ${payPayload.accountBalance.toLocaleString()}원`
+      const payChargePayload = item.payload as PayChargeCompletedPayloadDTO
+      return `각자 ${payChargePayload.amount.toLocaleString()}원씩 페이 충전 완료했습니다.\n계좌 잔액 ${payChargePayload.accountBalance.toLocaleString()}원`
     // 투표 제안 등록
-    case HistoryType.VOTE_CREATED:
-      const createdPayload = item.payload as VoteCreatedPayloadDTO
-      return `${createdPayload.proposerName}님이 매도 제안을 등록했습니다.`
+    case HistoryType.VOTE_CREATED_BUY:
+      const buyPayload = item.payload as VoteCreatedPayloadDTO
+      return `${buyPayload.proposerName}님이 매수 제안을 등록했습니다.`
+    case HistoryType.VOTE_CREATED_SELL:
+      const sellPayload = item.payload as VoteCreatedPayloadDTO
+      return `${sellPayload.proposerName}님이 매도 제안을 등록했습니다.`
+    case HistoryType.VOTE_CREATED_PAY:
+      const payVotePayload = item.payload as VoteCreatedPayloadDTO
+      return `${payVotePayload.proposerName}님이 페이 충전 제안을 등록했습니다.`
     // 거래 실패
     case HistoryType.TRADE_FAILED:
       const failedPayload = item.payload as TradeExecutedPayloadDTO
@@ -113,7 +165,7 @@ export default function HistoryCard({ item, className }: HistoryCardProps) {
         <p className="text-sm text-gray-600 whitespace-pre-line">{getHistoryDescription(item)}</p>
       </div>
       <div className="flex justify-end">
-        <div className="text-xs text-gray-400">{item.date}</div>
+        <div className="text-xs text-gray-400">{formatSimpleDate(item.date)}</div>
       </div>
     </Card>
   );

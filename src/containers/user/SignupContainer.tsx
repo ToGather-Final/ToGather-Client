@@ -75,7 +75,7 @@ export default function SignupContainer({ onSignupComplete }: SignupContainerPro
       await signup(signupData, deviceId)
       
       // 회원가입 성공 후 자동 로그인
-      console.log("회원가입 완료, 자동 로그인 시작...")
+      // console.log("회원가입 완료, 자동 로그인 시작...")
       
       const loginData: LoginRequest = {
         username: formData.id,
@@ -87,18 +87,18 @@ export default function SignupContainer({ onSignupComplete }: SignupContainerPro
       // 토큰 저장
       saveTokens(loginResponse.accessToken, loginResponse.refreshToken, loginResponse.userId)
       
-      console.log("자동 로그인 완료:", loginResponse.userId)
+      // console.log("자동 로그인 완료:", loginResponse.userId)
       
       // 회원가입 완료 - 닉네임과 userId 전달
       onSignupComplete(formData.nickname, loginResponse.userId)
     } catch (err: any) {
-      console.error("Signup error:", err)
-      console.error("Signup error type:", typeof err)
-      console.error("Signup error keys:", err ? Object.keys(err) : 'null/undefined')
+      // console.error("Signup error:", err)
+      // console.error("Signup error type:", typeof err)
+      // console.error("Signup error keys:", err ? Object.keys(err) : 'null/undefined')
       
       // 빈 객체인 경우 (성공 응답이지만 본문이 없는 경우)
       if (err && typeof err === 'object' && Object.keys(err).length === 0) {
-        console.log("Empty response detected - treating as success")
+        // console.log("Empty response detected - treating as success")
         onSignupComplete(formData.nickname)
         return
       }
