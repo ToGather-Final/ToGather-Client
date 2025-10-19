@@ -8,6 +8,7 @@ import { createInvestmentAccount } from "@/utils/api"
 import { getUserId } from "@/utils/token"
 import { markAccountCreated } from "@/utils/userStatus"
 import { ApiErrorWithStatus } from "@/types/api/auth"
+import Image from "next/image"
 
 interface AccountSetupContainerProps {
   onComplete: () => void
@@ -89,9 +90,11 @@ export default function AccountSetupContainer({ onComplete }: AccountSetupContai
     <div className="h-full bg-white relative overflow-hidden flex flex-col">
       {/* Header */}
       <div className="p-6 relative z-10 flex-shrink-0">
-        <img 
+        <Image
           src="/images/logo-blue.png"
           alt="ToGather Logo"
+          width={32}
+          height={32}
           className="h-8 w-8 object-contain"
         />
       </div>
