@@ -48,6 +48,11 @@ const formatKoreanDate = (isoDateString: string) => {
 // 주식 거래 정보를 포맷팅하는 함수
 const formatStockTradeInfo = (payload: VoteApprovedPayloadDTO) => {
   const { stockName, shares, unitPrice, side } = payload;
+  
+  if (!shares || !unitPrice) {
+    return `${stockName} 거래 예정`;
+  }
+  
   const totalAmount = shares * unitPrice;
   const sideKorean = side === "BUY" ? "매수" : "매도";
   
@@ -109,8 +114,17 @@ const getHistoryDescription = (item: HistoryDTO) => {
     case HistoryType.VOTE_APPROVED:
       const votePayload = item.payload as VoteApprovedPayloadDTO
       const formattedDate = formatKoreanDate(votePayload.scheduledAt)
-      const formattedTradeInfo = formatStockTradeInfo(votePayload)
-      return `${formattedDate}\n${formattedTradeInfo}`
+      
+      if (votePayload.side === "PAY") {
+        // PAY인 경우: 예수금 충전 메시지만 표시
+        return `예수금 충전이 자동으로 진행됩니다.`
+      } else {
+        // TRADE인 경우 (BUY/SELL): 주식 정보 표시
+        const sideText = votePayload.side === "BUY" ? "매수" : "매도"
+        const currencyText = votePayload.currency === "USD" ? "달러" : "원"
+        
+        return `투표가 가결되었습니다\n${formattedDate}\n${votePayload.stockName} ${votePayload.shares}주 ${votePayload.unitPrice.toLocaleString()}${currencyText} ${sideText} 예정`
+      }
     // 투표 부결
     case HistoryType.VOTE_REJECTED:
       const rejectedPayload = item.payload as VoteCreatedPayloadDTO
