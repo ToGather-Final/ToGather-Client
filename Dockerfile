@@ -2,9 +2,11 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# 빌드 인자로 받은 API URL을 환경변수로 설정
+# 빌드 인자로 받은 API URL과 CDN URL을 환경변수로 설정
 ARG NEXT_PUBLIC_API_BASE_URL
+ARG CDN_URL
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+ENV CDN_URL=$CDN_URL
 
 # 🚀 Sharp 빌드를 위한 필수 라이브러리 설치
 RUN apk add --no-cache \
