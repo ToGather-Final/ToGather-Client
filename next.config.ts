@@ -17,6 +17,11 @@ const nextConfig: NextConfig = {
         // 이미지 최적화 강화
         dangerouslyAllowSVG: true,
         contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+        // 환경별 이미지 로더 설정
+        ...(process.env.NODE_ENV === 'production' ? {
+            loader: 'custom',
+            loaderFile: './src/lib/imageLoader.ts',
+        } : {}),
     },
     compress: true,
     
@@ -59,6 +64,18 @@ const nextConfig: NextConfig = {
         },
     },
     
+    // 🚀 Webpack 설정으로 assetPrefix 강제 적용 (프로덕션 환경만)
+    webpack: (config, { isServer }) => {
+        if (!isServer && process.env.NODE_ENV === 'production') {
+            const cdnUrl = process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net';
+            
+            // 정적 자산에 CDN URL 강제 적용
+            config.output.publicPath = `${cdnUrl}/`;
+        }
+        // 개발 환경에서는 기본 Next.js 설정 사용
+        return config;
+    },
+    
     // 🚀 캐싱 전략 (SSR 성능 향상)
     headers: async () => [
         {
@@ -98,6 +115,25 @@ const nextConfig: NextConfig = {
             permanent: true,
         },
     ],
+    
+    // 🚀 CDN을 통한 정적 자산 서빙 (프로덕션 환경만)
+    rewrites: async () => {
+        if (process.env.NODE_ENV === 'production') {
+            const cdnUrl = process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net';
+            return [
+                {
+                    source: '/fonts/:path*',
+                    destination: `${cdnUrl}/fonts/:path*`,
+                },
+                {
+                    source: '/images/:path*',
+                    destination: `${cdnUrl}/images/:path*`,
+                },
+            ];
+        }
+        // 개발 환경에서는 rewrites 없음 (기본 Next.js 동작 사용)
+        return [];
+    },
 };
 
 export default nextConfig;
