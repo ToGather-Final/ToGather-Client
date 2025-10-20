@@ -115,16 +115,21 @@ const getHistoryDescription = (item: HistoryDTO) => {
       const votePayload = item.payload as VoteApprovedPayloadDTO
       const formattedDate = formatKoreanDate(votePayload.scheduledAt)
       
-      if (votePayload.side === "PAY") {
+      if (votePayload.historyType === "PAY") {
         // PAY인 경우: 예수금 충전 메시지만 표시
         return `예수금 충전이 자동으로 진행됩니다.`
-      } else {
-        // TRADE인 경우 (BUY/SELL): 주식 정보 표시
+      } else if (votePayload.historyType === "TRADE") {
+        // TRADE인 경우: 주식 정보 표시
         const sideText = votePayload.side === "BUY" ? "매수" : "매도"
         const currencyText = votePayload.currency === "USD" ? "달러" : "원"
+        const stockName = votePayload.stockName || "주식"
+        const shares = votePayload.shares || 0
+        const unitPrice = votePayload.unitPrice || 0
         
-        return `투표가 가결되었습니다\n${formattedDate}\n${votePayload.stockName} ${votePayload.shares}주 ${votePayload.unitPrice.toLocaleString()}${currencyText} ${sideText} 예정`
+        return `${formattedDate}\n${stockName} ${shares}주 ${unitPrice.toLocaleString()}${currencyText} ${sideText} 예정`
       }
+      
+      return `투표가 가결되었습니다\n${formattedDate}`
     // 투표 부결
     case HistoryType.VOTE_REJECTED:
       const rejectedPayload = item.payload as VoteCreatedPayloadDTO
@@ -133,7 +138,7 @@ const getHistoryDescription = (item: HistoryDTO) => {
     // 예수금 충전 완료
     case HistoryType.CASH_DEPOSIT_COMPLETED:
       const cashPayload = item.payload as CashDepositCompletedPayloadDTO
-      return `각자 ${cashPayload.amount.toLocaleString()}원씩 예수금 충전 완료했습니다.\n계좌 잔액 ${cashPayload.accountBalance.toLocaleString()}원`
+      return `각자 ${cashPayload.amount.toLocaleString()}원씩 예수금 충전 완료했습니다.\n예수금 잔액 ${cashPayload.accountBalance.toLocaleString()}원`
     // 페이 충전 완료
     case HistoryType.PAY_CHARGE_COMPLETED:
       const payChargePayload = item.payload as PayChargeCompletedPayloadDTO
