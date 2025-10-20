@@ -64,6 +64,7 @@ export const API_ENDPOINTS = {
   // 계좌 관련
   ACCOUNT: {
     CREATE_GROUP_PAY: '/pay/accounts/group-pay/{groupId}',
+    GROUP_PAY_INFO: '/pay/accounts/group/{groupId}',
   },
   
   // 페이 관련
@@ -71,5 +72,6 @@ export const API_ENDPOINTS = {
     PAYMENT: '/payments',
     HISTORY: '/payments/history',
     QR_RESOLVE: '/qr/resolve',
+    TRANSFERS_RECHARGE: '/pay/transfers/recharge',
   },
 } as const

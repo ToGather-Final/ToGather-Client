@@ -1,9 +1,12 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import MainButton from "@/components/common/MainButton";
 import ChargeModal from "@/components/pay/ChargeModal";
 import { usePayTab } from "@/contexts/payTabContext";
 import QRScannerContainer from "./QRScannerContainer";
+import { useGroupId } from "@/contexts/groupIdContext";
+import { rechargePay, getGroupPayInfo, GroupPayAccountInfo } from "@/utils/api/transfers";
 
 const currency = new Intl.NumberFormat("ko-KR");
 
@@ -38,22 +41,47 @@ const mockTransactions: Transaction[] = [
 export default function PayContainer() {
   const [isChargeModalOpen, setIsChargeModalOpen] = useState(false);
   const { payTab, setPayTab } = usePayTab();
-  const accountNo = "937702-00-058937";
-  const payMoney = 210000;
+  const { groupId } = useGroupId();
+  const [accountNo, setAccountNo] = useState<string>("-");
+  const [payMoney, setPayMoney] = useState<number>(0);
 
   // 터치 이벤트를 위한 ref와 상태
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleChargeConfirm = (data: {
-    amount: string;
-    dueDate: string;
-    reason: string;
-  }) => {
-    console.log("charge proposal", data); // TODO: API 연동
-    setIsChargeModalOpen(false);
+  const handleChargeConfirm = async (data: { amount: string }) => {
+    try {
+      if (!groupId) throw new Error('그룹이 선택되지 않았습니다.');
+      const amount = Number(data.amount);
+      if (!Number.isFinite(amount) || amount <= 0) {
+        throw new Error('올바른 금액을 입력하세요.');
+      }
+      await rechargePay(groupId, amount);
+      setIsChargeModalOpen(false);
+      alert('충전 제안을 생성했습니다.');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '충전 요청에 실패했습니다.';
+      alert(msg);
+    }
   };
+
+  // 그룹 페이 계좌/잔액 조회
+  const loadGroupPay = async () => {
+    if (!groupId) return;
+    try {
+      const info: GroupPayAccountInfo = await getGroupPayInfo(groupId);
+      setAccountNo(info.accountNumber);
+      setPayMoney(info.balance);
+    } catch (e) {
+      console.error('Failed to load group pay info', e);
+    }
+  };
+
+  // 최초 및 groupId 변경 시 로드
+  useEffect(() => {
+    loadGroupPay();
+  }, [groupId]);
 
   // 터치 시작 이벤트 핸들러
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -164,12 +192,12 @@ export default function PayContainer() {
 
       {/* 고정 떠있는 충전 버튼 - 바코드 탭에서만 표시 */}
       {payTab === "BARCODE" && (
-        <Button
+        <MainButton
           onClick={() => setIsChargeModalOpen(true)}
-          className="fixed left-1/2 -translate-x-1/2 bottom-[80px] h-12 rounded-xl bg-sky-500 hover:bg-sky-500/90 w-[calc(100vw-32px)] max-w-[calc(var(--app-max-w)-32px)]"
+          className="fixed left-1/2 -translate-x-1/2 bottom-[80px] w-[calc(100vw-32px)] max-w-[calc(var(--app-max-w)-64px)]"
         >
           페이 머니 충전
-        </Button>
+        </MainButton>
       )}
 
       {/* 충전 모달 */}
