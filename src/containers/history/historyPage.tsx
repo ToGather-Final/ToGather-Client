@@ -62,7 +62,7 @@ const mockHistoryData: HistoryDTO[] = [
   {
     id: "4",
     category: HistoryCategory.VOTE,
-    type: HistoryType.VOTE_CREATED,
+    type: HistoryType.VOTE_CREATED_BUY,
     title: "테슬라 1주 58000원 매도 제안",
     date: "2025-09-14",
     payload: {
