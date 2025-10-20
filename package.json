@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "upload-assets": "node scripts/upload-assets.js",
+    "debug-files": "node scripts/debug-build-files.js",
+    "debug-response": "node scripts/debug-response-times.js",
     "deploy": "pnpm run build && pnpm run upload-assets",
     "deploy:local": "pnpm run build && pnpm run upload-assets"
   },
