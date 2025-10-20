@@ -9,6 +9,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=512 --max-semi-space-size=128"
 ENV NODE_NO_WARNINGS=1
 
+# 🚀 API 엔드포인트 환경변수 (런타임에 설정)
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+
 # 깃헙 액션에서 넣어준 산출물만 복사
 COPY .next/standalone ./
 COPY .next/static ./.next/static
