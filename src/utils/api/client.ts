@@ -108,23 +108,26 @@ export async function apiRequest<T>(
     }
 
     // 응답 내용 확인
-    const responseText = await response.text();
-    console.log('📄 Response text:', responseText);
+    // const responseText = await response.text();
+    // console.log('📄 Response text:', responseText);
     
-    if (!responseText.trim()) {
-      console.log('⚠️ Empty response received');
-      return {} as T;
-    }
+    // if (!responseText.trim()) {
+    //   // console.log('⚠️ Empty response received');
+    //   return {} as T;
+    // }
 
-    try {
-      const data = JSON.parse(responseText);
-      console.log('✅ Request successful');
-      return data;
-    } catch (jsonError) {
-      console.error('❌ JSON parsing failed:', jsonError);
-      console.log('Raw response:', responseText);
-      throw new Error(`Invalid JSON response: ${jsonError instanceof Error ? jsonError.message : 'Unknown error'}`);
-    }
+    // try {
+    //   const data = JSON.parse(responseText);
+    //   // console.log('✅ Request successful');
+    //   return data;
+    // } catch (jsonError) {
+    //   console.error('❌ JSON parsing failed:', jsonError);
+    //   // console.log('Raw response:', responseText);
+    //   throw new Error(`Invalid JSON response: ${jsonError instanceof Error ? jsonError.message : 'Unknown error'}`);
+    // }
+    
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('API request failed:', error);
     throw error;
