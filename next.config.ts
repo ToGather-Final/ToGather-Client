@@ -51,6 +51,12 @@ const nextConfig: NextConfig = {
     // 🚀 빌드 안정성 설정
     outputFileTracingRoot: undefined, // 워크스페이스 루트 경고 해결
     
+    // 🚀 서버 타임아웃 설정 (Cold Start 방지)
+    serverRuntimeConfig: {
+        // 서버 사이드 타임아웃 설정
+        timeout: 30000, // 30초
+    },
+    
     // 🚀 CSS 최적화 설정 (Next.js 15.5.3에서 제거됨)
     // swcMinify: true, // Next.js 15+에서 기본 활성화
     
@@ -73,12 +79,24 @@ const nextConfig: NextConfig = {
     },
     
     // 🚀 Webpack 설정으로 assetPrefix 강제 적용 (프로덕션 환경만)
-    webpack: (config, { isServer }) => {
+    webpack: (config, { isServer, dev }) => {
         if (!isServer && process.env.NODE_ENV === 'production') {
             const cdnUrl = process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net';
             
             // 정적 자산에 CDN URL 강제 적용
             config.output.publicPath = `${cdnUrl}/`;
+            
+            // Next.js 15+ 호환성을 위한 추가 설정
+            if (config.optimization && config.optimization.splitChunks) {
+                config.optimization.splitChunks.cacheGroups = {
+                    ...config.optimization.splitChunks.cacheGroups,
+                    default: {
+                        ...config.optimization.splitChunks.cacheGroups.default,
+                        filename: '_next/static/chunks/[name]-[contenthash].js',
+                        chunkFilename: '_next/static/chunks/[name]-[contenthash].js',
+                    },
+                };
+            }
         }
         // 개발 환경에서는 기본 Next.js 설정 사용
         return config;
@@ -134,7 +152,22 @@ const nextConfig: NextConfig = {
                     source: '/_next/static/:path*',
                     destination: `${cdnUrl}/_next/static/:path*`,
                 },
-                // 추가 정적 자산들
+                // Next.js 서버 자산
+                {
+                    source: '/_next/server/:path*',
+                    destination: `${cdnUrl}/_next/server/:path*`,
+                },
+                // Next.js standalone 자산
+                {
+                    source: '/_next/standalone/:path*',
+                    destination: `${cdnUrl}/_next/standalone/:path*`,
+                },
+                // Next.js 캐시 자산
+                {
+                    source: '/_next/cache/:path*',
+                    destination: `${cdnUrl}/_next/cache/:path*`,
+                },
+                // 추가 정적 자산들 (fallback)
                 {
                     source: '/static/:path*',
                     destination: `${cdnUrl}/_next/static/:path*`,
