@@ -89,6 +89,8 @@ export default function GroupJoinFlow() {
           <Image 
             src="/images/logo-blue.png"
             alt="ToGather Logo"
+            width={32}
+            height={32}
             className="h-8 w-8 object-contain"
           />
         </div>
