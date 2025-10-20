@@ -6,10 +6,11 @@ const nextConfig: NextConfig = {
         ignoreDuringBuilds: true,
     },
     // 🚀 CDN 최적화: 정적 자산을 CloudFront + S3로 분리
-    assetPrefix: process.env.NODE_ENV === 'production' 
-        ? 'https://d36ue99r8i68ow.cloudfront.net' 
-        : '',
+    // assetPrefix는 Next.js 15에서 문제가 있을 수 있으므로 제거
+    // 대신 CloudFront에서 _next/static/* 경로를 S3로 리다이렉트하도록 설정
     images: {
+        // CDN에서 직접 제공하도록 이미지 최적화 비활성화
+        unoptimized: true,
         formats: ['image/avif', 'image/webp'],
         deviceSizes: [640, 750, 828, 1080, 1200],
         imageSizes: [16, 32, 48, 64, 96, 128, 256],
@@ -40,6 +41,11 @@ const nextConfig: NextConfig = {
     
     // 🚀 서버 외부 패키지 설정 (Next.js 15+)
     serverExternalPackages: ['sharp'],
+    
+    // 🚀 서버 타임아웃 설정
+    serverRuntimeConfig: {
+        maxDuration: 30,
+    },
     
     // 🚀 컴파일러 최적화
     compiler: {
