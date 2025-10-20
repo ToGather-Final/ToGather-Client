@@ -8,6 +8,7 @@ import { signup, login } from "@/utils/api"
 import { getDeviceId } from "@/utils/deviceId"
 import { saveTokens } from "@/utils/token"
 import { SignupRequest, LoginRequest } from "@/types/api/auth"
+import Image from "next/image"
 
 interface SignupContainerProps {
   onSignupComplete: (nickname: string, userId?: string) => void
@@ -118,9 +119,11 @@ export default function SignupContainer({ onSignupComplete }: SignupContainerPro
       <div className="flex flex-col items-center justify-center h-full px-8 py-12 relative z-10">
         {/* Logo */}
         <div className="mb-6">
-          <img 
+          <Image 
             src="/images/logo-blue.png"
             alt="ToGather Logo"
+            width={64}
+            height={64}
             className="h-16 w-16 object-contain"
           />
         </div>

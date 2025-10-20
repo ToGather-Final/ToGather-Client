@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { getGroupStatus } from "@/utils/api"
 import { useGroupId } from "@/contexts/groupIdContext"
 import MainButton from "@/components/common/MainButton"
-import type { ApiErrorWithStatus } from "@/types/api/auth"
+import { ApiErrorWithStatus } from "@/types/api/auth"
 
 interface GroupCompleteContainerProps {
   onFinish?: () => void
@@ -176,9 +177,11 @@ export default function GroupCompleteContainer({
         <div className="w-full relative">
           {/* Group Image - Full Width */}
           <div className="w-full">
-            <img 
+            <Image 
               src="/images/group-create.png"
               alt="Group Created"
+              width={400}
+              height={300}
               className="w-full h-auto object-contain"
             />
           </div>

@@ -121,12 +121,12 @@ const getHistoryDescription = (item: HistoryDTO) => {
       } else if (votePayload.historyType === "TRADE") {
         // TRADE인 경우: 주식 정보 표시
         const sideText = votePayload.side === "BUY" ? "매수" : "매도"
-        const currencyText = votePayload.currency === "USD" ? "달러" : "원"
         const stockName = votePayload.stockName || "주식"
         const shares = votePayload.shares || 0
         const unitPrice = votePayload.unitPrice || 0
+        const totalAmount = shares * unitPrice
         
-        return `${formattedDate}\n${stockName} ${shares}주 ${unitPrice.toLocaleString()}${currencyText} ${sideText} 예정`
+        return `${formattedDate}\n${stockName} ${shares}주 ${totalAmount.toLocaleString()}원 ${sideText} 예정`
       }
       
       return `투표가 가결되었습니다\n${formattedDate}`

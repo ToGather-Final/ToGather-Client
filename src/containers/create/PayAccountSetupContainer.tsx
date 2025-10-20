@@ -5,7 +5,8 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import MainButton from "@/components/common/MainButton"
 import { createPayAccount } from "@/utils/api"
-import type { ApiErrorWithStatus } from "@/types/api/auth"
+import { ApiErrorWithStatus } from "@/types/api/auth"
+import Image from "next/image"
 
 interface PayAccountSetupContainerProps {
   onComplete: () => void
@@ -77,9 +78,11 @@ export default function PayAccountSetupContainer({ onComplete, groupId }: PayAcc
     <div className="h-full bg-white relative overflow-hidden flex flex-col">
       {/* Header */}
       <div className="p-6 relative z-10 flex-shrink-0">
-        <img 
+        <Image 
           src="/images/logo-blue.png"
           alt="ToGather Logo"
+          width={32}
+          height={32}
           className="h-8 w-8 object-contain"
         />
       </div>

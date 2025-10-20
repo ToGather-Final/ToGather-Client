@@ -1,15 +1,14 @@
 "use client";
 
-import type React from "react";
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import MainButton from "@/components/common/MainButton";
-import { createInvestmentAccount } from "@/utils/api";
-import { getUserId } from "@/utils/token";
-import { markAccountCreated } from "@/utils/userStatus";
-import { ApiErrorWithStatus } from "@/types/api/auth";
-import Image from "next/image";
-import type { ApiErrorWithStatus } from "@/types/api/auth";
+import type React from "react"
+import { useState } from "react"
+import { Input } from "@/components/ui/input"
+import MainButton from "@/components/common/MainButton"
+import { createInvestmentAccount } from "@/utils/api"
+import { getUserId } from "@/utils/token"
+import { markAccountCreated } from "@/utils/userStatus"
+import { ApiErrorWithStatus } from "@/types/api/auth"
+import Image from "next/image"
 
 interface AccountSetupContainerProps {
   onComplete: () => void;

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import Select from "@/components/ui/select"
 import MainButton from "@/components/common/MainButton"
 import { createGroup, CreateGroupRequest } from "@/utils/api"
-import type { ApiErrorWithStatus } from "@/types/api/auth"
+import { ApiErrorWithStatus } from "@/types/api/auth"
 import Image from "next/image"
 
 interface GroupCreateContainerProps {
@@ -229,7 +229,6 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
 
   return (
     <div className="h-full bg-white relative overflow-hidden flex flex-col">
-      {/* Header */}
       <div className="p-6 relative z-10 flex-shrink-0">
         <Image 
           src="/images/logo-blue.png"

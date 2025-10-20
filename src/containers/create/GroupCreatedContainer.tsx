@@ -8,7 +8,8 @@ import { checkGroupCreated, clearGroupCreated } from "@/utils/userStatus"
 import { getUserId } from "@/utils/token"
 import { GroupInfo } from "@/types/api/auth"
 import MainButton from "@/components/common/MainButton"
-import type { ApiErrorWithStatus } from "@/types/api/auth"
+import { ApiErrorWithStatus } from "@/types/api/auth"
+import Image from "next/image"
 
 export default function GroupCreatedContainer() {
   const router = useRouter()
@@ -220,9 +221,11 @@ export default function GroupCreatedContainer() {
     <div className="h-full bg-white relative overflow-hidden flex flex-col">
       {/* Header */}
       <div className="p-6 relative z-10 flex-shrink-0">
-        <img 
+        <Image 
           src="/images/logo-blue.png"
           alt="ToGather Logo"
+          width={32}
+          height={32}
           className="h-8 w-8 object-contain"
         />
       </div>
@@ -233,9 +236,11 @@ export default function GroupCreatedContainer() {
         <div className="w-full relative">
           {/* Group Image - Full Width */}
           <div className="w-full">
-            <img 
+            <Image 
               src="/images/group-create.png"
               alt="Group Created"
+              width={400}
+              height={300}
               className="w-full h-auto object-contain"
             />
           </div>
