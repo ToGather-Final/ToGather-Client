@@ -1,6 +1,7 @@
 # ---- runtime only ----
-#FROM node:18-alpine AS runner
-FROM ghcr.io/library/node:18.19.1-alpine AS runner
+FROM node:18-alpine AS runner
+#FROM ghcr.io/library/node:18.19.1-alpine AS runner
+#FROM node:20-alpine AS runner
 
 WORKDIR /app
 
