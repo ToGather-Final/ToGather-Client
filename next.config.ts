@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
     
     // Docker 환경 최적화
     poweredByHeader: false,
-    generateEtags: true,
+    generateEtags: false,
     
     // 🚀 SSR 성능 최적화 (Next.js 15 + React 19)
     experimental: {
@@ -100,7 +100,7 @@ const nextConfig: NextConfig = {
             headers: [
                 {
                     key: 'Cache-Control',
-                    value: 'public, max-age=60, s-maxage=60',
+                    value: 'public, max-age=60', // , s-maxage=60',
                 },
             ],
         },
@@ -115,14 +115,14 @@ const nextConfig: NextConfig = {
         },
     ],
     
-    // 🚀 리다이렉트 최적화
-    redirects: async () => [
-        {
-            source: '/home',
-            destination: '/',
-            permanent: true,
-        },
-    ],
+    // // 🚀 리다이렉트 최적화
+    // redirects: async () => [
+    //     {
+    //         source: '/home',
+    //         destination: '/',
+    //         permanent: true,
+    //     },
+    // ],
     
     // 🚀 CDN을 통한 정적 자산 서빙 (프로덕션 환경만)
     rewrites: async () => {
