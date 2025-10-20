@@ -1,6 +1,6 @@
 # ---- runtime only ----
 #FROM node:18-alpine AS runner
-FROM public.ecr.aws/docker/library/node:18.19.1-alpine AS runner
+FROM ghcr.io/library/node:18.19.1-alpine AS runner
 
 WORKDIR /app
 
