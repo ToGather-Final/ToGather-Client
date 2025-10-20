@@ -8,7 +8,7 @@ import { checkGroupCreated, clearGroupCreated } from "@/utils/userStatus"
 import { getUserId } from "@/utils/token"
 import { GroupInfo } from "@/types/api/auth"
 import MainButton from "@/components/common/MainButton"
-import type { ApiErrorWithStatus } from "@/types/api/auth"
+import { ApiErrorWithStatus } from "@/types/api/auth"
 import Image from "next/image"
 
 export default function GroupCreatedContainer() {

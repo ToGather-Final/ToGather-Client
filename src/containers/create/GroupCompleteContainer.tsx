@@ -6,7 +6,7 @@ import Image from "next/image"
 import { getGroupStatus } from "@/utils/api"
 import { useGroupId } from "@/contexts/groupIdContext"
 import MainButton from "@/components/common/MainButton"
-import type { ApiErrorWithStatus } from "@/types/api/auth"
+import { ApiErrorWithStatus } from "@/types/api/auth"
 
 interface GroupCompleteContainerProps {
   onFinish?: () => void

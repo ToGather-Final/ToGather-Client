@@ -1,7 +1,7 @@
 import { getAuthHeaders } from '@/utils/token'
 import { API_GATEWAY_URL, API_ENDPOINTS } from './config'
 import { CreateGroupRequest, CreateGroupResponse, CreatePayAccountRequest, GroupStatusResponse, JoinGroupResponse, GroupMemberResponse } from '@/types/api/group'
-import type { ApiErrorWithStatus } from '@/types/api/auth'
+import { ApiErrorWithStatus } from '@/types/api/auth'
 
 const BASE_URL = API_GATEWAY_URL
 

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import Select from "@/components/ui/select"
 import MainButton from "@/components/common/MainButton"
 import { createGroup, CreateGroupRequest } from "@/utils/api"
-import type { ApiErrorWithStatus } from "@/types/api/auth"
+import { ApiErrorWithStatus } from "@/types/api/auth"
 import Image from "next/image"
 
 interface GroupCreateContainerProps {

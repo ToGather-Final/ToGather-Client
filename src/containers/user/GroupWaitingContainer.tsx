@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { getGroupStatus } from "@/utils/api"
 import { useGroupId } from "@/contexts/groupIdContext"
-import type { ApiErrorWithStatus } from "@/types/api/auth"
+import { ApiErrorWithStatus } from "@/types/api/auth"
 import Image from "next/image"
 
 interface GroupWaitingContainerProps {

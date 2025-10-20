@@ -5,7 +5,7 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import MainButton from "@/components/common/MainButton"
 import { createPayAccount } from "@/utils/api"
-import type { ApiErrorWithStatus } from "@/types/api/auth"
+import { ApiErrorWithStatus } from "@/types/api/auth"
 import Image from "next/image"
 
 interface PayAccountSetupContainerProps {

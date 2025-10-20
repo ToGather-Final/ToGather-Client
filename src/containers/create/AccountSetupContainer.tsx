@@ -7,7 +7,7 @@ import MainButton from "@/components/common/MainButton"
 import { createInvestmentAccount } from "@/utils/api"
 import { getUserId } from "@/utils/token"
 import { markAccountCreated } from "@/utils/userStatus"
-import type { ApiErrorWithStatus } from "@/types/api/auth"
+import { ApiErrorWithStatus } from "@/types/api/auth"
 import Image from "next/image"
 
 interface AccountSetupContainerProps {

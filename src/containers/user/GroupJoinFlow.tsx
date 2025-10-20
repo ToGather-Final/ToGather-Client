@@ -8,7 +8,7 @@ import GroupWaitingContainer from "./GroupWaitingContainer"
 import { joinGroup } from "@/utils/api"
 import { markGroupJoined } from "@/utils/userStatus"
 import { getUserId } from "@/utils/token"
-import type { ApiErrorWithStatus } from "@/types/api/auth"
+import { ApiErrorWithStatus } from "@/types/api/auth"
 
 export default function GroupJoinFlow() {
   const router = useRouter()

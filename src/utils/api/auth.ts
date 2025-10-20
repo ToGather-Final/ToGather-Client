@@ -1,5 +1,5 @@
 import { SignupRequest, LoginRequest, LoginResponse } from '@/types/api/auth'
-import type { ApiErrorWithStatus } from '@/types/api/auth'
+import { ApiErrorWithStatus } from '@/types/api/auth'
 import { getAuthHeaders, clearTokens } from '@/utils/token'
 import { resetUserStatus } from '@/utils/userStatus'
 import { API_GATEWAY_URL, API_ENDPOINTS } from './config'

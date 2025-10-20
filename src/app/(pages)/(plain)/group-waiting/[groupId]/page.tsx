@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation"
 import { getGroupStatus } from "@/utils/api"
 import { useGroupId } from "@/contexts/groupIdContext"
 import { GroupInfo } from "@/types/api/auth"
-import type { ApiErrorWithStatus } from "@/types/api/auth"
+import { ApiErrorWithStatus } from "@/types/api/auth"
 import Image from "next/image"
 
 export default function GroupWaitingPage() {
