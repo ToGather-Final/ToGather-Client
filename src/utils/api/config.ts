@@ -1,7 +1,10 @@
 // API Gateway 설정
-// 모든 서비스 요청을 API Gateway로 통일
+// 서버사이드(SSR/route handlers)는 K8s FQDN을 사용, 클라이언트는 퍼블릭 도메인을 사용
+const isServer = typeof window === 'undefined'
+const serverBase = process.env.SERVER_API_BASE_URL || 'http://api-gateway.togather.svc.cluster.local:8000'
+const clientBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
 
-export const API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api'
+export const API_GATEWAY_URL = isServer ? serverBase : clientBase
 
 // 서비스별 엔드포인트 (API Gateway 경로)
 export const API_ENDPOINTS = {
