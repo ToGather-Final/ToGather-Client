@@ -86,7 +86,7 @@ export default function GroupJoinFlow() {
       <div className="h-full bg-white relative overflow-hidden flex flex-col">
         {/* Header */}
         <div className="p-6 relative z-10 flex-shrink-0">
-          <img 
+          <Image 
             src="/images/logo-blue.png"
             alt="ToGather Logo"
             className="h-8 w-8 object-contain"

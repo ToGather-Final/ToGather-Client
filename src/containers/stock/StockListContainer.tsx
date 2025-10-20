@@ -8,6 +8,7 @@ import { Stock } from "@/types/api/stock";
 import { Response } from "@/types/api/response";
 import { baseUrl } from "@/constants/baseUrl";
 import useSWR from "swr";
+import Image from "next/image";
 
 export default function StockListContainer() {
   const [open, setOpen] = useState(false);
@@ -114,9 +115,11 @@ export default function StockListContainer() {
                   }}
                 >
                   <div className="flex items-center gap-[15px]">
-                    <img
+                    <Image
                       src={stock.stockImage}
                       alt="stock"
+                      width={35}
+                      height={35}
                       className="h-[35px] w-[35px] rounded-full object-cover"
                     />
                     <div className="">

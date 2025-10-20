@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { getGroupStatus } from "@/utils/api"
 import { useGroupId } from "@/contexts/groupIdContext"
 import type { ApiErrorWithStatus } from "@/types/api/auth"
+import Image from "next/image"
 
 interface GroupWaitingContainerProps {
   groupId: string
@@ -76,9 +77,11 @@ export default function GroupWaitingContainer({ groupId, groupName }: GroupWaiti
     <div className="h-full bg-white relative overflow-hidden flex flex-col">
       {/* Header */}
       <div className="p-6 relative z-10 flex-shrink-0">
-        <img 
+        <Image 
           src="/images/logo-blue.png"
           alt="ToGather Logo"
+          width={32}
+          height={32}
           className="h-8 w-8 object-contain"
         />
       </div>
