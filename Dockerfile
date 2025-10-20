@@ -10,14 +10,9 @@ ENV NODE_OPTIONS="--max-old-space-size=512 --max-semi-space-size=128"
 ENV NODE_NO_WARNINGS=1
 
 # 깃헙 액션에서 넣어준 산출물만 복사
-# (standalone 서버, 정적, public)
-COPY ./.next/standalone ./        # <- actions에서 tar 풀어준 경로 기준
-COPY ./.next/static ./.next/static
-COPY ./public ./public
-
-# sharp가 필요 없다면 생략 가능. 필요하다면 node_modules 포함 COPY 필요
-# (standalone에 포함된 require 경로 확인)
-# COPY --from=builder /app/node_modules/.pnpm/sharp@*/node_modules/sharp ./node_modules/sharp
+COPY .next/standalone ./
+COPY .next/static ./.next/static
+COPY public ./public
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs && \
