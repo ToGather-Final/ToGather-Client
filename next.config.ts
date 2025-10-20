@@ -49,7 +49,10 @@ const nextConfig: NextConfig = {
     serverExternalPackages: ['sharp'],
     
     // 🚀 빌드 안정성 설정
-    outputFileTracingRoot: undefined, // 워크스페이스 루트 경고 해결
+    outputFileTracingRoot: process.cwd(), // 워크스페이스 루트 경고 해결
+    
+    // 🚀 빌드 캐시 설정 (CI/CD 최적화)
+    generateBuildId: process.env.CI ? () => 'build' : undefined,
     
     // 🚀 서버 타임아웃 설정 (Cold Start 방지)
     serverRuntimeConfig: {
@@ -78,29 +81,11 @@ const nextConfig: NextConfig = {
         },
     },
     
-    // 🚀 Webpack 설정으로 assetPrefix 강제 적용 (프로덕션 환경만)
-    webpack: (config, { isServer, dev }) => {
-        if (!isServer && process.env.NODE_ENV === 'production') {
-            const cdnUrl = process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net';
-            
-            // 정적 자산에 CDN URL 강제 적용
-            config.output.publicPath = `${cdnUrl}/`;
-            
-            // Next.js 15+ 호환성을 위한 추가 설정
-            if (config.optimization && config.optimization.splitChunks) {
-                config.optimization.splitChunks.cacheGroups = {
-                    ...config.optimization.splitChunks.cacheGroups,
-                    default: {
-                        ...config.optimization.splitChunks.cacheGroups.default,
-                        filename: '_next/static/chunks/[name]-[contenthash].js',
-                        chunkFilename: '_next/static/chunks/[name]-[contenthash].js',
-                    },
-                };
-            }
-        }
-        // 개발 환경에서는 기본 Next.js 설정 사용
-        return config;
-    },
+    // 🚀 Webpack 설정 (assetPrefix가 이미 설정되어 있으므로 webpack 설정 제거)
+    // webpack: (config, { isServer, dev }) => {
+    //     // assetPrefix가 이미 CDN URL을 처리하므로 webpack 설정 불필요
+    //     return config;
+    // },
     
     // 🚀 캐싱 전략 (SSR 성능 향상)
     headers: async () => [
@@ -142,53 +127,11 @@ const nextConfig: NextConfig = {
     //     },
     // ],
     
-    // 🚀 CDN을 통한 정적 자산 서빙 (프로덕션 환경만)
-    rewrites: async () => {
-        if (process.env.NODE_ENV === 'production') {
-            const cdnUrl = process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net';
-            return [
-                // Next.js 정적 자산을 CDN으로 리다이렉트
-                {
-                    source: '/_next/static/:path*',
-                    destination: `${cdnUrl}/_next/static/:path*`,
-                },
-                // Next.js 서버 자산
-                {
-                    source: '/_next/server/:path*',
-                    destination: `${cdnUrl}/_next/server/:path*`,
-                },
-                // Next.js standalone 자산
-                {
-                    source: '/_next/standalone/:path*',
-                    destination: `${cdnUrl}/_next/standalone/:path*`,
-                },
-                // Next.js 캐시 자산
-                {
-                    source: '/_next/cache/:path*',
-                    destination: `${cdnUrl}/_next/cache/:path*`,
-                },
-                // 추가 정적 자산들 (fallback)
-                {
-                    source: '/static/:path*',
-                    destination: `${cdnUrl}/_next/static/:path*`,
-                },
-                {
-                    source: '/fonts/:path*',
-                    destination: `${cdnUrl}/fonts/:path*`,
-                },
-                {
-                    source: '/images/:path*',
-                    destination: `${cdnUrl}/images/:path*`,
-                },
-                {
-                    source: '/favicon.ico',
-                    destination: `${cdnUrl}/favicon.ico`,
-                },
-            ];
-        }
-        // 개발 환경에서는 rewrites 없음 (기본 Next.js 동작 사용)
-        return [];
-    },
+    // 🚀 CDN을 통한 정적 자산 서빙 (assetPrefix가 이미 처리하므로 rewrites 제거)
+    // rewrites: async () => {
+    //     // assetPrefix가 이미 CDN URL을 처리하므로 rewrites 불필요
+    //     return [];
+    // },
 };
 
 export default nextConfig;
