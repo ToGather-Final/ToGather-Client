@@ -64,11 +64,12 @@ export enum HistoryCategory {
   export type VoteApprovedPayloadDTO = {
     proposalId: string;  // 제안 아이디
     scheduledAt: string; // 실행 예정 시각
+    historyType: "TRADE" | "PAY"; // TRADE/PAY 구분
     side: "BUY" | "SELL" | "PAY"; // 매수/매도/페이
-    stockName: string; // 주식 이름 또는 설명 메시지
-    shares: number; // 몇 주
-    unitPrice: number; // 1주 가격
-    currency: "KRW" | "USD"; // 원/달러
+    stockName: string | null; // 주식 이름 (TRADE일 때만, PAY일 때는 null)
+    shares: number | null; // 몇 주 (TRADE일 때만, PAY일 때는 null)
+    unitPrice: number | null; // 1주 가격 (TRADE일 때만, PAY일 때는 null)
+    currency: "KRW" | "USD" | null; // 원/달러 (TRADE일 때만, PAY일 때는 null)
   };
   
   // 투표 부결
