@@ -129,6 +129,12 @@ const nextConfig: NextConfig = {
         if (process.env.NODE_ENV === 'production') {
             const cdnUrl = process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net';
             return [
+                // Next.js 정적 자산을 CDN으로 리다이렉트
+                {
+                    source: '/_next/static/:path*',
+                    destination: `${cdnUrl}/_next/static/:path*`,
+                },
+                // 추가 정적 자산들
                 {
                     source: '/static/:path*',
                     destination: `${cdnUrl}/_next/static/:path*`,

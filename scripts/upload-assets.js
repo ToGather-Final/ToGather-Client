@@ -104,10 +104,16 @@ async function invalidateCloudFront() {
 
 async function main() {
     try {
-        // .next/static 디렉토리 업로드
+        // .next/static 디렉토리 업로드 (Next.js 정적 자산)
         const staticDir = path.join(__dirname, '..', '.next', 'static');
         if (fs.existsSync(staticDir)) {
             await uploadDirectory(staticDir, '_next/static');
+        }
+        
+        // .next/server 디렉토리 업로드 (SSR 관련 자산)
+        const serverDir = path.join(__dirname, '..', '.next', 'server');
+        if (fs.existsSync(serverDir)) {
+            await uploadDirectory(serverDir, '_next/server');
         }
         
         // public 디렉토리 업로드 (이미지, 폰트 등)
