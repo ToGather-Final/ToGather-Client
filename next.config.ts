@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
     
     // Docker 환경 최적화
     poweredByHeader: false,
-    generateEtags: false,
+    generateEtags: true,
     
     // 🚀 SSR 성능 최적화 (Next.js 15 + React 19)
     experimental: {
@@ -94,7 +94,7 @@ const nextConfig: NextConfig = {
             headers: [
                 {
                     key: 'Cache-Control',
-                    value: 'public, max-age=0, must-revalidate',
+                    value: 'public, max-age=0, s-maxage=300, stale-while-revalidate=60',
                 },
             ],
         },
@@ -103,7 +103,7 @@ const nextConfig: NextConfig = {
             headers: [
                 {
                     key: 'Cache-Control',
-                    value: 'public, max-age=60', // , s-maxage=60',
+                    value: 'public, max-age=0, s-maxage=60, stale-while-revalidate=30',
                 },
             ],
         },

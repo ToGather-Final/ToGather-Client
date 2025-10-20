@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import BackgroundCoins from "@/components/common/BackgroundCoins"
+export const revalidate = 300;
 
 // React 19 최적화를 위한 컴포넌트 분리
 const SplashScreen = ({ showAnimation }: { showAnimation: boolean }) => (
