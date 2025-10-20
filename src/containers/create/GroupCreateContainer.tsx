@@ -26,10 +26,12 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({})
 
-  // 드롭다운 옵션 생성 함수
+  // 드롭다운 옵션 생성 함수 (최소 2명부터)
   const generateQuorumOptions = (maxMembers: number) => {
     const options = []
-    for (let i = 1; i <= maxMembers; i++) {
+    // 최소 2명부터 시작, 최대 인원수까지
+    const startCount = Math.max(2, 1) // 항상 2명부터 시작
+    for (let i = startCount; i <= maxMembers; i++) {
       options.push({ value: i.toString(), label: `${i}명` })
     }
     return options
@@ -37,8 +39,8 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
 
   // 그룹 인원수에 따른 옵션 생성
   const maxMembers = parseInt(formData.groupMemberId) || 1
-  const voteQuorumOptions = generateQuorumOptions(maxMembers)
-  const dissolutionQuorumOptions = generateQuorumOptions(maxMembers)
+  const voteQuorumOptions = maxMembers >= 2 ? generateQuorumOptions(maxMembers) : []
+  const dissolutionQuorumOptions = maxMembers >= 2 ? generateQuorumOptions(maxMembers) : []
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -224,7 +226,13 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
       !isNaN(goalAmount) && goalAmount > 0 &&
       initialAmount <= goalAmount
     
-    return allFieldsFilled && noFieldErrors && numericValidation
+    // 2명 이상일 때만 매매 규칙과 그룹 해체 규칙 필수
+    const rulesValidation = memberCount < 2 || (
+      formData.voteQuorum && formData.voteQuorum.trim() !== "" &&
+      formData.dissolutionQuorum && formData.dissolutionQuorum.trim() !== ""
+    )
+    
+    return allFieldsFilled && noFieldErrors && numericValidation && rulesValidation
   }
 
   return (
@@ -341,7 +349,7 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
             {/* Rules Section */}
             <div className="space-y-4 py-4">
               {/* 매매 규칙 */}
-              <div className="flex items-center justify-between">
+              <div className={`flex items-center justify-between ${maxMembers < 2 ? 'opacity-50' : ''}`}>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-700">매매 규칙</span>
                   <button type="button" className="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center">
@@ -353,14 +361,14 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
                     options={voteQuorumOptions}
                     value={formData.voteQuorum}
                     onChange={(value) => handleInputChange("voteQuorum", value)}
-                    placeholder="선택"
+                    placeholder={maxMembers < 2 ? "2명 이상 필요" : "선택"}
                     className="text-sm"
                   />
                 </div>
               </div>
               
               {/* 그룹 해체 규칙 */}
-              <div className="flex items-center justify-between">
+              <div className={`flex items-center justify-between ${maxMembers < 2 ? 'opacity-50' : ''}`}>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-700">그룹 해체 규칙</span>
                   <button type="button" className="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center">
@@ -372,7 +380,7 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
                     options={dissolutionQuorumOptions}
                     value={formData.dissolutionQuorum}
                     onChange={(value) => handleInputChange("dissolutionQuorum", value)}
-                    placeholder="선택"
+                    placeholder={maxMembers < 2 ? "2명 이상 필요" : "선택"}
                     className="text-sm"
                   />
                 </div>

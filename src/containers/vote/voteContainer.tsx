@@ -120,7 +120,15 @@ export default function VotingPage() {
       
     } catch (error) {
       console.error('Failed to submit vote:', error);
-      // 에러 처리 (사용자에게 알림 등)
+      
+      // 409 Conflict - 이미 투표했을 때
+      if (error instanceof Error && (error as any).status === 409) {
+        alert(error.message);
+        return;
+      }
+      
+      // 기타 에러
+      alert('투표 제출에 실패했습니다. 다시 시도해주세요.');
     }
   };
 

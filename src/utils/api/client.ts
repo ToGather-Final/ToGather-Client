@@ -104,6 +104,26 @@ export async function apiRequest<T>(
     
     if (!response.ok) {
       console.log(`❌ Original request failed with status: ${response.status}`);
+      
+      // 409 Conflict - 이미 투표했을 때
+      if (response.status === 409) {
+        const errorText = await response.text();
+        let errorMessage = "이미 투표하셨습니다.";
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (e) {
+          // JSON 파싱 실패 시 기본 메시지 사용
+        }
+        
+        const conflictError = new Error(errorMessage);
+        (conflictError as any).status = 409;
+        throw conflictError;
+      }
+      
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
@@ -126,8 +146,20 @@ export async function apiRequest<T>(
     //   throw new Error(`Invalid JSON response: ${jsonError instanceof Error ? jsonError.message : 'Unknown error'}`);
     // }
     
-    const data = await response.json();
-    return data;
+    // 응답이 비어있는지 확인
+    const responseText = await response.text();
+    if (!responseText.trim()) {
+      return {} as T;
+    }
+    
+    try {
+      const data = JSON.parse(responseText);
+      return data;
+    } catch (jsonError) {
+      console.error('❌ JSON parsing failed:', jsonError);
+      console.log('Raw response:', responseText);
+      throw new Error(`Invalid JSON response: ${jsonError instanceof Error ? jsonError.message : 'Unknown error'}`);
+    }
   } catch (error) {
     console.error('API request failed:', error);
     throw error;
