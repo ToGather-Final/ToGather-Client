@@ -7,10 +7,11 @@ import TransferModal from "@/components/pay/TransferModal";
 
 type Props = {
   onDetected?: (text: string) => void; // 스캔 성공 시 콜백(선택)
+  onScan?: (qrData: string) => void; // QR 스캔 결과 콜백
   once?: boolean; // true면 한 번만 처리하고 멈춤
 };
 
-export default function QRScannerContainer({ onDetected, once = true }: Props) {
+export default function QRScannerContainer({ onDetected, onScan, once = true }: Props) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const scannerRef = useRef<QrScanner | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -59,8 +60,8 @@ export default function QRScannerContainer({ onDetected, once = true }: Props) {
         setScannedData(text);
         navigator.vibrate?.(80);
 
-        // 송금 모달 열기
-        setIsTransferModalOpen(true);
+        // onScan 콜백 호출 (부모 컴포넌트에서 처리)
+        onScan?.(text);
 
         // 필요한 경우 URL 검증/정제
         onDetected?.(text);
@@ -118,8 +119,8 @@ export default function QRScannerContainer({ onDetected, once = true }: Props) {
   };
 
   // 송금 모달 핸들러
-  const handleTransferConfirm = (amount: number) => {
-    console.log(`송금 완료: ${amount}원을 ${scannedData}로 송금`);
+  const handleTransferConfirm = (data: { amount: string }) => {
+    console.log(`송금 완료: ${data.amount}원을 ${scannedData}로 송금`);
     setIsTransferModalOpen(false);
     setResult(null);
     setScannedData("");

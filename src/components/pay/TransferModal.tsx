@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 interface TransferModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (amount: number) => void;
+  onConfirm: (data: { amount: string }) => void;
+  recipientName?: string;
   defaultAmount?: number;
 }
 
@@ -15,6 +16,7 @@ export default function TransferModal({
   isOpen,
   onClose,
   onConfirm,
+  recipientName = "수신자",
   defaultAmount = 0,
 }: TransferModalProps) {
   const [amount, setAmount] = useState<string>(defaultAmount.toString());
@@ -27,7 +29,7 @@ export default function TransferModal({
   const handleYes = () => {
     const numAmount = Number(amount || "0");
     if (numAmount > 0) {
-      onConfirm(numAmount);
+      onConfirm({ amount });
     }
   };
 
@@ -45,7 +47,7 @@ export default function TransferModal({
     >
       <div className="text-start">
         <div className="text-gray-900 text-xl mb-6 ">
-          <span className="text-blue-600">교대이층집</span>으로 얼마를
+          <span className="text-blue-600">{recipientName}</span>으로 얼마를
           송금하시겠습니까?
         </div>
 
