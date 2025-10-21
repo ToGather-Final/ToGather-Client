@@ -234,10 +234,12 @@ export default function PortfolioContainer() {
 
       // 완료 모달 표시
       setIsCompleteModalOpen(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error("목표 금액 설정 실패:", error);
-      // 에러 처리 - 사용자에게 알림을 줄 수 있습니다
-      alert("목표 금액 설정에 실패했습니다. 다시 시도해주세요.");
+      // API에서 반환한 에러 메시지를 표시
+      const errorMessage =
+        error?.message || "목표 금액 설정에 실패했습니다. 다시 시도해주세요.";
+      alert(errorMessage);
     }
   };
 
@@ -294,7 +296,7 @@ export default function PortfolioContainer() {
               />
             </div>
             <button
-              className="bg-blue-600 text-white rounded-[10px] px-4 py-2 text-[12px] hover:bg-blue-700 transition-colors"
+              className="bg-primary text-white rounded-[10px] px-4 py-2 text-[12px] hover:bg-blue-700 transition-colors"
               onClick={handleDepositClick}
             >
               예수금 제안
@@ -304,7 +306,7 @@ export default function PortfolioContainer() {
             <div className="w-full">
               <div className="relative h-[15px] w-full bg-blue-100 rounded-full">
                 <div
-                  className="absolute h-[15px] bg-blue-600 rounded-full transition-all duration-300"
+                  className="absolute h-[15px] bg-primary rounded-full transition-all duration-300"
                   style={{ width: progressBarWidth }}
                 ></div>
               </div>
