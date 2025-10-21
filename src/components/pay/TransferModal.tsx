@@ -9,6 +9,7 @@ interface TransferModalProps {
   onClose: () => void;
   onConfirm: (data: { amount: string }) => void;
   recipientName?: string;
+  suggestedAmount?: number;
   defaultAmount?: number;
 }
 
@@ -17,9 +18,10 @@ export default function TransferModal({
   onClose,
   onConfirm,
   recipientName = "수신자",
+  suggestedAmount = 0,
   defaultAmount = 0,
 }: TransferModalProps) {
-  const [amount, setAmount] = useState<string>(defaultAmount.toString());
+  const [amount, setAmount] = useState<string>((suggestedAmount || defaultAmount).toString());
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const digits = e.target.value.replace(/\D/g, ""); // 숫자만
@@ -47,8 +49,8 @@ export default function TransferModal({
     >
       <div className="text-start">
         <div className="text-gray-900 text-xl mb-6 ">
-          <span className="text-blue-600">{recipientName}</span>으로 얼마를
-          송금하시겠습니까?
+          <span className="text-blue-600">{recipientName}</span>으로
+          <br/>얼마를 송금하시겠습니까?
         </div>
 
         <div className="space-y-4">

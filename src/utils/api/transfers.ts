@@ -88,6 +88,45 @@ export interface PaymentRequest {
   clientRequestId: string;
 }
 
+// QR 해석 결과 인터페이스
+export interface QRResolveResponse {
+  paymentSessionId: string;
+  recipient: {
+    recipientName: string;
+    bankName: string;
+    maskedAccountNo: string;
+    logoUrl: string;
+  };
+  suggestedAmount: number;
+  payerAccounts: Array<{
+    accountId: string;
+    accountType: string;
+    displayName: string;
+    balance: number;
+  }>;
+  expiresAt: string;
+}
+
+// QR 코드 해석
+export async function resolveQR(qrData: string, amount?: number): Promise<QRResolveResponse> {
+  const params = new URLSearchParams({
+    m: qrData,
+  });
+  
+  if (amount !== undefined) {
+    params.append('a', amount.toString());
+  }
+
+  const url = `${API_GATEWAY_URL}${API_ENDPOINTS.PAY.QR_RESOLVE}?${params.toString()}`;
+  console.log('🔍 QR 해석 API 요청 URL:', url);
+  console.log('🔍 QR 해석 요청 파라미터:', { qrData, amount });
+
+  const response = await apiRequest<QRResolveResponse>(url, { method: 'GET' });
+  console.log('🔍 QR 해석 API 응답:', response);
+  
+  return response;
+}
+
 // 결제 처리
 export async function processPayment(paymentData: PaymentRequest): Promise<void> {
   const url = `${API_GATEWAY_URL}${API_ENDPOINTS.PAY.PAYMENT}`;

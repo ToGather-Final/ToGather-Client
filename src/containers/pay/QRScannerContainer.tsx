@@ -168,15 +168,9 @@ export default function QRScannerContainer({ onDetected, onScan, once = true }: 
         </div>
       </div>
       <div className="flex flex-col items-center justify-center">
-        {/* 결과/에러 */}
-        <div className="mt-3 text-sm break-all text-center text-[#686868]">
-          {result ? (
-            <>
-              스캔 결과: <strong>{result}</strong>
-            </>
-          ) : (
-            "QR을 중앙 가이드 프레임에 맞춰 비춰주세요."
-          )}
+        {/* 안내 메시지 */}
+        <div className="mt-3 text-sm text-center text-[#686868]">
+          QR을 중앙 가이드 프레임에 맞춰 비춰주세요.
         </div>
         <div className="mt-3 text-sm break-all text-center">
           {errorMsg && <p className="mt-2 text-sm text-red-600">{errorMsg}</p>}
