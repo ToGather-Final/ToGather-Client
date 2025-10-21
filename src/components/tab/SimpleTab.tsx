@@ -30,7 +30,7 @@ export default function SimpleTab({
   const setActiveTab = externalSetActiveTab || setInternalActiveTab;
 
   return (
-    <div className="flex space-x-8 border-b border-gray-200 mt-[15px]">
+    <div className="flex space-x-8 border-b border-gray-200 mt-[5px]">
       {tabs.map((tab) => (
         <button
           key={tab.id}
