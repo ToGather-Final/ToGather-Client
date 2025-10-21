@@ -59,18 +59,18 @@ const mockHistoryData: HistoryDTO[] = [
       accountBalance: 6000000,
     } as CashDepositCompletedPayloadDTO,
   },
-  {
-    id: "4",
-    category: HistoryCategory.VOTE,
-    type: HistoryType.VOTE_CREATED,
-    title: "테슬라 1주 58000원 매도 제안",
-    date: "2025-09-14",
-    payload: {
-      proposalId: "1",
-      proposalName: "테슬라 1주 58000원 매도 제안",
-      proposerName: "정다영",
-    } as VoteCreatedPayloadDTO,
-  },
+  // {
+  //   id: "4",
+  //   category: HistoryCategory.VOTE,
+  //   type: HistoryType.VOTE_CREATED,
+  //   title: "테슬라 1주 58000원 매도 제안",
+  //   date: "2025-09-14",
+  //   payload: {
+  //     proposalId: "1",
+  //     proposalName: "테슬라 1주 58000원 매도 제안",
+  //     proposerName: "정다영",
+  //   } as VoteCreatedPayloadDTO,
+  // },
   {
     id: "5",
     category: HistoryCategory.CASH,
