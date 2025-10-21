@@ -7,6 +7,7 @@ import MainButton from "@/components/common/MainButton"
 import { createPayAccount } from "@/utils/api"
 import { ApiErrorWithStatus } from "@/types/api/auth"
 import Image from "next/image"
+import PayTermsModal from "@/components/common/PayTermsModal"
 
 interface PayAccountSetupContainerProps {
   onComplete: () => void
@@ -21,6 +22,7 @@ export default function PayAccountSetupContainer({ onComplete, groupId }: PayAcc
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showTermsModal, setShowTermsModal] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -163,9 +165,20 @@ export default function PayAccountSetupContainer({ onComplete, groupId }: PayAcc
                 defaultChecked
                 required
               />
-              <label htmlFor="pay-agreement" className="text-sm text-gray-700 leading-relaxed">
-                개인(신용) 정보 처리 동의서 (금융 거래)
-              </label>
+              <div className="flex-1">
+                <label htmlFor="pay-agreement" className="text-sm text-gray-700 leading-relaxed">
+                  개인(신용) 정보 처리 동의서 (금융 거래)
+                </label>
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowTermsModal(true)}
+                    className="text-xs text-blue-600 underline hover:text-blue-800"
+                  >
+                    페이계좌 이용약관 보기
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Error Message */}
@@ -186,6 +199,12 @@ export default function PayAccountSetupContainer({ onComplete, groupId }: PayAcc
           </form>
         </div>
       </div>
+
+      {/* Terms Modal */}
+      <PayTermsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
     </div>
   )
 }
