@@ -1,4 +1,4 @@
-import { GroupInfo } from "@/types/api/group";
+import { GroupInfo, UserInvestmentAccount } from "@/types/api/group";
 import {
   getAuthHeaders,
   getRefreshToken,
@@ -320,6 +320,142 @@ export async function updateGoalAmount(
           ? error.message
           : "알 수 없는 오류가 발생했습니다.",
       path: `/groups/${groupId}/goal-amount`,
+      timestamp: new Date().toISOString(),
+      status: 0,
+    } as ApiErrorWithStatus;
+  }
+}
+
+/**
+ * 사용자 투자 계좌 정보 조회
+ * @param url - API 엔드포인트 URL
+ * @returns 사용자의 투자 계좌 정보
+ */
+export async function getUserInvestmentAccount(
+  url: string
+): Promise<UserInvestmentAccount> {
+  const config: RequestInit = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+  };
+
+  try {
+    const response = await fetch(url, config);
+
+    console.log("투자 계좌 조회 응답 상태:", response.status);
+
+    // 403 에러인 경우 토큰 갱신 시도
+    if (response.status === 403) {
+      console.log("403 에러 발생, 토큰 갱신 시도...");
+      const refreshed = await refreshTokenIfNeeded();
+
+      if (refreshed) {
+        console.log("토큰 갱신 성공, 재시도...");
+        // 토큰 갱신 성공 시 재시도
+        const retryConfig: RequestInit = {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(),
+          },
+        };
+
+        const retryResponse = await fetch(url, retryConfig);
+        console.log("재시도 응답 상태:", retryResponse.status);
+
+        if (!retryResponse.ok) {
+          const errorText = await retryResponse.text();
+          console.error("재시도 에러 응답:", errorText);
+
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch {
+            errorData = { message: errorText };
+          }
+
+          throw {
+            code: errorData.code || "API_ERROR",
+            message:
+              errorData.message ||
+              `투자 계좌 조회 실패: ${retryResponse.status}`,
+            path: url,
+            timestamp: new Date().toISOString(),
+            status: retryResponse.status,
+          } as ApiErrorWithStatus;
+        }
+
+        const data = await retryResponse.json();
+        console.log("투자 계좌 조회 성공:", data);
+        return data;
+      } else {
+        console.log("토큰 갱신 실패, 로그아웃 필요");
+        clearTokens();
+        throw {
+          code: "TOKEN_REFRESH_FAILED",
+          message: "인증이 만료되었습니다. 다시 로그인해주세요.",
+          path: url,
+          timestamp: new Date().toISOString(),
+          status: 403,
+        } as ApiErrorWithStatus;
+      }
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("투자 계좌 조회 에러 응답:", errorText);
+
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { message: errorText };
+      }
+
+      throw {
+        code: errorData.code || "API_ERROR",
+        message: errorData.message || `투자 계좌 조회 실패: ${response.status}`,
+        path: url,
+        timestamp: new Date().toISOString(),
+        status: response.status,
+      } as ApiErrorWithStatus;
+    }
+
+    const data = await response.json();
+    console.log("투자 계좌 조회 성공:", data);
+    return data;
+  } catch (error) {
+    console.error("투자 계좌 조회 중 에러 발생:", error);
+
+    // 네트워크 오류인 경우
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      console.error("네트워크 오류:", error.message);
+      throw {
+        code: "NETWORK_ERROR",
+        message: "서버에 연결할 수 없습니다.",
+        path: url,
+        timestamp: new Date().toISOString(),
+        status: 0,
+      } as ApiErrorWithStatus;
+    }
+
+    // 이미 구조화된 에러인 경우 그대로 throw
+    if ((error as any).code && (error as any).message) {
+      throw error;
+    }
+
+    // 예상치 못한 에러인 경우
+    console.error("Get User Investment Account API Error:", error);
+    throw {
+      code: "UNKNOWN_ERROR",
+      message:
+        error instanceof Error
+          ? error.message
+          : "알 수 없는 오류가 발생했습니다.",
+      path: url,
       timestamp: new Date().toISOString(),
       status: 0,
     } as ApiErrorWithStatus;

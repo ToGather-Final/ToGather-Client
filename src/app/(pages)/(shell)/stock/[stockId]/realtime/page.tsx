@@ -18,10 +18,9 @@ export default function RealtimePage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="text-4xl mb-4">⏳</div>
-          <p className="text-gray-600 text-lg">종목 정보를 불러오는 중...</p>
+          <p className="text-gray-500">종목 정보를 불러오는 중...</p>
         </div>
       </div>
     );
@@ -31,7 +30,6 @@ export default function RealtimePage() {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <div className="text-4xl mb-4">❌</div>
           <p className="text-gray-600 text-lg">
             종목 정보를 불러올 수 없습니다.
           </p>

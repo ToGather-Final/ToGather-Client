@@ -92,3 +92,11 @@ export interface GroupHolding {
   profitRate: number;
   changeDirection: string;
 }
+
+// 사용자 투자 계좌 정보
+export interface UserInvestmentAccount {
+  investmentAccountId: string;
+  userId: string;
+  accountNo: string;
+  createdAt: string;
+}

@@ -9,9 +9,10 @@ import {
   type CashDepositCompletedPayloadDTO,
   type PayChargeCompletedPayloadDTO,
   type VoteCreatedPayloadDTO,
+  type VoteExpiredPayloadDTO,
   type GoalAchievedPayloadDTO,
 } from "@/types/api/history";
-import { Handshake, CheckCircle, Wallet, XCircle, DollarSign, Award, X, Vote, Coins } from "lucide-react";
+import { Handshake, CheckCircle, Wallet, XCircle, DollarSign, Award, X, Vote, Coins, Timer } from "lucide-react";
 
 // 한글 받침 유무에 따라 이/가 구별하는 함수
 const getKoreanParticle = (text: string) => {
@@ -98,6 +99,8 @@ const getHistoryIcon = (type: HistoryType) => {
       return <CheckCircle className="w-5 h-5 text-green-600" />
     case HistoryType.VOTE_REJECTED: // 투표 부결 - 빨간색 X 아이콘
       return <XCircle className="w-5 h-5 text-red-600" />
+    case HistoryType.VOTE_EXPIRED: // 투표 만료 - 회색 시계 아이콘
+      return <XCircle className="w-5 h-5 text-gray-500" />
     case HistoryType.CASH_DEPOSIT_COMPLETED: // 예수금 충전 완료 - 동전 아이콘
       return <Coins className="w-5 h-5" />
     case HistoryType.PAY_CHARGE_COMPLETED: // 페이 충전 완료 - 달러 아이콘
@@ -127,7 +130,7 @@ const getHistoryDescription = (item: HistoryDTO) => {
       const tradePayload = item.payload as TradeExecutedPayloadDTO
       const totalAmount = (tradePayload.shares || 0) * (tradePayload.unitPrice || 0)
       const formattedAmount = totalAmount % 1 === 0 ? Math.floor(totalAmount).toLocaleString() : totalAmount.toLocaleString()
-      return `계좌 잔액 ${tradePayload.accountBalance?.toLocaleString() || '0'}원`
+      return `예수금 잔액 ${tradePayload.accountBalance?.toLocaleString() || '0'}원`
     // 투표 가결
     case HistoryType.VOTE_APPROVED:
       const votePayload = item.payload as VoteApprovedPayloadDTO
@@ -153,6 +156,11 @@ const getHistoryDescription = (item: HistoryDTO) => {
       const rejectedPayload = item.payload as VoteCreatedPayloadDTO
       const particle = getKoreanParticle(rejectedPayload.proposalName)
       return `${rejectedPayload.proposalName}${particle} 부결되었습니다.`
+    // 투표 만료
+    case HistoryType.VOTE_EXPIRED:
+      const expiredPayload = item.payload as VoteExpiredPayloadDTO
+      const expiredParticle = getKoreanParticle(expiredPayload.proposalName)
+      return `${expiredPayload.reason}`
     // 예수금 충전 완료
     case HistoryType.CASH_DEPOSIT_COMPLETED:
       const cashPayload = item.payload as CashDepositCompletedPayloadDTO

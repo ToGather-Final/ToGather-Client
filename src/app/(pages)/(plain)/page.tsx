@@ -11,7 +11,7 @@ const SplashScreen = ({ showAnimation }: { showAnimation: boolean }) => (
     <div className="h-full relative overflow-hidden" style={{ background: '#6592FD' }}>
         {/* Animated slide up overlay */}
         <div
-            className={`absolute inset-0 bg-white transition-transform duration-800 ease-out ${showAnimation ? "translate-y-0" : "translate-y-full"
+          className={`relative transition-all duration-800 ${showAnimation ? "transform -translate-y-27" : "transform translate-y-4"
             }`}
         />
 
@@ -62,20 +62,15 @@ const AuthSelectionScreen = ({ showButtons }: { showButtons: boolean }) => (
             <BackgroundCoins />
         </Suspense>
 
-        {/* Main content */}
-        <div className="flex flex-col items-center justify-center h-full px-8">
-            {/* Logo */}
-            <div className="mb-8">
-                <Image
-                    src="/images/logo-blue.webp"
-                    alt="ToGather Logo"
-                    width={80}
-                    height={80}
-                    priority
-                    fetchPriority="high"
-                    className="h-20 w-20 object-contain"
-                />
-            </div>
+    {/* Main content */}
+    <div className="flex flex-col items-center justify-center h-full px-8">
+      {/* Logo */}
+      <div className="mb-8">
+        <Logo
+          variant="blue"
+          size="lg"
+        />
+      </div>
 
             <h1 className="text-3xl font-bold text-gray-900 text-center mb-2">
                 ToGather
