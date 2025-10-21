@@ -105,6 +105,13 @@ export async function apiRequest<T>(
     if (!response.ok) {
       console.log(`❌ Original request failed with status: ${response.status}`);
       
+      // 402 Payment Required - 잔액 부족
+      if (response.status === 402) {
+        const insufficientFundsError = new Error("잔액이 부족합니다! 페이 머니 충전 후 다시 이용해주세요.");
+        (insufficientFundsError as any).status = 402;
+        throw insufficientFundsError;
+      }
+      
       // 409 Conflict - 이미 투표했을 때
       if (response.status === 409) {
         const errorText = await response.text();

@@ -18,9 +18,7 @@ export default function PayMenuTab({ tabs, children }: MenuTabProps) {
   return (
     <div>
       <div
-        className={`sticky top-0 ${
-          payTab === "QR" ? "bg-[#E5F0FE]" : "bg-transparent"
-        } flex items-center justify-center px-4 py-3 w-full gap-2`}
+        className={`sticky top-0 z-10 bg-white flex items-center justify-center px-4 py-3 w-full gap-2`}
       >
         {tabs.map((tab) => (
           <button

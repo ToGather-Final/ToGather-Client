@@ -5,6 +5,7 @@ import {
   HistoryType,
   type VoteApprovedPayloadDTO,
   type TradeExecutedPayloadDTO,
+  type TradeFailedPayloadDTO,
   type CashDepositCompletedPayloadDTO,
   type PayChargeCompletedPayloadDTO,
   type VoteCreatedPayloadDTO,
@@ -59,6 +60,21 @@ const formatStockTradeInfo = (payload: VoteApprovedPayloadDTO) => {
   return `${stockName} ${shares}주 ${totalAmount.toLocaleString()}원 ${sideKorean} 예정`;
 };
 
+// TRADE_EXECUTED 제목을 포맷팅하는 함수
+const formatTradeExecutedTitle = (payload: TradeExecutedPayloadDTO) => {
+  const { stockName, shares, unitPrice, side } = payload;
+  
+  if (!shares || !unitPrice || !stockName) {
+    return payload.stockName || "주식 거래 완료";
+  }
+  
+  const totalAmount = shares * unitPrice;
+  const formattedAmount = totalAmount % 1 === 0 ? Math.floor(totalAmount).toLocaleString() : totalAmount.toLocaleString();
+  const sideKorean = side === "BUY" ? "매수" : side === "SELL" ? "매도" : "거래";
+  
+  return `${stockName} ${shares}주 ${formattedAmount}원 ${sideKorean} 완료`;
+};
+
 // 날짜를 YYYY-MM-DD 형식으로 변환하는 함수
 const formatSimpleDate = (dateString: string) => {
   try {
@@ -109,7 +125,9 @@ const getHistoryDescription = (item: HistoryDTO) => {
     // 매수/매도 거래 완료
     case HistoryType.TRADE_EXECUTED:
       const tradePayload = item.payload as TradeExecutedPayloadDTO
-      return `계좌 잔액 ${tradePayload.accountBalance.toLocaleString()}원`
+      const totalAmount = (tradePayload.shares || 0) * (tradePayload.unitPrice || 0)
+      const formattedAmount = totalAmount % 1 === 0 ? Math.floor(totalAmount).toLocaleString() : totalAmount.toLocaleString()
+      return `계좌 잔액 ${tradePayload.accountBalance?.toLocaleString() || '0'}원`
     // 투표 가결
     case HistoryType.VOTE_APPROVED:
       const votePayload = item.payload as VoteApprovedPayloadDTO
@@ -155,8 +173,8 @@ const getHistoryDescription = (item: HistoryDTO) => {
       return `${payVotePayload.proposerName}님이 페이 충전 제안을 등록했습니다.`
     // 거래 실패
     case HistoryType.TRADE_FAILED:
-      const failedPayload = item.payload as TradeExecutedPayloadDTO
-      return `${failedPayload.stockName} ${failedPayload.shares}주 매도가 실패했습니다.\n계좌 잔액 ${failedPayload.accountBalance.toLocaleString()}원`
+      const failedPayload = item.payload as TradeFailedPayloadDTO
+      return `${failedPayload.reason}`
     // 목표 달성
     case HistoryType.GOAL_ACHIEVED:
       const goalPayload = item.payload as GoalAchievedPayloadDTO
@@ -172,12 +190,20 @@ interface HistoryCardProps {
 }
 
 export default function HistoryCard({ item, className }: HistoryCardProps) {
+  // TRADE_EXECUTED 타입일 때 제목을 동적으로 생성
+  const getDisplayTitle = () => {
+    if (item.type === HistoryType.TRADE_EXECUTED) {
+      return formatTradeExecutedTitle(item.payload as TradeExecutedPayloadDTO);
+    }
+    return item.title;
+  };
+
   return (
     <Card className={cn("p-4 bg-white rounded-3xl border border-gray-200", className)}>
       <div className="flex items-center gap-3 mb-0">
         <div className="flex-shrink-0">{getHistoryIcon(item.type)}</div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900">{item.title}</h3>
+          <h3 className="font-semibold text-gray-900">{getDisplayTitle()}</h3>
         </div>
       </div>
       <div className="ml-8 mb-2">
