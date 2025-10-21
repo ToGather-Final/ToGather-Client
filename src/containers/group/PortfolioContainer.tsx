@@ -366,101 +366,115 @@ export default function PortfolioContainer() {
         </div>
         <div className="border border-[#e9e9e9] m-[15px] p-[20px] rounded-[20px]">
           <h1 className="font-bold text-[18px]">포트폴리오</h1>
-          <div className="flex flex-col items-center">
-            <p className="font-bold text-[30px] mt-[15px]">
-              {currency.format(portfolio.valuation)}원
-            </p>
-            <div
-              className={`flex justify-center gap-[7px] ${
-                portfolio.totalPnlAmount >= 0 ? "text-red-600" : "text-blue-600"
-              }`}
-            >
-              <p>
-                {portfolio.totalPnlAmount >= 0 ? "+" : ""}
-                {currency.format(portfolio.totalPnlAmount)}
-              </p>
-              <p>
-                ({portfolio.totalPnlAmount >= 0 ? "+" : ""}
-                {(portfolio.totalPnlRate * 100).toFixed(2)}%)
+          {portfolio.holdings.length === 0 ? (
+            <div className="flex items-center justify-center py-10">
+              <p className="text-gray-500 text-center">
+                매매 제안으로 포트폴리오를 구성해주세요.
               </p>
             </div>
-            <div className="h-60 mt-[10px]">
-              <Doughnut data={chartData} options={chartOptions} />
-            </div>
-          </div>
-          <div>
-            <div className="flex justify-between mb-[7px]">
-              <h2 className="font-bold">보유 종목</h2>
-              <div className="text-[#686868]">
-                총 {portfolio.holdings.length}건
+          ) : (
+            <div>
+              <div className="flex flex-col items-center">
+                <p className="font-bold text-[30px] mt-[15px]">
+                  {currency.format(portfolio.valuation)}원
+                </p>
+                <div
+                  className={`flex justify-center gap-[7px] ${
+                    portfolio.totalPnlAmount >= 0
+                      ? "text-red-600"
+                      : "text-blue-600"
+                  }`}
+                >
+                  <p>
+                    {portfolio.totalPnlAmount >= 0 ? "+" : ""}
+                    {currency.format(portfolio.totalPnlAmount)}
+                  </p>
+                  <p>
+                    ({portfolio.totalPnlAmount >= 0 ? "+" : ""}
+                    {(portfolio.totalPnlRate * 100).toFixed(2)}%)
+                  </p>
+                </div>
+                <div className="h-60 mt-[10px]">
+                  <Doughnut data={chartData} options={chartOptions} />
+                </div>
               </div>
-            </div>
-            {portfolio.holdings.map((holding, index) => (
-              <div
-                key={holding.symbol}
-                className="border border-[#e9e9e9] p-[15px] rounded-[20px] mb-3"
-              >
-                <div className="flex justify-between">
-                  <div className="flex flex-col">
-                    <div className="flex gap-[7px] items-center">
-                      <div className="font-bold text-[16px]">
-                        {holding.name}
-                      </div>
-                      <div className="text-[12px]">
-                        ({(holding.weight * 100).toFixed(1)}%)
-                      </div>
-                    </div>
-                    <div className="text-[12px]">{holding.qty}주</div>
+              <div>
+                <div className="flex justify-between mb-[7px]">
+                  <h2 className="font-bold">보유 종목</h2>
+                  <div className="text-[#686868]">
+                    총 {portfolio.holdings.length}건
                   </div>
+                </div>
+                {portfolio.holdings.map((holding, index) => (
                   <div
-                    className={`flex flex-col items-end ${
-                      holding.pnlAmount >= 0 ? "text-red-600" : "text-blue-600"
-                    }`}
+                    key={holding.symbol}
+                    className="border border-[#e9e9e9] p-[15px] rounded-[20px] mb-3"
                   >
-                    <div className="font-bold">
-                      {holding.pnlAmount >= 0 ? "+" : ""}
-                      {currency.format(holding.pnlAmount)}원
+                    <div className="flex justify-between">
+                      <div className="flex flex-col">
+                        <div className="flex gap-[7px] items-center">
+                          <div className="font-bold text-[16px]">
+                            {holding.name}
+                          </div>
+                          <div className="text-[12px]">
+                            ({(holding.weight * 100).toFixed(1)}%)
+                          </div>
+                        </div>
+                        <div className="text-[12px]">{holding.qty}주</div>
+                      </div>
+                      <div
+                        className={`flex flex-col items-end ${
+                          holding.pnlAmount >= 0
+                            ? "text-red-600"
+                            : "text-blue-600"
+                        }`}
+                      >
+                        <div className="font-bold">
+                          {holding.pnlAmount >= 0 ? "+" : ""}
+                          {currency.format(holding.pnlAmount)}원
+                        </div>
+                        <div>
+                          {holding.pnlAmount >= 0 ? "+" : ""}
+                          {(holding.pnlRate * 100).toFixed(2)}%
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      {holding.pnlAmount >= 0 ? "+" : ""}
-                      {(holding.pnlRate * 100).toFixed(2)}%
+                    <div className="border-t border-[#e9e9e9] my-3"></div>
+                    <div className="grid grid-cols-2">
+                      <div className="flex flex-col gap-[20px]">
+                        <div>
+                          <div className="text-[#686868]">평가금액</div>
+                          <div className="font-bold">
+                            {currency.format(holding.evalAmount)}원
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-[#686868]">현재가</div>
+                          <div className="font-bold">
+                            {currency.format(holding.currentPrice)}원
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-[20px]">
+                        <div>
+                          <div className="text-[#686868]">매입금액</div>
+                          <div className="font-bold">
+                            {currency.format(holding.purchaseAmount)}원
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-[#686868]">평균단가</div>
+                          <div className="font-bold">
+                            {currency.format(holding.avgPrice)}원
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="border-t border-[#e9e9e9] my-3"></div>
-                <div className="grid grid-cols-2">
-                  <div className="flex flex-col gap-[20px]">
-                    <div>
-                      <div className="text-[#686868]">평가금액</div>
-                      <div className="font-bold">
-                        {currency.format(holding.evalAmount)}원
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-[#686868]">현재가</div>
-                      <div className="font-bold">
-                        {currency.format(holding.currentPrice)}원
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-[20px]">
-                    <div>
-                      <div className="text-[#686868]">매입금액</div>
-                      <div className="font-bold">
-                        {currency.format(holding.purchaseAmount)}원
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-[#686868]">평균단가</div>
-                      <div className="font-bold">
-                        {currency.format(holding.avgPrice)}원
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       </div>
       {/* Todo 목표 달성률 100% 이상일 때 해당 팝업 완료하면 더이상 창 띄우지 않기 */}
