@@ -146,11 +146,12 @@ export default function VotingPage() {
   };
 
   // 모달 열고 어떤 선택인지 기록
-  const handleVote = (
-    proposalName: string,
-    proposalId: string,
-    voteType: "AGREE" | "DISAGREE"
-  ) => {
+  const handleVote = (proposalName: string, proposalId: string, voteType: "AGREE" | "DISAGREE", myVote: string | null) => {
+    // 이미 투표한 경우 모달을 열지 않음
+    if (myVote !== null) {
+      return;
+    }
+    
     setVoteModal({
       isOpen: true,
       proposalName,
@@ -224,6 +225,35 @@ export default function VotingPage() {
     const words = text.split(" ");
     if (words.length <= 15) return text; // 대략 2줄 분량
     return words.slice(0, 15).join(" ") + "...";
+  };
+
+  // closeAt 시간 표시 포맷팅 함수
+  const formatCloseAt = (closeAt: string) => {
+    if (!closeAt) return '시간 미정';
+    
+    try {
+      // "2025-10-21 19시 57분" 형식에서 날짜와 시간 추출
+      const dateTimeMatch = closeAt.match(/(\d{4}-\d{2}-\d{2})\s+(\d+시\s+\d+분)/);
+      if (!dateTimeMatch) return closeAt;
+      
+      const [, dateStr, timeStr] = dateTimeMatch;
+      const closeDate = new Date(dateStr);
+      const today = new Date();
+      
+      // 날짜 비교 (년월일만)
+      const isToday = closeDate.getFullYear() === today.getFullYear() &&
+                     closeDate.getMonth() === today.getMonth() &&
+                     closeDate.getDate() === today.getDate();
+      
+      if (isToday) {
+        return `오늘 ${timeStr}까지`;
+      } else {
+        return `${closeAt}까지`;
+      }
+    } catch (error) {
+      console.error('Error formatting closeAt:', error);
+      return closeAt;
+    }
   };
 
   return (
@@ -351,14 +381,8 @@ export default function VotingPage() {
                     {proposal.status === ProposalStatus.OPEN && (
                       <span className="text-xs">
                         <span className="text-blue-600 font-bold">
-                          {proposal.closeAt &&
-                          proposal.closeAt.includes("시") &&
-                          proposal.closeAt.includes("분")
-                            ? proposal.closeAt.match(/\d+시 \d+분/)?.[0] ||
-                              proposal.closeAt // "15시 39분" 패턴 추출
-                            : proposal.closeAt || "시간 미정"}
+                          {formatCloseAt(proposal.closeAt)}
                         </span>
-                        <span className="text-gray-500 font-normal">까지</span>
                       </span>
                     )}
                   </div>
@@ -385,15 +409,10 @@ export default function VotingPage() {
                     <p className="text-sm text-gray-700">
                       {proposal.payload.reason}
                     </p>
+                    
                     <div className="flex items-center gap-2 justify-end">
                       <button
-                        onClick={() =>
-                          handleVote(
-                            proposal.proposalName,
-                            proposal.proposalId,
-                            "AGREE"
-                          )
-                        }
+                        onClick={() => handleVote(proposal.proposalName, proposal.proposalId, "AGREE", proposal.myVote)}
                         disabled={proposal.myVote !== null}
                         className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded transition-colors ${
                           proposal.myVote === "AGREE"
@@ -407,11 +426,7 @@ export default function VotingPage() {
                       </button>
                       <button
                         onClick={() =>
-                          handleVote(
-                            proposal.proposalName,
-                            proposal.proposalId,
-                            "DISAGREE"
-                          )
+                          handleVote(proposal.proposalName, proposal.proposalId, "DISAGREE", proposal.myVote)
                         }
                         disabled={proposal.myVote !== null}
                         className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded transition-colors ${
