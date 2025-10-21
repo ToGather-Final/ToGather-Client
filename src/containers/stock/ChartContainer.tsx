@@ -133,7 +133,7 @@ export default function ChartContainer() {
         </div>
         <button
           onClick={handleOrderClick}
-          className="text-[12px] text-white bg-blue-600 rounded-[8px] px-[8px] py-[4px]"
+          className="text-[12px] text-white bg-primary rounded-[8px] px-[10px] py-[4px]"
         >
           주문
         </button>

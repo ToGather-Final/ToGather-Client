@@ -213,7 +213,7 @@ export default function AccountSetupContainer({
 
             {/* Submit Button */}
             <MainButton type="submit" className="mt-8" disabled={isLoading}>
-              {isLoading ? "계좌 만들는 중..." : "계좌 만들기"}
+              {isLoading ? "계좌 만드는 중..." : "계좌 만들기"}
             </MainButton>
           </form>
         </div>

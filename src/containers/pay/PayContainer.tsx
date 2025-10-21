@@ -234,12 +234,12 @@ export default function PayContainer() {
     const swipeDistance = touchEndX.current - touchStartX.current;
 
     if (Math.abs(swipeDistance) > swipeThreshold) {
-      if (swipeDistance > 0 && payTab === "QR") {
+      if (swipeDistance > 0 && payTab === "QR 스캔") {
         // 오른쪽으로 스와이프 (바코드로 보기)
         setPayTab("BARCODE");
       } else if (swipeDistance < 0 && payTab === "BARCODE") {
         // 왼쪽으로 스와이프 (QR로 보기)
-        setPayTab("QR");
+        setPayTab("QR 스캔");
       }
     }
   };
@@ -255,25 +255,30 @@ export default function PayContainer() {
       {payTab === "BARCODE" && (
         <div className="h-full flex flex-col">
           {/* 상단 고정 영역 */}
-          <div className="px-6 py-6 flex-shrink-0">
+          <div className="px-6 mb-6 px-2 flex-shrink-0">
             {/* 바코드 + QR 영역 */}
-            <div className="flex gap-6 items-center justify-center">
-              {/* 바코드 더미 */}
-              <div className="w-8/12 h-20 bg-[repeating-linear-gradient(90deg,black_0_2px,transparent_2px_6px)] rounded-sm" />
-              {/* QR 더미 */}
-              <div className="size-20 grid grid-cols-4 grid-rows-4 gap-0.5">
-                {Array.from({ length: 16 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className={i % 3 === 0 ? "bg-black" : "bg-stone-200"}
-                  />
-                ))}
+            <div className="flex items-center justify-center">
+              {/* 바코드 이미지 */}
+              <div className="w-10/12 h-28 flex items-center justify-center">
+                <img 
+                  src="/images/barcode.png" 
+                  alt="바코드" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              {/* QR 코드 이미지 */}
+              <div className="size-24 flex items-center justify-center">
+                <img 
+                  src="/images/qrcode.png" 
+                  alt="QR 코드" 
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
 
             {/* 계좌/잔액 정보 */}
             <div>
-              <div className="flex items-center justify-between text-sm mt-8">
+              <div className="flex items-center justify-between text-sm mt-4">
                 <span className="text-stone-700 font-medium text-lg">계좌</span>
                 <span className=" tracking-wide text-stone-900 text-h2">
                   {accountNo}
@@ -375,8 +380,8 @@ export default function PayContainer() {
         onConfirm={handleChargeConfirm}
       />
 
-      {/* QR 탭 화면 */}
-      {payTab === "QR" && (
+      {/* QR 스캔 탭 화면 */}
+      {payTab === "QR 스캔" && (
         <div className="bg-[#E5F0FE] h-full">
           <QRScannerContainer once onScan={handleQrScan} />
         </div>

@@ -49,7 +49,9 @@ export const ChartComponent: React.FC<ChartProps> = ({
   const [legendData, setLegendData] = useState({
     volume: "",
   });
-  const [tooltipData, setTooltipData] = useState<StockChartData | null>(null);
+  const [tooltipData, setTooltipData] = useState<
+    (StockChartData & { prevClose?: number; prevVolume?: number }) | null
+  >(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
@@ -63,6 +65,7 @@ export const ChartComponent: React.FC<ChartProps> = ({
       ]),
     [dayData, weekData, monthData, yearData]
   );
+  console.log(dayData);
 
   // 날짜 형식 변환 함수
   const formatTimeForChart = (timeStr: string): Time => {
@@ -346,6 +349,18 @@ export const ChartComponent: React.FC<ChartProps> = ({
           y = margin;
         }
 
+        // 전일 종가 및 거래량 계산
+        const currentData = seriesesData.get(selectedPeriod) || [];
+        const currentIndex = currentData.findIndex(
+          (d) => formatTimeForChart(d.time) === param.time
+        );
+        const prevClose =
+          currentIndex > 0 ? currentData[currentIndex - 1].close : undefined;
+        const prevVolume =
+          currentIndex > 0
+            ? currentData[currentIndex - 1].trading_volume
+            : undefined;
+
         setTooltipPosition({ x, y });
         setTooltipData({
           time: param.time as string,
@@ -355,9 +370,11 @@ export const ChartComponent: React.FC<ChartProps> = ({
           close: (candleData as any).close,
           trading_volume: (volumeData as any).value,
           ma_5: (ma5Data as any)?.value ?? 0,
+          ma_10: (ma10Data as any)?.value ?? 0,
           ma_20: (ma20Data as any)?.value ?? 0,
           ma_60: (ma60Data as any)?.value ?? 0,
-          ma_10: (ma10Data as any)?.value ?? 0,
+          prevClose,
+          prevVolume,
         });
         setTooltipVisible(true);
       }
@@ -426,23 +443,29 @@ export const ChartComponent: React.FC<ChartProps> = ({
               <div className="text-right">
                 <span
                   className={
-                    tooltipData.close >= tooltipData.open
+                    tooltipData.prevClose &&
+                    tooltipData.close >= tooltipData.prevClose
                       ? "text-red-600"
                       : "text-blue-600"
                   }
                 >
                   {tooltipData.close.toLocaleString()}
                 </span>
-                <span
-                  className={`ml-2 text-xs ${
-                    tooltipData.close >= tooltipData.open
-                      ? "text-red-600"
-                      : "text-blue-600"
-                  }`}
-                >
-                  {calculateChange(tooltipData.close, tooltipData.open).percent}
-                  %
-                </span>
+                {tooltipData.prevClose && (
+                  <span
+                    className={`ml-2 text-xs ${
+                      tooltipData.close >= tooltipData.prevClose
+                        ? "text-red-600"
+                        : "text-blue-600"
+                    }`}
+                  >
+                    {
+                      calculateChange(tooltipData.close, tooltipData.prevClose)
+                        .percent
+                    }
+                    %
+                  </span>
+                )}
               </div>
             </div>
             <div className="text-sm">
@@ -451,26 +474,29 @@ export const ChartComponent: React.FC<ChartProps> = ({
                 <div className="text-right">
                   <span
                     className={
-                      tooltipData.open >= tooltipData.close
-                        ? "text-blue-600"
-                        : "text-red-600"
+                      tooltipData.prevClose &&
+                      tooltipData.open >= tooltipData.prevClose
+                        ? "text-red-600"
+                        : "text-blue-600"
                     }
                   >
                     {tooltipData.open.toLocaleString()}
                   </span>
-                  <span
-                    className={`ml-2 text-xs ${
-                      tooltipData.open >= tooltipData.close
-                        ? "text-blue-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {
-                      calculateChange(tooltipData.open, tooltipData.close)
-                        .percent
-                    }
-                    %
-                  </span>
+                  {tooltipData.prevClose && (
+                    <span
+                      className={`ml-2 text-xs ${
+                        tooltipData.open >= tooltipData.prevClose
+                          ? "text-red-600"
+                          : "text-blue-600"
+                      }`}
+                    >
+                      {
+                        calculateChange(tooltipData.open, tooltipData.prevClose)
+                          .percent
+                      }
+                      %
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -479,26 +505,29 @@ export const ChartComponent: React.FC<ChartProps> = ({
                 <div className="text-right">
                   <span
                     className={
-                      tooltipData.high >= tooltipData.close
+                      tooltipData.prevClose &&
+                      tooltipData.high >= tooltipData.prevClose
                         ? "text-red-600"
                         : "text-blue-600"
                     }
                   >
                     {tooltipData.high.toLocaleString()}
                   </span>
-                  <span
-                    className={`ml-2 text-xs ${
-                      tooltipData.high >= tooltipData.close
-                        ? "text-red-600"
-                        : "text-blue-600"
-                    }`}
-                  >
-                    {
-                      calculateChange(tooltipData.high, tooltipData.close)
-                        .percent
-                    }
-                    %
-                  </span>
+                  {tooltipData.prevClose && (
+                    <span
+                      className={`ml-2 text-xs ${
+                        tooltipData.high >= tooltipData.prevClose
+                          ? "text-red-600"
+                          : "text-blue-600"
+                      }`}
+                    >
+                      {
+                        calculateChange(tooltipData.high, tooltipData.prevClose)
+                          .percent
+                      }
+                      %
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -507,44 +536,55 @@ export const ChartComponent: React.FC<ChartProps> = ({
                 <div className="text-right">
                   <span
                     className={
-                      tooltipData.low >= tooltipData.close
+                      tooltipData.prevClose &&
+                      tooltipData.low >= tooltipData.prevClose
                         ? "text-red-600"
                         : "text-blue-600"
                     }
                   >
                     {tooltipData.low.toLocaleString()}
                   </span>
-                  <span
-                    className={`ml-2 text-xs ${
-                      tooltipData.low >= tooltipData.close
-                        ? "text-red-600"
-                        : "text-blue-600"
-                    }`}
-                  >
-                    {
-                      calculateChange(tooltipData.low, tooltipData.close)
-                        .percent
-                    }
-                    %
-                  </span>
+                  {tooltipData.prevClose && (
+                    <span
+                      className={`ml-2 text-xs ${
+                        tooltipData.low >= tooltipData.prevClose
+                          ? "text-red-600"
+                          : "text-blue-600"
+                      }`}
+                    >
+                      {
+                        calculateChange(tooltipData.low, tooltipData.prevClose)
+                          .percent
+                      }
+                      %
+                    </span>
+                  )}
                 </div>
               </div>
 
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">거래량</span>
                 <div className="text-right">
-                  <span className="text-blue-600 font-medium">
+                  <span className="text-gray-700 font-medium">
                     {Math.round(tooltipData.trading_volume).toLocaleString()}
                   </span>
-                  <span className="ml-2 text-xs text-blue-600">
-                    {
-                      calculateChange(
-                        tooltipData.trading_volume,
-                        tooltipData.close
-                      ).percent
-                    }
-                    %
-                  </span>
+                  {tooltipData.prevVolume && (
+                    <span
+                      className={`ml-2 text-xs ${
+                        tooltipData.trading_volume >= tooltipData.prevVolume
+                          ? "text-red-600"
+                          : "text-blue-600"
+                      }`}
+                    >
+                      {
+                        calculateChange(
+                          tooltipData.trading_volume,
+                          tooltipData.prevVolume
+                        ).percent
+                      }
+                      %
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -556,54 +596,95 @@ export const ChartComponent: React.FC<ChartProps> = ({
                   <div className="text-right">
                     <span
                       className={
-                        tooltipData.ma_5 >= tooltipData.close
+                        tooltipData.prevClose &&
+                        tooltipData.ma_5 >= tooltipData.prevClose
                           ? "text-red-600"
                           : "text-blue-600"
                       }
                     >
                       {tooltipData.ma_5.toLocaleString()}
                     </span>
-                    <span
-                      className={`ml-2 text-xs ${
-                        tooltipData.ma_5 >= tooltipData.close
-                          ? "text-red-600"
-                          : "text-blue-600"
-                      }`}
-                    >
-                      {
-                        calculateChange(tooltipData.ma_5, tooltipData.close)
-                          .percent
-                      }
-                      %
-                    </span>
+                    {tooltipData.prevClose && (
+                      <span
+                        className={`ml-2 text-xs ${
+                          tooltipData.ma_5 >= tooltipData.prevClose
+                            ? "text-red-600"
+                            : "text-blue-600"
+                        }`}
+                      >
+                        {
+                          calculateChange(
+                            tooltipData.ma_5,
+                            tooltipData.prevClose
+                          ).percent
+                        }
+                        %
+                      </span>
+                    )}
                   </div>
                 </div>
-
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">이평 10</span>
+                  <div className="text-right">
+                    <span
+                      className={
+                        tooltipData.prevClose &&
+                        tooltipData.ma_10 >= tooltipData.prevClose
+                          ? "text-red-600"
+                          : "text-blue-600"
+                      }
+                    >
+                      {tooltipData.ma_10.toLocaleString()}
+                    </span>
+                    {tooltipData.prevClose && (
+                      <span
+                        className={`ml-2 text-xs ${
+                          tooltipData.ma_10 >= tooltipData.prevClose
+                            ? "text-red-600"
+                            : "text-blue-600"
+                        }`}
+                      >
+                        {
+                          calculateChange(
+                            tooltipData.ma_10,
+                            tooltipData.prevClose
+                          ).percent
+                        }
+                        %
+                      </span>
+                    )}
+                  </div>
+                </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">이평 20</span>
                   <div className="text-right">
                     <span
                       className={
-                        tooltipData.ma_20 >= tooltipData.close
+                        tooltipData.prevClose &&
+                        tooltipData.ma_20 >= tooltipData.prevClose
                           ? "text-red-600"
                           : "text-blue-600"
                       }
                     >
                       {tooltipData.ma_20.toLocaleString()}
                     </span>
-                    <span
-                      className={`ml-2 text-xs ${
-                        tooltipData.ma_20 >= tooltipData.close
-                          ? "text-red-600"
-                          : "text-blue-600"
-                      }`}
-                    >
-                      {
-                        calculateChange(tooltipData.ma_20, tooltipData.close)
-                          .percent
-                      }
-                      %
-                    </span>
+                    {tooltipData.prevClose && (
+                      <span
+                        className={`ml-2 text-xs ${
+                          tooltipData.ma_20 >= tooltipData.prevClose
+                            ? "text-red-600"
+                            : "text-blue-600"
+                        }`}
+                      >
+                        {
+                          calculateChange(
+                            tooltipData.ma_20,
+                            tooltipData.prevClose
+                          ).percent
+                        }
+                        %
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -612,54 +693,31 @@ export const ChartComponent: React.FC<ChartProps> = ({
                   <div className="text-right">
                     <span
                       className={
-                        tooltipData.ma_60 >= tooltipData.close
-                          ? "text-blue-600"
-                          : "text-red-600"
+                        tooltipData.prevClose &&
+                        tooltipData.ma_60 >= tooltipData.prevClose
+                          ? "text-red-600"
+                          : "text-blue-600"
                       }
                     >
                       {tooltipData.ma_60.toLocaleString()}
                     </span>
-                    <span
-                      className={`ml-2 text-xs ${
-                        tooltipData.ma_60 >= tooltipData.close
-                          ? "text-blue-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      {
-                        calculateChange(tooltipData.ma_60, tooltipData.close)
-                          .percent
-                      }
-                      %
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">이평 10</span>
-                  <div className="text-right">
-                    <span
-                      className={
-                        tooltipData.ma_10 >= tooltipData.close
-                          ? "text-blue-600"
-                          : "text-red-600"
-                      }
-                    >
-                      {tooltipData.ma_10.toLocaleString()}
-                    </span>
-                    <span
-                      className={`ml-2 text-xs ${
-                        tooltipData.ma_10 >= tooltipData.close
-                          ? "text-blue-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      {
-                        calculateChange(tooltipData.ma_10, tooltipData.close)
-                          .percent
-                      }
-                      %
-                    </span>
+                    {tooltipData.prevClose && (
+                      <span
+                        className={`ml-2 text-xs ${
+                          tooltipData.ma_60 >= tooltipData.prevClose
+                            ? "text-red-600"
+                            : "text-blue-600"
+                        }`}
+                      >
+                        {
+                          calculateChange(
+                            tooltipData.ma_60,
+                            tooltipData.prevClose
+                          ).percent
+                        }
+                        %
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
