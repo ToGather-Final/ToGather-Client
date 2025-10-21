@@ -35,4 +35,69 @@ export async function getGroupPayInfo(groupId: string): Promise<GroupPayAccountI
   return apiRequest<GroupPayAccountInfo>(url, { method: 'GET' })
 }
 
+// 거래 내역 조회
+export interface TransactionHistoryItem {
+  id: string;
+  type: string;
+  amount: number;
+  balanceAfter: number;
+  description: string;
+  createdAt: string;
+}
+
+export interface TransactionHistoryResponse {
+  items: TransactionHistoryItem[];
+  nextCursorCreatedAt?: string;
+  nextCursorId?: string;
+  hasMore: boolean;
+}
+
+export async function getTransactionHistory(
+  accountId: string,
+  size: number = 20,
+  type?: string,
+  cursorCreatedAt?: string,
+  cursorId?: string
+): Promise<TransactionHistoryResponse> {
+  const params = new URLSearchParams({
+    accountId,
+    size: size.toString(),
+  });
+  
+  if (type) params.append('type', type);
+  if (cursorCreatedAt) params.append('cursorCreatedAt', cursorCreatedAt);
+  if (cursorId) params.append('cursorId', cursorId);
+
+  const url = `${API_GATEWAY_URL}${API_ENDPOINTS.PAY.HISTORY}?${params.toString()}`;
+  console.log('🌐 거래 내역 API 요청 URL:', url);
+  console.log('🌐 요청 파라미터:', { accountId, size, type, cursorCreatedAt, cursorId });
+
+  const response = await apiRequest<TransactionHistoryResponse>(url, { method: 'GET' });
+  console.log('🌐 거래 내역 API 응답:', response);
+  
+  return response;
+}
+
+// 결제 요청 인터페이스
+export interface PaymentRequest {
+  payerAccountId: string;
+  amount: number;
+  recipientName: string;
+  recipientBankName: string;
+  recipientAccountNumber: string;
+  clientRequestId: string;
+}
+
+// 결제 처리
+export async function processPayment(paymentData: PaymentRequest): Promise<void> {
+  const url = `${API_GATEWAY_URL}${API_ENDPOINTS.PAY.PAYMENT}`;
+  console.log('💳 결제 API 요청 URL:', url);
+  console.log('💳 결제 요청 데이터:', paymentData);
+
+  await apiRequest<void>(url, {
+    method: 'POST',
+    body: JSON.stringify(paymentData),
+  });
+}
+
 

@@ -6,44 +6,23 @@ import ChargeModal from "@/components/pay/ChargeModal";
 import { usePayTab } from "@/contexts/payTabContext";
 import QRScannerContainer from "./QRScannerContainer";
 import { useGroupId } from "@/contexts/groupIdContext";
-import { rechargePay, getGroupPayInfo, GroupPayAccountInfo } from "@/utils/api/transfers";
+import { rechargePay, getGroupPayInfo, getTransactionHistory, processPayment, GroupPayAccountInfo, TransactionHistoryItem, PaymentRequest } from "@/utils/api/transfers";
+import TransferModal from "@/components/pay/TransferModal";
 
 const currency = new Intl.NumberFormat("ko-KR");
 
-type Transaction = {
-  id: string;
-  title: string;
-  date: string; // YYYY.MM.DD HH:mm
-  amount: number; // + 충전, - 결제
-};
-
-const mockTransactions: Transaction[] = [
-  {
-    id: "t1",
-    title: "춘천 닭갈비",
-    date: "2025.09.23 14:50",
-    amount: -30000,
-  },
-  {
-    id: "t2",
-    title: "천안 휴게소",
-    date: "2025.09.23 14:50",
-    amount: -13000,
-  },
-  {
-    id: "t3",
-    title: "페이머니 충전",
-    date: "2025.09.23 14:50",
-    amount: 50000,
-  },
-];
-
 export default function PayContainer() {
   const [isChargeModalOpen, setIsChargeModalOpen] = useState(false);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [qrRecipientInfo, setQrRecipientInfo] = useState<string>("");
+  const [scannedQrCode, setScannedQrCode] = useState<string>("");
   const { payTab, setPayTab } = usePayTab();
   const { groupId } = useGroupId();
   const [accountNo, setAccountNo] = useState<string>("-");
   const [payMoney, setPayMoney] = useState<number>(0);
+  const [transactions, setTransactions] = useState<TransactionHistoryItem[]>([]);
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
+  const [groupAccountId, setGroupAccountId] = useState<string>("");
 
   // 터치 이벤트를 위한 ref와 상태
   const touchStartX = useRef<number>(0);
@@ -59,7 +38,7 @@ export default function PayContainer() {
       }
       await rechargePay(groupId, amount);
       setIsChargeModalOpen(false);
-      alert('충전 제안을 생성했습니다.');
+      alert('페이 머니에 충전을 완료했습니다.');
     } catch (e) {
       const msg = e instanceof Error ? e.message : '충전 요청에 실패했습니다.';
       alert(msg);
@@ -70,11 +49,92 @@ export default function PayContainer() {
   const loadGroupPay = async () => {
     if (!groupId) return;
     try {
+      console.log('🏦 loadGroupPay 시작, groupId:', groupId);
       const info: GroupPayAccountInfo = await getGroupPayInfo(groupId);
+      console.log('🏦 계좌 정보 응답:', info);
       setAccountNo(info.accountNumber);
       setPayMoney(info.balance);
+      setGroupAccountId(info.id); // 그룹 계좌 ID 저장
+      
+      // 계좌 정보를 받아온 후 거래 내역 조회
+      console.log('🏦 거래 내역 조회 시작, accountId:', info.id);
+      await loadTransactionHistory(info.id);
     } catch (e) {
       console.error('Failed to load group pay info', e);
+    }
+  };
+
+  // 거래 내역 조회
+  const loadTransactionHistory = async (accountId: string) => {
+    if (!accountId) return;
+    
+    console.log('🔍 loadTransactionHistory 시작, accountId:', accountId);
+    setIsLoadingTransactions(true);
+    try {
+      const response = await getTransactionHistory(accountId, 10); // 최근 10개만 조회
+      console.log('📊 거래 내역 API 응답:', response);
+      console.log('📊 response.items:', response.items);
+      console.log('📊 response.items.length:', response.items?.length);
+      
+      // id가 null인 항목들에 대해 경고만 출력하고 모든 항목을 표시
+      (response.items || []).forEach((tx, index) => {
+        if (!tx.id) {
+          console.warn(`⚠️ 거래 내역 ${index}번째 항목의 id가 null입니다:`, tx);
+        }
+      });
+      
+      setTransactions(response.items || []);
+      console.log('📊 transactions 상태 설정 완료:', response.items || []);
+    } catch (e) {
+      console.error('Failed to load transaction history', e);
+      setTransactions([]);
+    } finally {
+      setIsLoadingTransactions(false);
+    }
+  };
+
+  // QR 스캔 처리
+  const handleQrScan = (qrData: string) => {
+    console.log('📱 QR 스캔 결과:', qrData);
+    setScannedQrCode(qrData);
+    setQrRecipientInfo("교대이층집"); // 고정값
+    setIsTransferModalOpen(true);
+  };
+
+  // 결제 처리
+  const handleTransferConfirm = async (data: { amount: string }) => {
+    try {
+      if (!groupAccountId) throw new Error('그룹 계좌 정보가 없습니다.');
+      
+      const amount = Number(data.amount);
+      if (!Number.isFinite(amount) || amount <= 0) {
+        throw new Error('올바른 금액을 입력하세요.');
+      }
+
+      const clientRequestId = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : Math.random().toString(36).slice(2);
+
+      const paymentData: PaymentRequest = {
+        payerAccountId: groupAccountId,
+        amount: amount,
+        recipientName: "교대이층집",
+        recipientBankName: "신한은행",
+        recipientAccountNumber: "1234567890123456", // 임시 계좌번호
+        clientRequestId: clientRequestId,
+      };
+
+      await processPayment(paymentData);
+      setIsTransferModalOpen(false);
+      alert('송금이 완료되었습니다.');
+      
+      // 거래 내역 새로고침
+      if (groupAccountId) {
+        await loadTransactionHistory(groupAccountId);
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '송금에 실패했습니다.';
+      alert(msg);
     }
   };
 
@@ -163,28 +223,46 @@ export default function PayContainer() {
             </h2>
 
             <div className="space-y-2">
-              {mockTransactions.map((tx) => (
-                <div
-                  key={tx.id}
-                  className="rounded-xl border border-stone-200 px-4 py-3 shadow-xs bg-white flex items-center gap-3"
-                >
-                  <div className="flex-1">
-                    <div className="text-sm text-stone-800">{tx.title}</div>
-                    <div className="text-[11px] text-stone-500 mt-0.5">
-                      {tx.date}
+              {isLoadingTransactions ? (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                  <p className="text-sm text-gray-500">거래 내역을 불러오는 중...</p>
+                </div>
+              ) : transactions && transactions.length > 0 ? (
+                transactions.map((tx, index) => (
+                  <div
+                    key={tx.id || `transaction-${index}-${tx.createdAt}`}
+                    className="rounded-xl border border-stone-200 px-4 py-3 shadow-xs bg-white flex items-center gap-3"
+                  >
+                    <div className="flex-1">
+                      <div className="text-sm text-stone-800">{tx.description}</div>
+                      <div className="text-[11px] text-stone-500 mt-0.5">
+                        {new Date(tx.createdAt).toLocaleString('ko-KR', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false
+                        }).replace(/\./g, '.').replace(/,/g, '')}
+                      </div>
+                    </div>
+                    <div
+                      className={
+                        "text-sm font-semibold ml-2 " +
+                        (tx.amount >= 0 ? "text-sky-600" : "text-stone-500")
+                      }
+                    >
+                      {tx.amount >= 0 ? "+" : "-"}
+                      {currency.format(Math.abs(tx.amount))}원
                     </div>
                   </div>
-                  <div
-                    className={
-                      "text-sm font-semibold ml-2 " +
-                      (tx.amount >= 0 ? "text-sky-600" : "text-stone-500")
-                    }
-                  >
-                    {tx.amount >= 0 ? "+" : "-"}
-                    {currency.format(Math.abs(tx.amount))}원
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-sm text-gray-500">거래 내역이 없습니다.</p>
                 </div>
-              ))}
+              )}
             </div>
           </section>
         </div>
@@ -210,9 +288,17 @@ export default function PayContainer() {
       {/* QR 탭 화면 */}
       {payTab === "QR" && (
         <div className="bg-[#E5F0FE] h-full">
-          <QRScannerContainer once />
+          <QRScannerContainer once onScan={handleQrScan} />
         </div>
       )}
+
+      {/* 송금 모달 */}
+      <TransferModal
+        isOpen={isTransferModalOpen}
+        onClose={() => setIsTransferModalOpen(false)}
+        onConfirm={handleTransferConfirm}
+        recipientName={qrRecipientInfo}
+      />
     </div>
   );
 }
