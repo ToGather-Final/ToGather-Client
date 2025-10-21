@@ -93,7 +93,13 @@ export default function StockListContainer() {
     <MenuTab tabs={uptabs} activeTab={stockTab} onTabChange={setStockTab}>
       {isLoading || (stockTab === "MY" && myStockLoading) ? (
         <div className="flex items-center justify-center h-64 text-center text-gray-500">
-          Loading...
+          주식 데이터를 불러오는 중...
+        </div>
+      ) : stockList.length === 0 ? (
+        <div className="flex items-center justify-center h-64 text-center">
+          <p className="text-gray-500 text-lg">
+            {stockTab === "MY" ? "보유종목이 없습니다." : "종목이 없습니다."}
+          </p>
         </div>
       ) : (
         <div>
