@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
+import Logo from "@/components/common/Logo"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import BackgroundCoins from "@/components/common/BackgroundCoins"
@@ -177,17 +177,7 @@ export default function LoginFlow() {
       {/* Main content */}
       <div className="flex flex-col items-center justify-center h-full px-8 relative z-10">
         {/* Logo */}
-        <div className="mb-8">
-          <Image 
-            src="/images/logo-blue.webp"
-            alt="ToGather Logo"
-            width={64}
-            height={64}
-            priority
-            fetchPriority="high"
-            className="h-16 w-16 object-contain"
-          />
-        </div>
+        <Logo variant="blue" size="lg" />
 
         <h1 className="text-5xl font-bold text-center mb-16" style={{ color: '#6592FD' }}>ToGather</h1>
 
