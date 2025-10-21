@@ -59,7 +59,7 @@ export const SimpleChart: React.FC<ChartProps> = ({ dayData, stockCode }) => {
     const validData = dayData.filter(
       (d) =>
         d &&
-        d.time &&
+        d.date &&
         d.open !== undefined &&
         d.high !== undefined &&
         d.low !== undefined &&
@@ -70,7 +70,7 @@ export const SimpleChart: React.FC<ChartProps> = ({ dayData, stockCode }) => {
 
     candleSeriesRef.current?.setData(
       validData.map((d) => ({
-        time: formatDateForChart(d.time),
+        time: formatDateForChart(d.date),
         open: d.open,
         high: d.high,
         low: d.low,
