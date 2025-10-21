@@ -33,7 +33,7 @@ export default function StockDrawer({ open, onOpenChange, stockCode }: props) {
   };
 
   const { data, error, isLoading } = useSWR(
-    stockCode ? `${baseUrl}/trading/stocks/${stockCode}` : null,
+    stockCode ? `${baseUrl}/trading/stocks/${stockCode}/info` : null,
     getStockDetail
   );
 
@@ -75,8 +75,16 @@ export default function StockDrawer({ open, onOpenChange, stockCode }: props) {
 
   const stockInfo: StockDetail = data.data;
 
-  // chartData는 이미 API에서 SimpleChartData 형식으로 옴
-  const chartData: SimpleChartData[] = stockInfo.chartData as SimpleChartData[];
+  // chartData를 SimpleChart 형식으로 변환
+  const chartData: SimpleChartData[] =
+    stockInfo.chartData?.map((item) => ({
+      time: item.time,
+      open: item.open,
+      high: item.high,
+      low: item.low,
+      close: item.close,
+      trading_volume: item.trading_volume,
+    })) || [];
 
   return (
     <div>
