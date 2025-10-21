@@ -4,7 +4,6 @@ import { useState } from "react";
 import Modal from "@/components/common/Modal";
 import { DialogTitle } from "@/components/ui/dialog";
 import YesNoModal from "../../common/YesNoModal";
-import { createDepositProposal } from "@/services/vote/payDeposit";
 
 interface DepositProposalModalProps {
   isOpen: boolean;
@@ -20,90 +19,22 @@ export default function DepositProposalModal({
   const [amount, setAmount] = useState(0);
   const [dueDate, setDueDate] = useState("");
   const [reason, setReason] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 선택한 시간과 현재 시간의 차이를 분으로 계산
-  const calculateDurationMinutes = (timeString: string): number => {
-    if (!timeString) return 0;
-
-    const [hours, minutes] = timeString.split(":").map(Number);
-    const now = new Date();
-    const selectedTime = new Date();
-    selectedTime.setHours(hours, minutes, 0, 0);
-
-    // 선택한 시간이 현재 시간보다 이전이면 다음날로 계산
-    if (selectedTime <= now) {
-      selectedTime.setDate(selectedTime.getDate() + 1);
-    }
-
-    const diffMs = selectedTime.getTime() - now.getTime();
-    const diffMinutes = Math.ceil(diffMs / (1000 * 60));
-
-    return diffMinutes;
-  };
-
-  const handleSubmit = async () => {
-    if (!amount || !dueDate || !reason) {
-      alert("모든 필드를 입력해주세요.");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const durationMinutes = calculateDurationMinutes(dueDate);
-
-      console.log("=== 예수금 제안 시작 ===");
-      console.log("Amount:", amount);
-      console.log("DueDate:", dueDate);
-      console.log("Duration Minutes:", durationMinutes);
-      console.log("Reason:", reason);
-
-      // API 호출
-      await createDepositProposal({
-        proposalName: "예수금 충전 제안",
-        category: "PAY",
-        action: "DEPOSIT",
-        payload: {
-          reason: reason,
-          amountPerPerson: amount,
-        },
-        durationMinutes: durationMinutes,
-      });
-
-      console.log("✅ 예수금 제안 성공");
-
-      // 성공 시 부모 컴포넌트에 전달
-      onSubmit({
-        amount,
-        dueDate,
-        reason,
-      });
-
-      onClose();
-    } catch (error: any) {
-      console.error("❌ 예수금 제안 실패:", error);
-      alert(error?.message || "예수금 제안에 실패했습니다. 다시 시도해주세요.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCancel = () => {
-    // 입력값 초기화
-    setAmount(0);
-    setDueDate("");
-    setReason("");
+  const handleSubmit = () => {
+    onSubmit({
+      amount,
+      dueDate,
+      reason,
+    });
     onClose();
   };
 
   return (
     <YesNoModal
       isOpen={isOpen}
-      onClose={handleCancel}
-      onYes={handleSubmit}
+      onClose={handleSubmit}
       text1="취소"
-      text2={isSubmitting ? "제안 중..." : "제안하기"}
+      text2="제안하기"
     >
       <div className="text-center py-8">
         <DialogTitle className="text-2xl font-bold text-gray-900 mb-2">
@@ -118,8 +49,7 @@ export default function DepositProposalModal({
               type="number"
               value={amount}
               onChange={(e) => setAmount(Number(e.target.value))}
-              disabled={isSubmitting}
-              className="w-full px-4 py-3 text-xl border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 text-xl border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="예수금 금액을 입력하세요"
             />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">
@@ -133,11 +63,10 @@ export default function DepositProposalModal({
               마감일자
             </label>
             <input
-              type="time"
+              type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              disabled={isSubmitting}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
@@ -149,8 +78,7 @@ export default function DepositProposalModal({
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              disabled={isSubmitting}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               rows={3}
               placeholder="제안 이유를 입력해주세요"
             />

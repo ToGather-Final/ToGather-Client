@@ -16,12 +16,12 @@ export interface Stock {
 //   enabled: boolean
 
 export interface SimpleChartData {
-  date: string;
+  time: string; //time
   open: number;
   high: number;
   low: number;
   close: number;
-  volume: number;
+  trading_volume: number; //trading_volume
 }
 
 export interface StockChartData {
@@ -79,22 +79,4 @@ export interface Price {
   price: number;
   quantity: number;
   type: "ask" | "bid";
-}
-
-// 주문 관련 타입들
-export interface OrderRequest {
-  accountId: string;
-  stockCode: string;
-  orderType: "BUY" | "SELL";
-  priceType: "LIMIT" | "MARKET";
-  price: number;
-  quantity: number;
-}
-
-export interface OrderResponse {
-  orderId: string;
-  status: "PENDING" | "FILLED" | "CANCELLED" | "REJECTED";
-  message: string;
-  executedPrice?: number;
-  executedQuantity?: number;
 }

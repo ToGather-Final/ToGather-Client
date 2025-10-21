@@ -2,34 +2,50 @@
 
 import SimpleTab from "@/components/tab/SimpleTab";
 import { ChevronLeft } from "lucide-react";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import YesNoModal from "@/components/common/YesNoModal";
 import Modal from "@/components/common/Modal";
 import { DialogTitle } from "@/components/ui/dialog";
-import { useStompWebSocket } from "@/hooks/useWebSocket";
-import { createTradeProposal } from "@/services/vote/payDeposit";
 
-interface RealtimeContainerProps {
-  stockId: string;
-  stockCode: string;
-  stockName: string;
-}
-
-export default function RealtimeContainer({
-  stockId,
-  stockCode,
-  stockName,
-}: RealtimeContainerProps) {
+export default function RealtimeContainer() {
   const searchParams = useSearchParams();
-  const { isConnected, orderbookData } = useStompWebSocket(stockCode);
 
   const downtabs = [
     { id: "매수", label: "매수" },
     { id: "매도", label: "매도" },
   ];
 
+  // 호가 데이터 (매도호가 - 높은 가격부터)
+  const asks = [
+    { price: 82950, size: 150 },
+    { price: 82900, size: 200 },
+    { price: 82850, size: 300 },
+    { price: 82800, size: 180 },
+    { price: 82750, size: 250 },
+    { price: 82700, size: 120 },
+    { price: 82650, size: 400 },
+    { price: 82600, size: 350 },
+    { price: 82550, size: 280 },
+    { price: 82500, size: 500 },
+  ];
+
+  // 매수호가 데이터 (낮은 가격부터)
+  const bids = [
+    { price: 82450, size: 200 },
+    { price: 82400, size: 150 },
+    { price: 82350, size: 300 },
+    { price: 82300, size: 180 },
+    { price: 82250, size: 250 },
+    { price: 82200, size: 120 },
+    { price: 82150, size: 400 },
+    { price: 82100, size: 350 },
+    { price: 82050, size: 280 },
+    { price: 82000, size: 500 },
+  ];
+
   const [activeTab, setActiveTab] = useState("매수");
+  const [currentPrice, setCurrentPrice] = useState(82500);
   const [selectedPrice, setSelectedPrice] = useState<number | null>(null);
   const [quantity, setQuantity] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -41,94 +57,19 @@ export default function RealtimeContainer({
   const [adjustedPrice, setAdjustedPrice] = useState<number>(0);
   const [adjustedPerPersonPrice, setAdjustedPerPersonPrice] =
     useState<number>(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [useAdjustedPrice, setUseAdjustedPrice] = useState(false); // 가격 조정 사용 여부
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const GROUP_MEMBER_COUNT = 3; // 그룹원 수 하드코딩
 
-  // WebSocket 데이터에서 현재가 추출 (메모이제이션으로 불필요한 재계산 방지)
-  const currentPrice = useMemo(
-    () => orderbookData?.currentPrice || 0,
-    [orderbookData?.currentPrice]
-  );
-
-  const asks = useMemo(
-    () => (orderbookData?.askPrices || []).slice().reverse(),
-    [orderbookData?.askPrices]
-  );
-
-  const bids = useMemo(
-    () => orderbookData?.bidPrices || [],
-    [orderbookData?.bidPrices]
-  );
-
-  // Time input을 분으로 계산하는 함수
-  const calculateDurationMinutes = (timeString: string): number => {
-    if (!timeString) return 0;
-    const [hours, minutes] = timeString.split(":").map(Number);
-    const now = new Date();
-    const selectedTime = new Date();
-    selectedTime.setHours(hours, minutes, 0, 0);
-
-    // 선택한 시간이 현재 시간보다 이전이면 다음날로 설정
-    if (selectedTime <= now) {
-      selectedTime.setDate(selectedTime.getDate() + 1);
-    }
-
-    const diffMs = selectedTime.getTime() - now.getTime();
-    return Math.ceil(diffMs / (1000 * 60)); // 밀리초를 분으로 변환
-  };
-
-  const handleConfirmYes = async () => {
-    if (!reason || !dueDate || !quantity) {
-      alert("모든 필드를 입력해주세요.");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const durationMinutes = calculateDurationMinutes(dueDate);
-      const proposalName = `${stockName} ${quantity}주 ${orderType} 제안`;
-
-      // 가격 결정: 조정된 가격 사용 여부에 따라 달라짐
-      const finalPrice = useAdjustedPrice
-        ? Math.round(adjustedPrice / parseInt(quantity)) // 조정된 총 금액을 수량으로 나눔
-        : selectedPrice || currentPrice;
-
-      await createTradeProposal({
-        proposalName,
-        category: "TRADE",
-        action: orderType === "매수" ? "BUY" : "SELL",
-        payload: {
-          reason: reason,
-          stockId: stockId,
-          stockName: stockName,
-          price: finalPrice,
-          quantity: parseInt(quantity),
-        },
-        durationMinutes: durationMinutes,
-      });
-
-      console.log(`${orderType} 제안 성공:`, {
-        proposalName,
-        price: finalPrice,
-        priceType: useAdjustedPrice ? "조정된 가격" : "선택된 가격",
-        quantity: parseInt(quantity),
-        dueDate,
-        durationMinutes,
-        reason,
-      });
-
-      setIsConfirmModalOpen(false);
-      setIsCompleteModalOpen(true);
-    } catch (error: any) {
-      console.error("매매 제안 실패:", error);
-      alert(error?.message || "매매 제안에 실패했습니다. 다시 시도해주세요.");
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleConfirmYes = () => {
+    console.log(`${orderType} 주문:`, {
+      price: selectedPrice || currentPrice,
+      quantity: parseInt(quantity),
+      dueDate,
+      reason,
+    });
+    setIsConfirmModalOpen(false);
+    setIsCompleteModalOpen(true);
   };
 
   const handleCompleteClose = () => {
@@ -138,9 +79,6 @@ export default function RealtimeContainer({
     setDueDate("");
     setReason("");
     setSelectedPrice(null);
-    setUseAdjustedPrice(false);
-    setAdjustedPrice(0);
-    setAdjustedPerPersonPrice(0);
   };
 
   // 호가 항목 클릭 핸들러
@@ -164,7 +102,6 @@ export default function RealtimeContainer({
     if (Number.isInteger(perPersonPrice)) {
       // case1: 정수이면 바로 확인 모달
       setOrderType(activeTab as "매수" | "매도");
-      setUseAdjustedPrice(false); // 가격 조정 없음
       setIsConfirmModalOpen(true);
     } else {
       // case2: 실수이면 반올림 후 조정 모달
@@ -181,7 +118,6 @@ export default function RealtimeContainer({
   const handlePriceAdjustConfirm = () => {
     setIsPriceAdjustModalOpen(false);
     setOrderType(activeTab as "매수" | "매도");
-    setUseAdjustedPrice(true); // 조정된 가격 사용
     setIsConfirmModalOpen(true);
   };
 
@@ -205,11 +141,13 @@ export default function RealtimeContainer({
 
   // 시장가를 정중앙에 위치시키는 스크롤
   useEffect(() => {
-    if (scrollContainerRef.current && currentPrice && asks.length > 0) {
+    if (scrollContainerRef.current) {
       const container = scrollContainerRef.current;
       const containerHeight = container.clientHeight;
+      const scrollHeight = container.scrollHeight;
 
-      // 시장가가 정중앙에 오도록 스크롤 위치 계산
+      // 시장가(82500)가 정중앙에 오도록 스크롤 위치 계산
+      // asks 배열에서 82500의 인덱스를 찾기
       const currentPriceIndex = asks.findIndex(
         (ask) => ask.price === currentPrice
       );
@@ -220,43 +158,9 @@ export default function RealtimeContainer({
         container.scrollTop = Math.max(0, targetScrollTop);
       }
     }
-  }, [currentPrice, asks]);
-
-  // 로딩 상태 표시
-  if (!orderbookData) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="text-4xl mb-4">⏳</div>
-          <p className="text-gray-600 text-lg">
-            {isConnected
-              ? "호가 데이터를 불러오는 중..."
-              : "WebSocket에 연결 중..."}
-          </p>
-          <p className="text-gray-400 text-sm mt-2">
-            종목: {stockCode} ({stockName})
-          </p>
-        </div>
-      </div>
-    );
-  }
-
+  }, [currentPrice]);
   return (
     <div>
-      {/* WebSocket 연결 상태 표시 */}
-      <div className="flex items-center justify-between px-5 py-1 bg-gray-50">
-        <div className="flex items-center gap-2">
-          <div
-            className={`w-2 h-2 rounded-full ${
-              isConnected ? "bg-green-500" : "bg-red-500"
-            }`}
-          />
-          <span className="text-xs text-gray-600">
-            {isConnected ? "실시간 연결됨" : "연결 끊김"}
-          </span>
-        </div>
-      </div>
-
       <div className="flex gap-[10px] items-center justify-start py-2 px-5">
         <button
           onClick={() => window.history.back()}
@@ -264,48 +168,31 @@ export default function RealtimeContainer({
         >
           <ChevronLeft className="w-5 h-5 mr-1" />
         </button>
-        <span className="text-[14px] font-bold">
-          {orderbookData.stockName || stockName}
-        </span>
+        <span className="text-[14px] font-bold">NAVER</span>
       </div>
 
       <div className="px-8">
         <div className="flex justify-between items-center">
           <div>
             <div className="flex justify-start items-center text-[10px] gap-[10px]">
-              <div>{orderbookData.stockCode || stockCode}</div>
+              <div>035420</div>
               <div>KOSPI</div>
               <div>KRX</div>
             </div>
             <div className="flex justify-between items-center">
               <div
                 className={`flex items-center font-bold gap-[10px] text-[10px] ${
-                  orderbookData.changeDirection === "up"
-                    ? "text-red-600"
-                    : orderbookData.changeDirection === "down"
-                    ? "text-blue-600"
-                    : "text-gray-600"
+                  currentPrice >= 82500 ? "text-red-600" : "text-blue-600"
                 }`}
               >
                 <div className="text-[20px]">
                   {currentPrice.toLocaleString()}
                 </div>
                 <div className="flex items-center">
-                  <div>
-                    {orderbookData.changeDirection === "up"
-                      ? "▲"
-                      : orderbookData.changeDirection === "down"
-                      ? "▼"
-                      : ""}
-                  </div>
-                  <div>
-                    {Math.abs(orderbookData.changeAmount).toLocaleString()}
-                  </div>
+                  <div>▲</div>
+                  <div>3,200</div>
                 </div>
-                <div>
-                  {orderbookData.changeDirection === "up" ? "+" : ""}
-                  {orderbookData.changeRate}%
-                </div>
+                <div>+3.72%</div>
               </div>
             </div>
           </div>
@@ -332,57 +219,45 @@ export default function RealtimeContainer({
             >
               {/* 매도호가 (빨간색) */}
               <div className="space-y-1">
-                {asks.length > 0 ? (
-                  asks.map((ask, index) => (
-                    <div
-                      key={`ask-${ask.price}-${index}`}
-                      onClick={() => handlePriceClick(ask.price)}
-                      className={`w-full px-4 py-2 text-sm flex items-center justify-between cursor-pointer ${
-                        ask.price === currentPrice
-                          ? "border-2 border-[#686868] font-bold"
-                          : "hover:bg-[#e9e9e9]"
-                      }`}
-                    >
-                      <span className="text-red-600 font-medium">
-                        {ask.price.toLocaleString()}
-                      </span>
-                      <span className="text-gray-500">
-                        {ask.quantity.toLocaleString()}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center text-gray-400 py-4">
-                    매도호가 데이터 없음
+                {asks.map((ask) => (
+                  <div
+                    key={`ask-${ask.price}`}
+                    onClick={() => handlePriceClick(ask.price)}
+                    className={`w-full px-4 py-2 text-sm flex items-center justify-between cursor-pointer ${
+                      ask.price === currentPrice
+                        ? "border-2 border-[#686868] font-bold"
+                        : "hover:bg-[#e9e9e9]"
+                    }`}
+                  >
+                    <span className="text-red-600 font-medium">
+                      {ask.price.toLocaleString()}
+                    </span>
+                    <span className="text-gray-500">
+                      {ask.size.toLocaleString()}
+                    </span>
                   </div>
-                )}
+                ))}
               </div>
               {/* 매수호가 (파란색) */}
               <div className="space-y-1">
-                {bids.length > 0 ? (
-                  bids.map((bid, index) => (
-                    <div
-                      key={`bid-${bid.price}-${index}`}
-                      onClick={() => handlePriceClick(bid.price)}
-                      className={`w-full px-4 py-2 text-sm flex items-center justify-between cursor-pointer ${
-                        bid.price === currentPrice
-                          ? "border-2 border-[#686868] font-bold"
-                          : "hover:bg-[#e9e9e9]"
-                      }`}
-                    >
-                      <span className="text-blue-600 font-medium">
-                        {bid.price.toLocaleString()}
-                      </span>
-                      <span className="text-gray-500">
-                        {bid.quantity.toLocaleString()}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center text-gray-400 py-4">
-                    매수호가 데이터 없음
+                {bids.map((bid) => (
+                  <div
+                    key={`bid-${bid.price}`}
+                    onClick={() => handlePriceClick(bid.price)}
+                    className={`w-full px-4 py-2 text-sm flex items-center justify-between cursor-pointer ${
+                      bid.price === currentPrice
+                        ? "border-2 border-[#686868] font-bold"
+                        : "hover:bg-[#e9e9e9]"
+                    }`}
+                  >
+                    <span className="text-blue-600 font-medium">
+                      {bid.price.toLocaleString()}
+                    </span>
+                    <span className="text-gray-500">
+                      {bid.size.toLocaleString()}
+                    </span>
                   </div>
-                )}
+                ))}
               </div>
             </div>
           </div>
@@ -449,7 +324,7 @@ export default function RealtimeContainer({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    제안 이유
+                    {activeTab} 제안 이유
                   </label>
                   <textarea
                     value={reason}
@@ -498,67 +373,17 @@ export default function RealtimeContainer({
       {/* 확인 모달 */}
       <YesNoModal
         isOpen={isConfirmModalOpen}
-        onClose={() => !isSubmitting && setIsConfirmModalOpen(false)}
+        onClose={() => setIsConfirmModalOpen(false)}
         onYes={handleConfirmYes}
       >
         <div className="text-center py-8">
           <DialogTitle className="text-2xl font-bold text-gray-900 mb-4">
-            {isSubmitting ? "제안 중..." : `${orderType} 제안`}
+            {orderType} 제안
           </DialogTitle>
           <div className="max-h-[50dvh] overflow-y-auto">
-            {isSubmitting ? (
-              <div className="flex flex-col items-center gap-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                <p className="text-lg text-gray-700">
-                  제안을 처리하고 있습니다...
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-lg text-gray-700">
-                  {orderType} 주문을 제안하시겠습니까?
-                </p>
-                <div className="bg-gray-50 p-4 rounded-lg text-left space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">종목:</span>
-                    <span className="font-semibold">{stockName}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">수량:</span>
-                    <span className="font-semibold">{quantity}주</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">주당 가격:</span>
-                    <span className="font-semibold">
-                      {useAdjustedPrice
-                        ? (adjustedPrice / parseInt(quantity)).toLocaleString()
-                        : (selectedPrice || currentPrice).toLocaleString()}
-                      원
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">총 금액:</span>
-                    <span className="font-semibold">
-                      {useAdjustedPrice
-                        ? adjustedPrice.toLocaleString()
-                        : (
-                            (selectedPrice || currentPrice) * parseInt(quantity)
-                          ).toLocaleString()}
-                      원
-                      {useAdjustedPrice && (
-                        <span className="text-xs text-blue-600 ml-1">
-                          (조정됨)
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">마감 시간:</span>
-                    <span className="font-semibold">{dueDate}</span>
-                  </div>
-                </div>
-              </div>
-            )}
+            <p className="text-lg text-gray-700">
+              {orderType} 주문을 제안하시겠습니까?
+            </p>
           </div>
         </div>
       </YesNoModal>
