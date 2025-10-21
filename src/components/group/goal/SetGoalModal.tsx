@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Modal from "@/components/common/Modal";
 import { DialogTitle } from "@/components/ui/dialog";
+import YesNoModal from "@/components/common/YesNoModal";
 
 interface SetGoalModalProps {
   isOpen: boolean;
@@ -25,7 +26,13 @@ export default function SetGoalModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleSubmit} text="설정">
+    <YesNoModal
+      isOpen={isOpen}
+      onClose={onClose}
+      onYes={handleSubmit}
+      text1="취소"
+      text2="설정"
+    >
       <div className="text-center py-8">
         <DialogTitle className="text-2xl font-bold text-gray-900 mb-6">
           목표 금액 설정
@@ -45,6 +52,6 @@ export default function SetGoalModal({
           </div>
         </div>
       </div>
-    </Modal>
+    </YesNoModal>
   );
 }

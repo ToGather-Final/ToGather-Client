@@ -22,19 +22,12 @@ export default function DepositProposalModal({
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 선택한 시간과 현재 시간의 차이를 분으로 계산
-  const calculateDurationMinutes = (timeString: string): number => {
-    if (!timeString) return 0;
+  // 선택한 날짜/시간과 현재 시간의 차이를 분으로 계산
+  const calculateDurationMinutes = (dateTimeString: string): number => {
+    if (!dateTimeString) return 0;
 
-    const [hours, minutes] = timeString.split(":").map(Number);
     const now = new Date();
-    const selectedTime = new Date();
-    selectedTime.setHours(hours, minutes, 0, 0);
-
-    // 선택한 시간이 현재 시간보다 이전이면 다음날로 계산
-    if (selectedTime <= now) {
-      selectedTime.setDate(selectedTime.getDate() + 1);
-    }
+    const selectedTime = new Date(dateTimeString);
 
     const diffMs = selectedTime.getTime() - now.getTime();
     const diffMinutes = Math.ceil(diffMs / (1000 * 60));
@@ -48,11 +41,16 @@ export default function DepositProposalModal({
       return;
     }
 
+    const durationMinutes = calculateDurationMinutes(dueDate);
+
+    if (durationMinutes < 0) {
+      alert("마감일자를 현재보다 이후 시간으로 설정해주세요.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const durationMinutes = calculateDurationMinutes(dueDate);
-
       console.log("=== 예수금 제안 시작 ===");
       console.log("Amount:", amount);
       console.log("DueDate:", dueDate);
@@ -133,7 +131,7 @@ export default function DepositProposalModal({
               마감일자
             </label>
             <input
-              type="time"
+              type="datetime-local"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               disabled={isSubmitting}

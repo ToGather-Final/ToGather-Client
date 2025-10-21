@@ -257,9 +257,11 @@ export default function PortfolioContainer() {
   // 로딩 중일 때 (포트폴리오 데이터가 없으면 로딩 중으로 처리)
   if (groupPortfolioIsLoading || groupIsLoading || !portfolio) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center  h-64 ">
         <div className="text-center">
-          <div className="text-xl font-bold">로딩 중...</div>
+          <div className="text-gray-500 ">
+            포트폴리오 데이터를 불러오는 중...
+          </div>
         </div>
       </div>
     );
@@ -268,11 +270,9 @@ export default function PortfolioContainer() {
   // 에러가 발생했을 때
   if (groupProtfolioError || groupError) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center h-64 ">
         <div className="text-center text-red-600">
-          <div className="text-xl font-bold">
-            데이터를 불러오는데 실패했습니다.
-          </div>
+          <div className="font-bold">데이터를 불러오는데 실패했습니다.</div>
           <div className="mt-2">
             {groupProtfolioError?.message || groupError?.message}
           </div>
