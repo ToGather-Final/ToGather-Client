@@ -1,14 +1,15 @@
 "use client";
 
-import type React from "react";
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import MainButton from "@/components/common/MainButton";
-import { createInvestmentAccount } from "@/utils/api";
-import { getUserId } from "@/utils/token";
-import { markAccountCreated } from "@/utils/userStatus";
-import { ApiErrorWithStatus } from "@/types/api/auth";
-import Image from "next/image";
+import type React from "react"
+import { useState } from "react"
+import { Input } from "@/components/ui/input"
+import MainButton from "@/components/common/MainButton"
+import { createInvestmentAccount } from "@/utils/api"
+import { getUserId } from "@/utils/token"
+import { markAccountCreated } from "@/utils/userStatus"
+import { ApiErrorWithStatus } from "@/types/api/auth"
+import Image from "next/image"
+import InvestmentTermsModal from "@/components/common/InvestmentTermsModal"
 
 interface AccountSetupContainerProps {
   onComplete: () => void;
@@ -24,6 +25,7 @@ export default function AccountSetupContainer({
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -183,12 +185,23 @@ export default function AccountSetupContainer({
                 defaultChecked
                 required
               />
-              <label
-                htmlFor="agreement"
-                className="text-sm text-gray-700 leading-relaxed"
-              >
-                개인(신용) 정보 처리 동의서 (금융 거래)
-              </label>
+              <div className="flex-1">
+                <label
+                  htmlFor="agreement"
+                  className="text-sm text-gray-700 leading-relaxed"
+                >
+                  개인(신용) 정보 처리 동의서 (금융 거래)
+                </label>
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowTermsModal(true)}
+                    className="text-xs text-blue-600 underline hover:text-blue-800"
+                  >
+                    투자계좌 이용약관 보기
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Error Message */}
@@ -205,6 +218,12 @@ export default function AccountSetupContainer({
           </form>
         </div>
       </div>
+
+      {/* Terms Modal */}
+      <InvestmentTermsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
     </div>
   );
 }
