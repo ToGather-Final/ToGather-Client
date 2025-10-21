@@ -49,7 +49,16 @@ const nextConfig: NextConfig = {
     serverExternalPackages: ['sharp'],
     
     // 🚀 빌드 안정성 설정
-    outputFileTracingRoot: undefined, // 워크스페이스 루트 경고 해결
+    outputFileTracingRoot: process.cwd(), // 워크스페이스 루트 경고 해결
+    
+    // 🚀 빌드 캐시 설정 (CI/CD 최적화)
+    generateBuildId: process.env.CI ? () => 'build' : undefined,
+    
+    // 🚀 서버 타임아웃 설정 (Cold Start 방지)
+    serverRuntimeConfig: {
+        // 서버 사이드 타임아웃 설정
+        timeout: 30000, // 30초
+    },
     
     // 🚀 CSS 최적화 설정 (Next.js 15.5.3에서 제거됨)
     // swcMinify: true, // Next.js 15+에서 기본 활성화
@@ -72,17 +81,11 @@ const nextConfig: NextConfig = {
         },
     },
     
-    // 🚀 Webpack 설정으로 assetPrefix 강제 적용 (프로덕션 환경만)
-    webpack: (config, { isServer }) => {
-        if (!isServer && process.env.NODE_ENV === 'production') {
-            const cdnUrl = process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net';
-            
-            // 정적 자산에 CDN URL 강제 적용
-            config.output.publicPath = `${cdnUrl}/`;
-        }
-        // 개발 환경에서는 기본 Next.js 설정 사용
-        return config;
-    },
+    // 🚀 Webpack 설정 (assetPrefix가 이미 설정되어 있으므로 webpack 설정 제거)
+    // webpack: (config, { isServer, dev }) => {
+    //     // assetPrefix가 이미 CDN URL을 처리하므로 webpack 설정 불필요
+    //     return config;
+    // },
     
     // 🚀 캐싱 전략 (SSR 성능 향상)
     headers: async () => [
@@ -91,7 +94,7 @@ const nextConfig: NextConfig = {
             headers: [
                 {
                     key: 'Cache-Control',
-                    value: 'public, max-age=0, must-revalidate',
+                    value: 'public, max-age=0, s-maxage=300, stale-while-revalidate=60',
                 },
             ],
         },
@@ -100,7 +103,7 @@ const nextConfig: NextConfig = {
             headers: [
                 {
                     key: 'Cache-Control',
-                    value: 'public, max-age=60, s-maxage=60',
+                    value: 'public, max-age=0, s-maxage=60, stale-while-revalidate=30',
                 },
             ],
         },
@@ -115,41 +118,20 @@ const nextConfig: NextConfig = {
         },
     ],
     
-    // 🚀 리다이렉트 최적화
-    redirects: async () => [
-        {
-            source: '/home',
-            destination: '/',
-            permanent: true,
-        },
-    ],
+    // // 🚀 리다이렉트 최적화
+    // redirects: async () => [
+    //     {
+    //         source: '/home',
+    //         destination: '/',
+    //         permanent: true,
+    //     },
+    // ],
     
-    // 🚀 CDN을 통한 정적 자산 서빙 (프로덕션 환경만)
-    rewrites: async () => {
-        if (process.env.NODE_ENV === 'production') {
-            const cdnUrl = process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net';
-            return [
-                {
-                    source: '/static/:path*',
-                    destination: `${cdnUrl}/_next/static/:path*`,
-                },
-                {
-                    source: '/fonts/:path*',
-                    destination: `${cdnUrl}/fonts/:path*`,
-                },
-                {
-                    source: '/images/:path*',
-                    destination: `${cdnUrl}/images/:path*`,
-                },
-                {
-                    source: '/favicon.ico',
-                    destination: `${cdnUrl}/favicon.ico`,
-                },
-            ];
-        }
-        // 개발 환경에서는 rewrites 없음 (기본 Next.js 동작 사용)
-        return [];
-    },
+    // 🚀 CDN을 통한 정적 자산 서빙 (assetPrefix가 이미 처리하므로 rewrites 제거)
+    // rewrites: async () => {
+    //     // assetPrefix가 이미 CDN URL을 처리하므로 rewrites 불필요
+    //     return [];
+    // },
 };
 
 export default nextConfig;
