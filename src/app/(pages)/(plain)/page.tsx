@@ -1,4 +1,4 @@
-export const revalidate = 300; // ✅ 5분마다 ISR 캐시 재검증
+"use client"
 
 import { useState, useEffect, Suspense } from "react"
 import { useRouter } from "next/navigation"

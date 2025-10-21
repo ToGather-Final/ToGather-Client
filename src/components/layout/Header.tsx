@@ -39,7 +39,7 @@ export default function Header() {
     mutate: mutateGroupData,
   } = useSWR(groupId ? `${baseUrl}/groups/${groupId}` : null, getGroupInfo);
   useEffect(() => {
-    if (groupData?.goalAmount) {
+    if (groupData?.groupName) {
       setGroupName(groupData.groupName);
     }
   }, [groupData]);
@@ -150,7 +150,13 @@ export default function Header() {
           onClick={handleDropdownToggle}
           className="flex items-center gap-1 px-2 py-1 rounded transition-colors"
         >
-          <div>{groupName}</div>
+          <div>
+            {groupIsLoading || !groupName ? (
+              <div className="animate-pulse bg-gray-200 h-4 w-16 rounded"></div>
+            ) : (
+              groupName
+            )}
+          </div>
           <ChevronDown
             className={`transition-transform ${
               isDropdownOpen ? "rotate-180" : ""

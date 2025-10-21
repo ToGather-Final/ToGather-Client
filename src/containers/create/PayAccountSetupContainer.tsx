@@ -124,7 +124,7 @@ export default function PayAccountSetupContainer({ onComplete, groupId }: PayAcc
               <br />
               공동 투자로 형성된 자금을 이 계좌로 이체하여
               <br />
-              모임의 각종 지출(여행, 회식 등)에 대한 결제 및 정산에 사용할 수 있습니다.
+              모임의 각종 지출(여행, 회식 등)에 대한 결제에 사용할 수 있습니다.
             </p>
           </div>
 

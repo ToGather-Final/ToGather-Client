@@ -8,9 +8,36 @@ import MainButton from "@/components/common/MainButton"
 import { createGroup, CreateGroupRequest } from "@/utils/api"
 import { ApiErrorWithStatus } from "@/types/api/auth"
 import Image from "next/image"
+import * as Tooltip from '@radix-ui/react-tooltip'
 
 interface GroupCreateContainerProps {
   onComplete: (groupId: string, groupName: string, invitationCode: string) => void
+}
+
+// Radix UI 툴팁 컴포넌트 (간단하고 완벽한 말풍선)
+function TooltipWrapper({ children, content }: { children: React.ReactNode; content: string }) {
+  return (
+    <Tooltip.Provider delayDuration={300}>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          {children}
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content 
+            side="right" 
+            align="start"
+            sideOffset={8}
+            className="z-[100] max-w-64 p-4 bg-white border-2 border-gray-300 rounded-lg shadow-xl animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
+          >
+            <p className="text-sm text-gray-700 leading-relaxed font-medium">
+              {content}
+            </p>
+            <Tooltip.Arrow className="fill-white stroke-gray-300 stroke-2" />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  )
 }
 
 export default function GroupCreateContainer({ onComplete }: GroupCreateContainerProps) {
@@ -76,9 +103,15 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
       if (isNaN(goalAmount) || goalAmount <= 0) {
         throw new Error("목표 투자금은 0원보다 커야 합니다.")
       }
-      if (initialAmount > goalAmount) {
-        throw new Error("초기 투자금은 목표 투자금보다 작거나 같아야 합니다.")
-      }
+       if (initialAmount > goalAmount) {
+         throw new Error("초기 투자금은 목표 투자금보다 작거나 같아야 합니다.")
+       }
+
+       // 예수금 총합 검증 (그룹 인원수 × 초기 투자금 < 목표 투자금)
+       const totalInitialAmount = maxMembers * initialAmount
+       if (totalInitialAmount >= goalAmount) {
+         throw new Error("그룹원들의 예수금 총합이 목표 금액보다 커야 해요!")
+       }
 
       // 정족수 검증
       const voteQuorum = parseInt(formData.voteQuorum)
@@ -136,32 +169,50 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
   // 입력값 유효성 검사 함수
   const validateField = (field: string, value: string): string | null => {
     switch (field) {
-      case "groupMemberId":
-        if (!value.trim()) return "그룹 인원수를 입력해주세요."
-        const memberCount = parseInt(value)
-        if (isNaN(memberCount) || memberCount <= 0) {
-          return "그룹 인원수는 1명 이상의 숫자여야 합니다."
-        }
-        if (memberCount > 100) {
-          return "그룹 인원수는 100명 이하여야 합니다."
-        }
-        return null
+       case "groupMemberId":
+         if (!value.trim()) return "그룹 인원수를 입력해주세요."
+         const memberCountForGroup = parseInt(value)
+         if (isNaN(memberCountForGroup) || memberCountForGroup <= 0) {
+           return "그룹 인원수는 1명 이상의 숫자여야 합니다."
+         }
+         if (memberCountForGroup > 100) {
+           return "그룹 인원수는 100명 이하여야 합니다."
+         }
+         // 예수금 총합 검증
+         const initialAmountForGroup = parseInt(formData.initialInvestment) || 0
+         const goalAmountForGroup = parseInt(formData.targetInvestment) || 0
+         if (initialAmountForGroup > 0 && goalAmountForGroup > 0 && (memberCountForGroup * initialAmountForGroup) >= goalAmountForGroup) {
+           return "그룹원들의 예수금 총합은 목표 금액보다 작아야 해요!"
+         }
+         return null
       
-      case "initialInvestment":
-        if (!value.trim()) return "초기 투자금을 입력해주세요."
-        const initialAmount = parseInt(value)
-        if (isNaN(initialAmount) || initialAmount < 0) {
-          return "초기 투자금은 0원 이상의 숫자여야 합니다."
-        }
-        return null
+       case "initialInvestment":
+         if (!value.trim()) return "초기 투자금을 입력해주세요."
+         const initialAmountForInitial = parseInt(value)
+         if (isNaN(initialAmountForInitial) || initialAmountForInitial < 0) {
+           return "초기 투자금은 0원 이상의 숫자여야 합니다."
+         }
+         // 예수금 총합 검증
+         const memberCountForInitial = parseInt(formData.groupMemberId) || 0
+         const goalAmountForInitial = parseInt(formData.targetInvestment) || 0
+         if (memberCountForInitial > 0 && goalAmountForInitial > 0 && (memberCountForInitial * initialAmountForInitial) >= goalAmountForInitial) {
+           return "그룹원들의 예수금 총합은 목표 금액보다 작아야 해요!"
+         }
+         return null
       
-      case "targetInvestment":
-        if (!value.trim()) return "목표 투자금을 입력해주세요."
-        const goalAmount = parseInt(value)
-        if (isNaN(goalAmount) || goalAmount <= 0) {
-          return "목표 투자금은 0원보다 큰 숫자여야 합니다."
-        }
-        return null
+       case "targetInvestment":
+         if (!value.trim()) return "목표 투자금을 입력해주세요."
+         const goalAmountForTarget = parseInt(value)
+         if (isNaN(goalAmountForTarget) || goalAmountForTarget <= 0) {
+           return "목표 투자금은 0원보다 큰 숫자여야 합니다."
+         }
+         // 예수금 총합 검증
+         const memberCountForTarget = parseInt(formData.groupMemberId) || 0
+         const initialAmountForTarget = parseInt(formData.initialInvestment) || 0
+         if (memberCountForTarget > 0 && initialAmountForTarget > 0 && (memberCountForTarget * initialAmountForTarget) >= goalAmountForTarget) {
+           return "그룹원들의 예수금 총합은 목표 금액보다 작아야 해요!"
+         }
+         return null
       
       default:
         return null
@@ -220,11 +271,12 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
     const initialAmount = parseInt(formData.initialInvestment)
     const goalAmount = parseInt(formData.targetInvestment)
     
-    const numericValidation = 
-      !isNaN(memberCount) && memberCount > 0 && memberCount <= 100 &&
-      !isNaN(initialAmount) && initialAmount >= 0 &&
-      !isNaN(goalAmount) && goalAmount > 0 &&
-      initialAmount <= goalAmount
+     const numericValidation = 
+       !isNaN(memberCount) && memberCount > 0 && memberCount <= 100 &&
+       !isNaN(initialAmount) && initialAmount >= 0 &&
+       !isNaN(goalAmount) && goalAmount > 0 &&
+       initialAmount <= goalAmount &&
+       (memberCount * initialAmount) < goalAmount // 예수금 총합 검증
     
     // 2명 이상일 때만 매매 규칙과 그룹 해체 규칙 필수
     const rulesValidation = memberCount < 2 || (
@@ -309,7 +361,7 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
             {/* Initial Investment Input */}
             <div>
               <Input
-                placeholder="초기 투자금(원당)"
+                placeholder="초기 투자금(인당)"
                 value={formData.initialInvestment}
                 onChange={(e) => handleInputChange("initialInvestment", e.target.value)}
                 className={`h-13 rounded-2xl text-lg placeholder:text-gray-400 bg-white ${
@@ -329,7 +381,7 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
             {/* Target Investment Input */}
             <div>
               <Input
-                placeholder="목표 투자금(원상)"
+                placeholder="목표 금액(그룹 합산)"
                 value={formData.targetInvestment}
                 onChange={(e) => handleInputChange("targetInvestment", e.target.value)}
                 className={`h-13 rounded-2xl text-lg placeholder:text-gray-400 bg-white ${
@@ -348,14 +400,19 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
 
             {/* Rules Section */}
             <div className="space-y-4 py-4">
-              {/* 매매 규칙 */}
-              <div className={`flex items-center justify-between ${maxMembers < 2 ? 'opacity-50' : ''}`}>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-700">매매 규칙</span>
-                  <button type="button" className="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center">
-                    <span className="text-xs text-gray-400">?</span>
-                  </button>
-                </div>
+               {/* 매매 규칙 */}
+               <div className={`flex items-center justify-between ${maxMembers < 2 ? 'opacity-50' : ''}`}>
+                 <div className="flex items-center gap-2">
+                   <span className="text-sm text-gray-700">매매 규칙</span>
+                   <TooltipWrapper content="그룹 내에서 매매 제안을 승인하기 위한 최소 찬성 인원이에요. 예를 들어 '2명'으로 설정하면, 그룹원 중 2명 이상이 찬성해야 매매가 진행됩니다.">
+                     <button 
+                       type="button" 
+                       className="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center hover:bg-gray-100 transition-colors"
+                     >
+                       <span className="text-xs text-gray-400">?</span>
+                     </button>
+                   </TooltipWrapper>
+                 </div>
                 <div className="w-20">
                   <Select
                     options={voteQuorumOptions}
@@ -367,14 +424,19 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
                 </div>
               </div>
               
-              {/* 그룹 해체 규칙 */}
-              <div className={`flex items-center justify-between ${maxMembers < 2 ? 'opacity-50' : ''}`}>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-700">그룹 해체 규칙</span>
-                  <button type="button" className="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center">
-                    <span className="text-xs text-gray-400">?</span>
-                  </button>
-                </div>
+               {/* 그룹 해체 규칙 */}
+               <div className={`flex items-center justify-between ${maxMembers < 2 ? 'opacity-50' : ''}`}>
+                 <div className="flex items-center gap-2">
+                   <span className="text-sm text-gray-700">그룹 해체 규칙</span>
+                   <TooltipWrapper content="그룹을 해체할 때 필요한 최소 동의 인원이에요. 설정한 인원 이상이 동의해야 그룹이 해체됩니다. (모두의 돈이 함께 움직이기 때문에, 신중하게 설정하세요.)">
+                     <button 
+                       type="button" 
+                       className="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center hover:bg-gray-100 transition-colors"
+                     >
+                       <span className="text-xs text-gray-400">?</span>
+                     </button>
+                   </TooltipWrapper>
+                 </div>
                 <div className="w-20">
                   <Select
                     options={dissolutionQuorumOptions}
