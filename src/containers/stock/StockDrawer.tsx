@@ -33,7 +33,7 @@ export default function StockDrawer({ open, onOpenChange, stockCode }: props) {
   };
 
   const { data, error, isLoading } = useSWR(
-    stockCode ? `${baseUrl}/trading/stocks/${stockCode}` : null,
+    stockCode ? `${baseUrl}/trading/stocks/${stockCode}/info` : null,
     getStockDetail
   );
 

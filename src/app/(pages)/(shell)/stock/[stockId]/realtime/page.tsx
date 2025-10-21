@@ -12,7 +12,7 @@ export default function RealtimePage() {
 
   // 종목 상세 정보를 가져와서 stockCode 추출
   const { data, error, isLoading } = useSWR(
-    stockId ? `${baseUrl}/trading/stocks/${stockId}` : null,
+    stockId ? `${baseUrl}/trading/stocks/${stockId}/info` : null,
     getStockDetail
   );
 

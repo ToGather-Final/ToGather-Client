@@ -28,7 +28,7 @@ export const API_ENDPOINTS = {
     PORTFOLIO: "/trading/portfolio/realtime",
     STOCKS: "/trading/stocks",
     ORDERBOOK: "/trading/stocks/{stock_code}/orderbook",
-    DETAIL: "/trading/stocks/{stock_code}/detail",
+    DETAIL: "/trading/stocks/{stock_code}/info",
     CHART: "/trading/stocks/{stock_code}/chart",
     ORDERS: "/trading/orders",
   },
