@@ -48,7 +48,7 @@ export default function RealtimePage() {
 
   return (
     <RealtimeContainer
-      stockId={stockId}
+      stockId={data.data.stockId}
       stockCode={data.data.stockCode}
       stockName={data.data.stockName}
     />

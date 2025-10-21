@@ -11,6 +11,9 @@ import { Copy, Check } from "lucide-react";
 import { useGroupId } from "@/contexts/groupIdContext";
 import { getGroupMembers } from "@/utils/api/group";
 import { GroupMember } from "@/types/api/group";
+import { baseUrl } from "@/constants/baseUrl";
+import useSWR from "swr";
+import { getGroupInfo } from "@/services/group/group";
 
 export default function Header() {
   const pathname = usePathname();
@@ -27,6 +30,19 @@ export default function Header() {
   const [groupMembers, setGroupMembers] = useState<GroupMember[]>([]);
   const [isMembersLoading, setIsMembersLoading] = useState(false);
   const [membersError, setMembersError] = useState<string | null>(null);
+  const [groupName, setGroupName] = useState<string>("");
+
+  const {
+    data: groupData,
+    error: groupError,
+    isLoading: groupIsLoading,
+    mutate: mutateGroupData,
+  } = useSWR(groupId ? `${baseUrl}/groups/${groupId}` : null, getGroupInfo);
+  useEffect(() => {
+    if (groupData?.goalAmount) {
+      setGroupName(groupData.groupName);
+    }
+  }, [groupData]);
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
@@ -134,7 +150,7 @@ export default function Header() {
           onClick={handleDropdownToggle}
           className="flex items-center gap-1 px-2 py-1 rounded transition-colors"
         >
-          <div>그룹명</div>
+          <div>{groupName}</div>
           <ChevronDown
             className={`transition-transform ${
               isDropdownOpen ? "rotate-180" : ""
