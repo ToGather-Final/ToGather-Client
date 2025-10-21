@@ -394,7 +394,14 @@ export default function VotingPage() {
                             "AGREE"
                           )
                         }
-                        className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8] transition-colors"
+                        disabled={proposal.myVote !== null}
+                        className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded transition-colors ${
+                          proposal.myVote === "AGREE"
+                            ? "bg-[#2563EB] text-white cursor-default"
+                            : proposal.myVote !== null
+                            ? "bg-[#2563EB] text-white cursor-default"
+                            : "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
+                        }`}
                       >
                         찬성 {proposal.agreeCount}
                       </button>
@@ -406,7 +413,14 @@ export default function VotingPage() {
                             "DISAGREE"
                           )
                         }
-                        className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#F85449] text-white rounded hover:bg-[#E53E3E] transition-colors"
+                        disabled={proposal.myVote !== null}
+                        className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded transition-colors ${
+                          proposal.myVote === "DISAGREE"
+                            ? "bg-gray-300 text-gray-500 cursor-default"
+                            : proposal.myVote !== null
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            : "bg-[#F85449] text-white hover:bg-[#E53E3E]"
+                        }`}
                       >
                         반대 {proposal.disagreeCount}
                       </button>
