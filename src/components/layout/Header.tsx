@@ -11,6 +11,9 @@ import { Copy, Check } from "lucide-react";
 import { useGroupId } from "@/contexts/groupIdContext";
 import { getGroupMembers } from "@/utils/api/group";
 import { GroupMember } from "@/types/api/group";
+import { baseUrl } from "@/constants/baseUrl";
+import useSWR from "swr";
+import { getGroupInfo } from "@/services/group/group";
 
 export default function Header() {
   const pathname = usePathname();
@@ -21,12 +24,25 @@ export default function Header() {
   const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   // 그룹 관련 상태
   const { groupId } = useGroupId();
   const [groupMembers, setGroupMembers] = useState<GroupMember[]>([]);
   const [isMembersLoading, setIsMembersLoading] = useState(false);
   const [membersError, setMembersError] = useState<string | null>(null);
+  const [groupName, setGroupName] = useState<string>("");
+
+  const {
+    data: groupData,
+    error: groupError,
+    isLoading: groupIsLoading,
+    mutate: mutateGroupData,
+  } = useSWR(groupId ? `${baseUrl}/groups/${groupId}` : null, getGroupInfo);
+  useEffect(() => {
+    if (groupData?.goalAmount) {
+      setGroupName(groupData.groupName);
+    }
+  }, [groupData]);
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
@@ -60,8 +76,8 @@ export default function Header() {
       const response = await getGroupMembers(groupId);
       // 방장을 맨 위로 정렬
       const sortedMembers = (response || []).sort((a, b) => {
-        if (a.role === 'OWNER') return -1; // OWNER를 맨 위로
-        if (b.role === 'OWNER') return 1;
+        if (a.role === "OWNER") return -1; // OWNER를 맨 위로
+        if (b.role === "OWNER") return 1;
         return 0; // 그 외는 원래 순서 유지
       });
       setGroupMembers(sortedMembers);
@@ -118,7 +134,14 @@ export default function Header() {
                  bg-white border-b border-stone-200
                  flex items-center gap-3 px-4"
     >
-      <Image src="/logo.webp" alt="logo" width={35} height={35} priority fetchPriority="high" />
+      <Image
+        src="/logo.webp"
+        alt="logo"
+        width={35}
+        height={35}
+        priority
+        fetchPriority="high"
+      />
       <div
         className="w-full flex justify-center items-center gap-1 relative"
         ref={dropdownRef}
@@ -127,7 +150,7 @@ export default function Header() {
           onClick={handleDropdownToggle}
           className="flex items-center gap-1 px-2 py-1 rounded transition-colors"
         >
-          <div>그룹명</div>
+          <div>{groupName}</div>
           <ChevronDown
             className={`transition-transform ${
               isDropdownOpen ? "rotate-180" : ""
@@ -152,12 +175,12 @@ export default function Header() {
               >
                 그룹원
               </div>
-              <div
+              {/* <div
                 className="px-4 py-2 text-sm text-center text-gray-600 hover:bg-gray-50 cursor-pointer"
                 onClick={handleCodeClick}
               >
                 그룹 코드
-              </div>
+              </div> */}
             </div>
           </div>
         )}
@@ -241,9 +264,15 @@ export default function Header() {
             ) : groupMembers.length > 0 ? (
               <div className="text-lg text-gray-700">
                 {groupMembers.map((member, index) => (
-                  <div key={member.userId} className="py-1 flex items-center justify-center">
+                  <div
+                    key={member.userId}
+                    className="py-1 flex items-center justify-center"
+                  >
                     {member.role === "OWNER" && (
-                      <Crown className="w-5 h-5 text-yellow-500 mr-2" fill="currentColor" />
+                      <Crown
+                        className="w-5 h-5 text-yellow-500 mr-2"
+                        fill="currentColor"
+                      />
                     )}
                     <span>{member.nickname}</span>
                     {member.role === "OWNER" && (

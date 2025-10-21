@@ -27,7 +27,15 @@ export default function CelebrateContainer() {
         });
       }, 300);
 
-      return () => clearInterval(interval);
+      // 5초 후 자동으로 멈춤
+      const timeout = setTimeout(() => {
+        clearInterval(interval);
+      }, 5000);
+
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
     };
 
     const cleanup = createRectangularConfetti();

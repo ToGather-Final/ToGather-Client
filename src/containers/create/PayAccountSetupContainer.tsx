@@ -7,6 +7,7 @@ import MainButton from "@/components/common/MainButton"
 import { createPayAccount } from "@/utils/api"
 import { ApiErrorWithStatus } from "@/types/api/auth"
 import Image from "next/image"
+import PayTermsModal from "@/components/common/PayTermsModal"
 
 interface PayAccountSetupContainerProps {
   onComplete: () => void
@@ -21,6 +22,7 @@ export default function PayAccountSetupContainer({ onComplete, groupId }: PayAcc
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showTermsModal, setShowTermsModal] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -118,9 +120,11 @@ export default function PayAccountSetupContainer({ onComplete, groupId }: PayAcc
           {/* Info Box */}
           <div className="rounded-3xl p-3 mb-8" style={{ backgroundColor: '#EEF2FF' }}>
             <p className="text-xs text-gray-800 leading-relaxed text-center">
-              와우 페이 통장이다!
+              그룹 전용 페이 계좌입니다.
               <br />
-              커튼 결제도 가능!
+              공동 투자로 형성된 자금을 이 계좌로 이체하여
+              <br />
+              모임의 각종 지출(여행, 회식 등)에 대한 결제 및 정산에 사용할 수 있습니다.
             </p>
           </div>
 
@@ -161,9 +165,20 @@ export default function PayAccountSetupContainer({ onComplete, groupId }: PayAcc
                 defaultChecked
                 required
               />
-              <label htmlFor="pay-agreement" className="text-sm text-gray-700 leading-relaxed">
-                개인(신용) 정보 처리 동의서 (금융 거래)
-              </label>
+              <div className="flex-1">
+                <label htmlFor="pay-agreement" className="text-sm text-gray-700 leading-relaxed">
+                  개인(신용) 정보 처리 동의서 (금융 거래)
+                </label>
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowTermsModal(true)}
+                    className="text-xs text-blue-600 underline hover:text-blue-800"
+                  >
+                    페이계좌 이용약관 보기
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Error Message */}
@@ -184,6 +199,12 @@ export default function PayAccountSetupContainer({ onComplete, groupId }: PayAcc
           </form>
         </div>
       </div>
+
+      {/* Terms Modal */}
+      <PayTermsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
     </div>
   )
 }

@@ -26,7 +26,11 @@ export default function YesNoModal({
         <DialogTitle className="sr-only">모달</DialogTitle>
         {children}
         <div className="flex gap-3">
-          <MainButton onClick={onClose} disabled={true} className="max-w-sm">
+          <MainButton
+            onClick={onClose}
+            variant="secondary"
+            className="max-w-sm"
+          >
             {text1 || "아니오"}
           </MainButton>
           <MainButton onClick={onYes || onClose} className="max-w-sm">

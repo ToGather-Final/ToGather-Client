@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react"
-import { cn } from "@/lib/utils"
+import { useState, useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 import {
   type HistoryDTO,
   HistoryType,
@@ -11,10 +11,10 @@ import {
   type CashDepositCompletedPayloadDTO,
   type VoteCreatedPayloadDTO,
   GoalAchievedPayloadDTO,
-} from "@/types/api/history"
-import HistoryCard from "@/components/history/HistoryCard"
-import HistoryCalendar from "@/components/history/HistoryCalendar"
-import { getHistory } from "@/utils/api/history"
+} from "@/types/api/history";
+import HistoryCard from "@/components/history/HistoryCard";
+import HistoryCalendar from "@/components/history/HistoryCalendar";
+import { getHistory } from "@/utils/api/history";
 
 // Mock data for demonstration
 const mockHistoryData: HistoryDTO[] = [
@@ -59,18 +59,18 @@ const mockHistoryData: HistoryDTO[] = [
       accountBalance: 6000000,
     } as CashDepositCompletedPayloadDTO,
   },
-  {
-    id: "4",
-    category: HistoryCategory.VOTE,
-    type: HistoryType.VOTE_CREATED_BUY,
-    title: "테슬라 1주 58000원 매도 제안",
-    date: "2025-09-14",
-    payload: {
-      proposalId: "1",
-      proposalName: "테슬라 1주 58000원 매도 제안",
-      proposerName: "정다영",
-    } as VoteCreatedPayloadDTO,
-  },
+  // {
+  //   id: "4",
+  //   category: HistoryCategory.VOTE,
+  //   type: HistoryType.VOTE_CREATED,
+  //   title: "테슬라 1주 58000원 매도 제안",
+  //   date: "2025-09-14",
+  //   payload: {
+  //     proposalId: "1",
+  //     proposalName: "테슬라 1주 58000원 매도 제안",
+  //     proposerName: "정다영",
+  //   } as VoteCreatedPayloadDTO,
+  // },
   {
     id: "5",
     category: HistoryCategory.CASH,
@@ -148,11 +148,11 @@ const mockHistoryData: HistoryDTO[] = [
 ];
 
 export default function HistoryPage() {
-  const [viewMode, setViewMode] = useState<"list" | "calendar">("list")
-  const [selectedDate, setSelectedDate] = useState(new Date()) // 오늘 날짜
-  const [historyData, setHistoryData] = useState<HistoryDTO[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
+  const [selectedDate, setSelectedDate] = useState(new Date()); // 오늘 날짜
+  const [historyData, setHistoryData] = useState<HistoryDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // 터치 이벤트를 위한 ref와 상태
   const touchStartX = useRef<number>(0);
@@ -162,24 +162,24 @@ export default function HistoryPage() {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        setLoading(true)
-        const response = await getHistory()
-        setHistoryData(response.items)
+        setLoading(true);
+        const response = await getHistory();
+        setHistoryData(response.items);
       } catch (err) {
-        console.error("히스토리 조회 실패:", err)
-        setError("히스토리를 불러오는데 실패했습니다.")
+        console.error("히스토리 조회 실패:", err);
+        setError("히스토리를 불러오는데 실패했습니다.");
         // 에러 발생 시 더미 데이터 사용
-        setHistoryData(mockHistoryData)
+        setHistoryData(mockHistoryData);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchHistory()
-  }, [])
+    fetchHistory();
+  }, []);
 
   const filteredHistoryForDate = historyData.filter((item) => {
-    const itemDate = new Date(item.date.replace(/\./g, "/"))
+    const itemDate = new Date(item.date.replace(/\./g, "/"));
     return (
       itemDate.getDate() === selectedDate.getDate() &&
       itemDate.getMonth() === selectedDate.getMonth() &&
@@ -253,11 +253,11 @@ export default function HistoryPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-8">
+          <div className="flex justify-center items-center text-center h-64">
             <div className="text-gray-500">히스토리를 불러오는 중...</div>
           </div>
         ) : error ? (
-          <div className="text-center py-8">
+          <div className=" flex justify-center items-center text-center h-64">
             <div className="text-red-500 mb-2">{error}</div>
             <div className="text-gray-500">더미 데이터를 표시합니다.</div>
           </div>
@@ -269,7 +269,7 @@ export default function HistoryPage() {
                 <HistoryCard key={item.id} item={item} />
               ))
             ) : (
-              <div className="text-center py-8">
+              <div className="flex justify-center items-center text-center h-64">
                 <div className="text-gray-500">표시할 히스토리가 없습니다.</div>
               </div>
             )}
@@ -278,7 +278,11 @@ export default function HistoryPage() {
           /* Calendar view */
           <div className="space-y-4">
             <div className="bg-white rounded-3xl border border-gray-200 px-4 pt-4 pb-2">
-              <HistoryCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} historyData={historyData} />
+              <HistoryCalendar
+                selectedDate={selectedDate}
+                onDateSelect={setSelectedDate}
+                historyData={historyData}
+              />
             </div>
 
             {/* Divider */}
@@ -297,7 +301,9 @@ export default function HistoryPage() {
                   ))
                 ) : (
                   <div className="text-center text-gray-500 py-8">
-                    {historyData.length > 0 ? "해당 날짜에 기록이 없습니다." : "표시할 히스토리가 없습니다."}
+                    {historyData.length > 0
+                      ? "해당 날짜에 기록이 없습니다."
+                      : "표시할 히스토리가 없습니다."}
                   </div>
                 )}
               </div>
