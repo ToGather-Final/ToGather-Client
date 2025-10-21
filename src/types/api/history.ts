@@ -16,6 +16,7 @@ export enum HistoryCategory {
     VOTE_CREATED_PAY = "VOTE_CREATED_PAY",     // 페이 충전 투표 제안
     VOTE_APPROVED = "VOTE_APPROVED",           // 투표 가결
     VOTE_REJECTED = "VOTE_REJECTED",           // 투표 부결
+    VOTE_EXPIRED = "VOTE_EXPIRED",             // 투표 만료
 
     // 매매
     TRADE_EXECUTED = "TRADE_EXECUTED", // 매도/매수 완료
@@ -44,6 +45,7 @@ export enum HistoryCategory {
       | VoteCreatedPayloadDTO
       | VoteApprovedPayloadDTO
       | VoteRejectedPayloadDTO
+      | VoteExpiredPayloadDTO
       | TradeExecutedPayloadDTO
       | TradeFailedPayloadDTO
       | CashDepositCompletedPayloadDTO
@@ -76,6 +78,13 @@ export enum HistoryCategory {
   export type VoteRejectedPayloadDTO = {
     proposalId: string;  // 서버에서는 string으로 옴
     proposalName: string;
+  };
+
+  // 투표 만료
+  export type VoteExpiredPayloadDTO = {
+    proposalId: string;  // 서버에서는 string으로 옴
+    proposalName: string;
+    reason: string;      // 만료 사유 (예: "마감시간")
   };
   
   // 매도/매수 완료

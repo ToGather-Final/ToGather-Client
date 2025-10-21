@@ -11,7 +11,11 @@ type Props = {
   once?: boolean; // true면 한 번만 처리하고 멈춤
 };
 
-export default function QRScannerContainer({ onDetected, onScan, once = true }: Props) {
+export default function QRScannerContainer({
+  onDetected,
+  onScan,
+  once = true,
+}: Props) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const scannerRef = useRef<QrScanner | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -172,9 +176,9 @@ export default function QRScannerContainer({ onDetected, onScan, once = true }: 
         <div className="mt-3 text-sm text-center text-[#686868]">
           QR을 중앙 가이드 프레임에 맞춰 비춰주세요.
         </div>
-        <div className="mt-3 text-sm break-all text-center">
+        {/* <div className="mt-3 text-sm break-all text-center">
           {errorMsg && <p className="mt-2 text-sm text-red-600">{errorMsg}</p>}
-        </div>
+        </div> */}
       </div>
 
       {/* 송금 모달 */}
