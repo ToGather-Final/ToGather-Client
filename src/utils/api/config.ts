@@ -73,7 +73,7 @@ export const API_ENDPOINTS = {
   // 페이 관련
   PAY: {
     PAYMENT: '/payments',
-    HISTORY: '/payments/history',
+    HISTORY: '/pay/history/cursor',
     QR_RESOLVE: '/qr/resolve',
     TRANSFERS_RECHARGE: '/pay/transfers/recharge',
   },

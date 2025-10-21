@@ -135,11 +135,10 @@ export default function AccountSetupContainer({
             style={{ backgroundColor: "#EEF2FF" }}
           >
             <p className="text-xs text-gray-800 leading-relaxed text-center">
-              주식과 금융상품을 한 계좌에서 거래할 수 있으며,
+              개설한 계좌는 매매 제안 및 투자 실행 시 사용되며,
               <br />
-              국내/해외주식, 금융상품(펀드, 채권, 연금) 서비스를
+              국내·해외 주식과 금융상품(펀드, 채권, 연금) 거래가 가능합니다.
               <br />
-              이용할 수 있습니다. 울랄라
             </p>
           </div>
 

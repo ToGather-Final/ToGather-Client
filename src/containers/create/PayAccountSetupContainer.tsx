@@ -118,9 +118,11 @@ export default function PayAccountSetupContainer({ onComplete, groupId }: PayAcc
           {/* Info Box */}
           <div className="rounded-3xl p-3 mb-8" style={{ backgroundColor: '#EEF2FF' }}>
             <p className="text-xs text-gray-800 leading-relaxed text-center">
-              와우 페이 통장이다!
+              그룹 전용 페이 계좌입니다.
               <br />
-              커튼 결제도 가능!
+              공동 투자로 형성된 자금을 이 계좌로 이체하여
+              <br />
+              모임의 각종 지출(여행, 회식 등)에 대한 결제 및 정산에 사용할 수 있습니다.
             </p>
           </div>
 
