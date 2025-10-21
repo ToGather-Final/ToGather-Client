@@ -40,15 +40,12 @@ export default function ChargeModal({
       <DialogContent className="mx-auto w-[calc(100vw-32px)] max-w-[calc(var(--app-max-w)-32px)] rounded-xl ">
         <DialogHeader className="text-center">
           <DialogTitle className="text-xl font-semibold text-gray-900">
-            <span className="text-sky-600 font-semibold">1인 충전 금액</span>을
+            <span className="text-sky-600 font-semibold">페이 머니에 충전할 금액</span>을
             입력해주세요
           </DialogTitle>
-          <DialogDescription className="text-sm text-gray-600">
-            충전 금액을 입력해주세요
-          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+        <form onSubmit={handleSubmit} className="space-y-2 pt-4">
           {/* 금액 */}
           <div className="space-y-1">
             <label htmlFor={amountId} className="text-sm text-stone-700">
@@ -84,7 +81,7 @@ export default function ChargeModal({
               type="submit"
               className="flex-1"
             >
-              제안하기
+              충전하기
             </MainButton>
           </div>
         </form>
