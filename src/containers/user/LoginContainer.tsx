@@ -217,9 +217,6 @@ export default function LoginFlow() {
             </button>
           </div>
 
-          <div className="text-center">
-            <button className="text-blue-500 font-medium">비밀번호 찾기</button>
-          </div>
         </div>
       </div>
 

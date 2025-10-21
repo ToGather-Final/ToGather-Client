@@ -41,7 +41,6 @@ export default function GroupJoinFlow() {
       return
     }
 
-    setStep("loading")
     setError(null)
 
     try {
@@ -56,7 +55,7 @@ export default function GroupJoinFlow() {
         console.log("그룹 참여 상태 업데이트 완료")
       }
       
-      // 그룹 정보 저장하고 대기 화면으로 이동
+      // 그룹 정보 저장하고 바로 대기 화면으로 이동 (로딩 단계 건너뛰기)
       setGroupInfo({
         groupId: result.groupId,
         groupName: result.groupName
@@ -96,7 +95,7 @@ export default function GroupJoinFlow() {
         </div>
 
         {/* Main content */}
-        <div className="flex-1 flex flex-col items-center justify-center px-8 relative z-10">
+        <div className="flex-1 flex flex-col items-center justify-start px-8 pt-48 relative z-10">
           {/* Title */}
           <h1 
             className="text-4xl font-extrabold text-center mb-4 leading-tight"
@@ -113,7 +112,7 @@ export default function GroupJoinFlow() {
           </h1>
 
           <p 
-            className="text-lg font-semibold text-center mb-16"
+            className="text-lg font-semibold text-center mb-8"
             style={{ 
               backgroundImage: 'linear-gradient(to right, #234085, #6989D4)',
               WebkitBackgroundClip: 'text',
@@ -125,7 +124,7 @@ export default function GroupJoinFlow() {
           </p>
 
           {/* Code Input Boxes */}
-          <div className="flex gap-3 mb-16">
+          <div className="flex gap-4 mb-16 justify-center">
             {[0, 1, 2, 3].map((index) => (
               <input
                 key={index}
@@ -134,27 +133,33 @@ export default function GroupJoinFlow() {
                 maxLength={1}
                 value={code[index]}
                 onChange={(e) => handleCodeChange(index, e.target.value)}
-                className="w-16 h-20 text-center text-2xl font-bold border-2 border-gray-300 rounded-2xl bg-white focus:border-blue-500 focus:outline-none transition-colors"
+                 className="w-14 h-24 text-center text-4xl border-2 border-gray-200 rounded-2xl bg-gray-50 focus:border-blue-500 focus:bg-white focus:outline-none transition-all duration-200 shadow-sm hover:border-gray-300 text-blue-900"
+                style={{ 
+                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                  letterSpacing: '0.1em',
+                  fontWeight: 500
+                }}
               />
             ))}
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="w-full max-w-sm mb-4">
-              <p className="text-sm text-red-500 text-center">{error}</p>
-            </div>
-          )}
+        </div>
 
-          {/* Submit Button */}
-          <div className="w-full max-w-sm">
-            <MainButton 
-              onClick={handleCodeSubmit}
-              disabled={code.some(c => !c)}
-            >
-              확인
-            </MainButton>
+        {/* Error Message - Fixed above button */}
+        {error && (
+          <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 w-full max-w-sm px-8 z-50">
+            <p className="text-sm text-red-500 text-center">{error}</p>
           </div>
+        )}
+
+        {/* Fixed Submit Button */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-full max-w-sm px-8 z-50">
+          <MainButton 
+            onClick={handleCodeSubmit}
+            disabled={code.some(c => !c)}
+          >
+            확인
+          </MainButton>
         </div>
       </div>
     )
@@ -189,7 +194,7 @@ export default function GroupJoinFlow() {
               WebkitTextStroke: '0.4px #264989'
             }}
           >
-            그룹 '고잉메리호'에
+            그룹에
             <br />
             입장하고 있어요
           </h1>
