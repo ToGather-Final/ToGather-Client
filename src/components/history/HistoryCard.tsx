@@ -130,7 +130,7 @@ const getHistoryDescription = (item: HistoryDTO) => {
       const tradePayload = item.payload as TradeExecutedPayloadDTO
       const totalAmount = (tradePayload.shares || 0) * (tradePayload.unitPrice || 0)
       const formattedAmount = totalAmount % 1 === 0 ? Math.floor(totalAmount).toLocaleString() : totalAmount.toLocaleString()
-      return `계좌 잔액 ${tradePayload.accountBalance?.toLocaleString() || '0'}원`
+      return `예수금 잔액 ${tradePayload.accountBalance?.toLocaleString() || '0'}원`
     // 투표 가결
     case HistoryType.VOTE_APPROVED:
       const votePayload = item.payload as VoteApprovedPayloadDTO

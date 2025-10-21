@@ -69,9 +69,17 @@ export default function VotingPage() {
   const [proposals, setProposals] = useState<ProposalDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // 컴포넌트 마운트 확인
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // 컴포넌트 마운트 시 데이터 가져오기
   useEffect(() => {
+    if (!isMounted) return;
+    
     const loadProposals = async () => {
       try {
         setIsLoading(true);
@@ -89,7 +97,7 @@ export default function VotingPage() {
     };
 
     loadProposals();
-  }, []);
+  }, [isMounted]);
 
   // 탭 바꿀 때 로직. 탭 바꾸면 드롭다운 닫음
   const handleTabChange = (tab: "ALL" | "TRADE" | "PAY") => {
@@ -335,12 +343,16 @@ export default function VotingPage() {
       )}
 
       <div className="p-4 space-y-3">
-        {isLoading ? (
-          <div className="flex justify-center items-center  text-center h-64">
+        {!isMounted ? (
+          <div className="flex justify-center items-center text-center h-64">
+            <div className="text-gray-500">로딩 중...</div>
+          </div>
+        ) : isLoading ? (
+          <div className="flex justify-center items-center text-center h-64">
             <div className="text-gray-500">제안 데이터를 불러오는 중...</div>
           </div>
         ) : error ? (
-          <div className="flex justify-center items-center  text-center h-64">
+          <div className="flex justify-center items-center text-center h-64">
             <div className="text-red-500">{error}</div>
           </div>
         ) : getFilteredProposals().length === 0 ? (
