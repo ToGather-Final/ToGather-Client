@@ -13,17 +13,17 @@ export const useStompWebSocket = (stockCode: string) => {
     console.log("🚀 순수 WebSocket 연결 시도 시작...");
     console.log("📡 연결 URL: ws://localhost:8000/ws");
     console.log("📊 종목 코드:", stockCode);
-    
+
     // 순수 WebSocket을 사용한 STOMP 클라이언트 생성 (SockJS 없음)
     const client = new Client({
       brokerURL: "ws://localhost:8000/ws",
-      
+
       // STOMP 프로토콜 버전 설정
       connectHeaders: {
         "accept-version": "1.2,1.1,1.0",
-        "heart-beat": "10000,10000"
+        "heart-beat": "10000,10000",
       },
-      
+
       // 연결 성공
       onConnect: () => {
         console.log("✅ WebSocket 연결 성공!");
@@ -68,6 +68,16 @@ export const useStompWebSocket = (stockCode: string) => {
         console.error("❌ WebSocket 에러:", error);
         console.error("에러 타입:", typeof error);
         console.error("에러 상세:", error);
+
+        // 더 자세한 에러 정보 출력
+        if (error instanceof Event) {
+          console.error("Event 타입:", error.type);
+          console.error("Event target:", error.target);
+        }
+
+        // 네트워크 연결 상태 확인
+        console.log("네트워크 상태:", navigator.onLine ? "온라인" : "오프라인");
+
         setIsConnected(false);
       },
 
@@ -79,10 +89,11 @@ export const useStompWebSocket = (stockCode: string) => {
 
       // 재연결 설정
       reconnectDelay: 3000,
+      maxWebSocketChunkSize: 8192,
 
       // 디버그 로그 활성화
       debug: (str) => {
-        console.log('🔍 STOMP:', str);
+        console.log("🔍 STOMP:", str);
       },
     });
 
@@ -93,8 +104,8 @@ export const useStompWebSocket = (stockCode: string) => {
 
     // 클린업
     return () => {
-      if (client.active) {
-        // 구독 해제 요청
+      // 구독 해제 요청 (연결되어 있을 때만)
+      if (client.active && client.connected) {
         try {
           client.publish({
             destination: "/app/orderbook/unsubscribe",
@@ -104,15 +115,28 @@ export const useStompWebSocket = (stockCode: string) => {
         } catch (error) {
           console.error("구독 해제 에러:", error);
         }
+      }
 
-        client.deactivate();
+      // 클라이언트 비활성화
+      if (client.active) {
+        try {
+          client.deactivate();
+          console.log("🔌 STOMP 클라이언트 비활성화 완료");
+        } catch (error) {
+          console.error("클라이언트 비활성화 에러:", error);
+        }
       }
     };
   }, [stockCode]);
 
   const disconnect = useCallback(() => {
     if (clientRef.current?.active) {
-      clientRef.current.deactivate();
+      try {
+        clientRef.current.deactivate();
+        console.log("🔌 수동 연결 해제 완료");
+      } catch (error) {
+        console.error("수동 연결 해제 에러:", error);
+      }
     }
   }, []);
 
