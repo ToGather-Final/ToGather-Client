@@ -143,6 +143,11 @@ export default function PayAccountSetupContainer({ onComplete, groupId }: PayAcc
               placeholder="영문 성"
               value={formData.englishLastName}
               onChange={(e) => handleInputChange("englishLastName", e.target.value)}
+              onInput={(e) => {
+                // 영어만 허용
+                e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-Z]/g, '');
+              }}
+              pattern="[a-zA-Z]*"
               className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
               required
             />
@@ -152,6 +157,11 @@ export default function PayAccountSetupContainer({ onComplete, groupId }: PayAcc
               placeholder="영문 이름"
               value={formData.englishFirstName}
               onChange={(e) => handleInputChange("englishFirstName", e.target.value)}
+              onInput={(e) => {
+                // 영어만 허용
+                e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-Z]/g, '');
+              }}
+              pattern="[a-zA-Z]*"
               className="h-13 rounded-2xl border-gray-200 text-lg placeholder:text-gray-400 bg-white"
               required
             />
@@ -162,7 +172,6 @@ export default function PayAccountSetupContainer({ onComplete, groupId }: PayAcc
                 type="checkbox"
                 id="pay-agreement"
                 className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                defaultChecked
                 required
               />
               <div className="flex-1">
