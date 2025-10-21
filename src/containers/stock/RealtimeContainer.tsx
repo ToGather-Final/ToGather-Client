@@ -12,7 +12,9 @@ import { createTradeProposal } from "@/services/vote/payDeposit";
 import { useGroupId } from "@/contexts/groupIdContext";
 import useSWR from "swr";
 import { baseUrl } from "@/constants/baseUrl";
-import { getGroupInfo } from "@/services/group/group";
+import { getGroupInfo, getUserInvestmentAccount } from "@/services/group/group";
+import { getPortfolioSummary } from "@/services/group/portfolio";
+import { getStockDetail } from "@/services/chart/stock";
 
 interface RealtimeContainerProps {
   stockId: string;
@@ -50,6 +52,9 @@ export default function RealtimeContainer({
   const [calculatedQuantity, setCalculatedQuantity] = useState<number>(0); // 자동 계산된 수량
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [groupMemberCount, setGroupMemberCount] = useState<number>(0);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const {
     data: groupData,
@@ -57,6 +62,24 @@ export default function RealtimeContainer({
     isLoading: groupIsLoading,
     mutate: mutateGroupData,
   } = useSWR(groupId ? `${baseUrl}/groups/${groupId}` : null, getGroupInfo);
+
+  const {
+    data: groupPortfolioData,
+    error: groupProtfolioError,
+    isLoading: groupPortfolioIsLoading,
+  } = useSWR(
+    groupId ? `${baseUrl}/trading/portfolio/summary?groupId=${groupId}` : null,
+    getPortfolioSummary
+  );
+
+  const {
+    data: stockDetailData,
+    error: stockDetailError,
+    isLoading: stockDetailIsLoading,
+  } = useSWR(
+    stockCode ? `${baseUrl}/trading/stocks/${stockCode}` : null,
+    getStockDetail
+  );
 
   useEffect(() => {
     if (groupData?.maxMembers) {
@@ -66,8 +89,8 @@ export default function RealtimeContainer({
 
   // WebSocket 데이터에서 현재가 추출 (메모이제이션으로 불필요한 재계산 방지)
   const currentPrice = useMemo(
-    () => orderbookData?.currentPrice || 0,
-    [orderbookData?.currentPrice]
+    () => stockDetailData?.data?.currentPrice || 0,
+    [stockDetailData?.data?.currentPrice]
   );
 
   const asks = useMemo(
@@ -95,6 +118,22 @@ export default function RealtimeContainer({
     }
   }, [orderAmount, selectedPrice, currentPrice]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const id = localStorage.getItem("togather_user_id");
+      setUserId(id);
+    }
+  }, []);
+
+  const {
+    data: accountData,
+    error: accountError,
+    isLoading: accountIsLoading,
+  } = useSWR(
+    userId ? `${baseUrl}/trading/internal/accounts/user/${userId}` : null,
+    getUserInvestmentAccount
+  );
+
   // Time input을 분으로 계산하는 함수
   const calculateDurationMinutes = (timeString: string): number => {
     if (!timeString) return 0;
@@ -114,7 +153,8 @@ export default function RealtimeContainer({
 
   const handleConfirmYes = async () => {
     if (!reason || !dueDate || !orderAmount) {
-      alert("모든 필드를 입력해주세요.");
+      setErrorMessage("모든 필드를 입력해주세요.");
+      setIsErrorModalOpen(true);
       return;
     }
 
@@ -163,7 +203,11 @@ export default function RealtimeContainer({
       setIsCompleteModalOpen(true);
     } catch (error: any) {
       console.error("매매 제안 실패:", error);
-      alert(error?.message || "매매 제안에 실패했습니다. 다시 시도해주세요.");
+      setErrorMessage(
+        error?.message || "매매 제안에 실패했습니다. 다시 시도해주세요."
+      );
+      setIsErrorModalOpen(true);
+      setIsConfirmModalOpen(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -195,16 +239,31 @@ export default function RealtimeContainer({
       isNaN(parseFloat(orderAmount)) ||
       parseFloat(orderAmount) <= 0
     ) {
-      alert("주문 금액을 올바르게 입력해주세요.");
+      setErrorMessage("주문 금액을 올바르게 입력해주세요.");
+      setIsErrorModalOpen(true);
       return;
     }
 
     if (calculatedQuantity <= 0) {
-      alert("수량이 0보다 커야 합니다.");
+      setErrorMessage("수량이 0보다 커야 합니다.");
+      setIsErrorModalOpen(true);
       return;
     }
 
     const totalPrice = parseFloat(orderAmount);
+
+    // 현금 잔액 확인 (매수 시에만)
+    if (activeTab === "매수") {
+      const cashBalance = groupPortfolioData?.data?.totalCashBalance || 0;
+      if (totalPrice > cashBalance) {
+        setErrorMessage(
+          `주문 금액이 현금 잔액을 초과합니다.\n현재 예수금: ${cashBalance.toLocaleString()}원`
+        );
+        setIsErrorModalOpen(true);
+        return;
+      }
+    }
+
     const perPersonPrice = totalPrice / groupMemberCount;
 
     // 정수인지 확인
@@ -226,6 +285,19 @@ export default function RealtimeContainer({
 
   // 가격 조정 모달에서 확인 버튼 클릭
   const handlePriceAdjustConfirm = () => {
+    // 조정된 금액도 현금 잔액 확인
+    if (activeTab === "매수") {
+      const cashBalance = groupPortfolioData?.data?.totalCashBalance || 0;
+      if (adjustedPrice > cashBalance) {
+        setErrorMessage(
+          `조정된 금액이 현금 잔액을 초과합니다.\n현재 잔액: ${cashBalance.toLocaleString()}원\n조정된 금액: ${adjustedPrice.toLocaleString()}원`
+        );
+        setIsPriceAdjustModalOpen(false);
+        setIsErrorModalOpen(true);
+        return;
+      }
+    }
+
     setIsPriceAdjustModalOpen(false);
     setOrderType(activeTab as "매수" | "매도");
     setUseAdjustedPrice(true); // 조정된 가격 사용
@@ -273,10 +345,9 @@ export default function RealtimeContainer({
   // 로딩 상태 표시
   if (!orderbookData) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="text-4xl mb-4">⏳</div>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-500">
             {isConnected
               ? "호가 데이터를 불러오는 중..."
               : "WebSocket에 연결 중..."}
@@ -292,7 +363,7 @@ export default function RealtimeContainer({
   return (
     <div>
       {/* WebSocket 연결 상태 표시 */}
-      <div className="flex items-center justify-between px-5 py-1 bg-gray-50">
+      {/* <div className="flex items-center justify-between px-5 py-1 bg-gray-50">
         <div className="flex items-center gap-2">
           <div
             className={`w-2 h-2 rounded-full ${
@@ -303,7 +374,7 @@ export default function RealtimeContainer({
             {isConnected ? "실시간 연결됨" : "연결 끊김"}
           </span>
         </div>
-      </div>
+      </div> */}
 
       <div className="flex gap-[10px] items-center justify-start py-2 px-5">
         <button
@@ -328,38 +399,40 @@ export default function RealtimeContainer({
             <div className="flex justify-between items-center">
               <div
                 className={`flex items-center font-bold gap-[10px] text-[10px] ${
-                  (orderbookData.changeAmount || 0) > 0
+                  (stockDetailData?.data?.changeAmount || 0) > 0
                     ? "text-red-600"
-                    : (orderbookData.changeAmount || 0) < 0
+                    : (stockDetailData?.data?.changeAmount || 0) < 0
                     ? "text-blue-600"
                     : "text-gray-600"
                 }`}
               >
                 <div className="text-[20px]">
-                  {currentPrice.toLocaleString()}
+                  {stockDetailData?.data?.currentPrice.toLocaleString()}
                 </div>
                 <div className="flex items-center">
                   <div>
-                    {(orderbookData.changeAmount || 0) > 0
+                    {(stockDetailData?.data?.changeAmount || 0) > 0
                       ? "▲"
-                      : (orderbookData.changeAmount || 0) < 0
+                      : (stockDetailData?.data?.changeAmount || 0) < 0
                       ? "▼"
                       : ""}
                   </div>
                   <div>
-                    {Math.abs(orderbookData.changeAmount || 0).toLocaleString()}
+                    {Math.abs(
+                      stockDetailData?.data?.changeAmount || 0
+                    ).toLocaleString()}
                   </div>
                 </div>
                 <div>
-                  {(orderbookData.changeAmount || 0) > 0 ? "+" : ""}
-                  {(orderbookData.changeRate || 0).toFixed(2)}%
+                  {(stockDetailData?.data?.changeAmount || 0) > 0 ? "+" : ""}
+                  {(stockDetailData?.data?.changeRate || 0).toFixed(2)}%
                 </div>
               </div>
             </div>
           </div>
-          <div className="flex flex-col justify-center items-center border border-[#e9e9e9] border-[2px] rounded-[10px] py-[5px] px-[10px]">
-            <div className="text-[#686868] text-[12px]">[종합매매]가나다</div>
-            <div className=" text-[12px]">001-12-566789</div>
+          <div className="flex flex-col justify-center items-center border border-[#e9e9e9] border-[2px] rounded-[10px] py-[5px] px-[6px]">
+            <div className="text-[#686868] text-[12px]">[종합매매 계좌]</div>
+            <div className=" text-[12px]">{accountData?.accountNo}</div>
           </div>
         </div>
         <SimpleTab
@@ -436,11 +509,22 @@ export default function RealtimeContainer({
           </div>
           <div>
             <div className="bg-white py-4">
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <div>
-                  <label className="block text-[14px] font-medium text-gray-700 mb-2">
-                    주문 금액
-                  </label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-[14px] font-medium text-gray-700">
+                      주문 금액
+                    </label>
+                    {activeTab === "매수" && (
+                      <span className="text-[12px] text-blue-600 font-medium">
+                        주문가능:{" "}
+                        {(
+                          groupPortfolioData?.data?.totalCashBalance || 0
+                        ).toLocaleString()}
+                        원
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="number"
                     step="1"
@@ -454,15 +538,15 @@ export default function RealtimeContainer({
                         : "focus:ring-blue-500"
                     } focus:border-transparent`}
                   />
-                  {calculatedQuantity > 0 && (
+                  {/* {calculatedQuantity > 0 && (
                     <p className="text-[12px] text-gray-500 mt-1">
                       수량: {calculatedQuantity.toFixed(1)}주
                     </p>
-                  )}
+                  )} */}
                 </div>
                 <div>
                   {/* 단가 표시 */}
-                  <label className="block text-[14px] font-medium text-gray-700 mb-2">
+                  <label className="block text-[14px] font-medium text-gray-700 mb-1">
                     단가
                   </label>
                   <input
@@ -481,7 +565,7 @@ export default function RealtimeContainer({
                 </div>
 
                 <div>
-                  <label className="block text-[14px] font-medium text-gray-700 mb-2">
+                  <label className="block text-[14px] font-medium text-gray-700 mb-1">
                     마감 시간
                   </label>
                   <input
@@ -497,14 +581,14 @@ export default function RealtimeContainer({
                 </div>
 
                 <div>
-                  <label className="block text-[14px] font-medium text-gray-700 mb-2">
+                  <label className="block text-[14px] font-medium text-gray-700 mb-1">
                     제안 이유
                   </label>
                   <textarea
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="이유를 입력해주세요."
-                    rows={3}
+                    rows={2}
                     className={`w-full px-2 py-1 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 ${
                       activeTab === "매수"
                         ? "focus:ring-red-500"
@@ -516,9 +600,9 @@ export default function RealtimeContainer({
                 <div className="bg-gray-50 border border-[#e9e9e9] border-[2px] rounded-[10px] px-2 py-1">
                   <div className="text-[#686868] text-[12px]">
                     <div className="flex justify-between items-center mb-1">
-                      <span>단가 ({selectedPrice ? "지정가" : "시장가"}):</span>
+                      <span>주문금액:</span>
                       <span className="font-semibold text-[14px]">
-                        {(selectedPrice || currentPrice).toLocaleString()}원
+                        {parseFloat(orderAmount || "0").toLocaleString()}원
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
@@ -682,6 +766,19 @@ export default function RealtimeContainer({
               {orderType} 주문이 제안되었습니다!
             </p>
           </div>
+        </div>
+      </Modal>
+
+      {/* 에러 모달 */}
+      <Modal
+        isOpen={isErrorModalOpen}
+        onClose={() => setIsErrorModalOpen(false)}
+      >
+        <div className="text-center py-8">
+          <DialogTitle className="text-2xl font-bold text-gray-900 mb-4">
+            알림
+          </DialogTitle>
+          <p className="text-gray-700 whitespace-pre-line">{errorMessage}</p>
         </div>
       </Modal>
     </div>
