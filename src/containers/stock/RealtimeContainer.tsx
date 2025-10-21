@@ -280,9 +280,9 @@ export default function RealtimeContainer({
             <div className="flex justify-between items-center">
               <div
                 className={`flex items-center font-bold gap-[10px] text-[10px] ${
-                  orderbookData.changeDirection === "up"
+                  (orderbookData.changeAmount || 0) > 0
                     ? "text-red-600"
-                    : orderbookData.changeDirection === "down"
+                    : (orderbookData.changeAmount || 0) < 0
                     ? "text-blue-600"
                     : "text-gray-600"
                 }`}
@@ -292,19 +292,19 @@ export default function RealtimeContainer({
                 </div>
                 <div className="flex items-center">
                   <div>
-                    {orderbookData.changeDirection === "up"
+                    {(orderbookData.changeAmount || 0) > 0
                       ? "▲"
-                      : orderbookData.changeDirection === "down"
+                      : (orderbookData.changeAmount || 0) < 0
                       ? "▼"
                       : ""}
                   </div>
                   <div>
-                    {Math.abs(orderbookData.changeAmount).toLocaleString()}
+                    {Math.abs(orderbookData.changeAmount || 0).toLocaleString()}
                   </div>
                 </div>
                 <div>
-                  {orderbookData.changeDirection === "up" ? "+" : ""}
-                  {orderbookData.changeRate}%
+                  {(orderbookData.changeAmount || 0) > 0 ? "+" : ""}
+                  {(orderbookData.changeRate || 0).toFixed(2)}%
                 </div>
               </div>
             </div>
@@ -425,9 +425,6 @@ export default function RealtimeContainer({
                           : "focus:ring-blue-500"
                       } focus:border-transparent`}
                     />
-                    <div className="text-[12px] text-gray-500 whitespace-nowrap">
-                      {selectedPrice ? "지정가" : "시장가"}
-                    </div>
                   </div>
                 </div>
 
