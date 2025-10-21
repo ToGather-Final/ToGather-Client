@@ -97,7 +97,7 @@ export default function StockListContainer() {
         </div>
       ) : stockList.length === 0 ? (
         <div className="flex items-center justify-center h-64 text-center">
-          <p className="text-gray-500 text-lg">
+          <p className="text-gray-500 text-[14px]">
             {stockTab === "MY" ? "보유종목이 없습니다." : "종목이 없습니다."}
           </p>
         </div>
