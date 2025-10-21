@@ -17,9 +17,9 @@ import { apiGet, apiPost } from "@/utils/api/client";
 // Vote Service API 호출 함수
 async function fetchProposals(): Promise<ProposalDTO[]> {
   try {
-    const data = await apiGet<any[]>('/vote');
-    console.log('Fetched proposals:', data);
-    
+    const data = await apiGet<any[]>("/vote");
+    console.log("Fetched proposals:", data);
+
     // API 응답을 ProposalDTO 형식으로 변환
     return data.map((item: any) => ({
       proposalId: item.proposalId,
@@ -27,7 +27,10 @@ async function fetchProposals(): Promise<ProposalDTO[]> {
       proposerName: item.proposerName,
       category: item.category as ProposalCategory,
       action: item.action as ProposalAction,
-      payload: typeof item.payload === 'string' ? JSON.parse(item.payload) : item.payload,
+      payload:
+        typeof item.payload === "string"
+          ? JSON.parse(item.payload)
+          : item.payload,
       status: item.status as ProposalStatus,
       date: item.date,
       closeAt: item.closeAt,
@@ -36,17 +39,17 @@ async function fetchProposals(): Promise<ProposalDTO[]> {
       myVote: item.myVote,
     }));
   } catch (error) {
-    console.error('Failed to fetch proposals:', error);
+    console.error("Failed to fetch proposals:", error);
     // 에러 발생 시 빈 배열 반환
     return [];
   }
 }
 
 export default function VotingPage() {
-  const [activeTab, setActiveTab] = useState<"ALL" | "TRADE" | "PAY">("ALL");     // "전체/매매/예수금 충전" 중 어디를 보고 있는지
-  const [tradeDropdown, setTradeDropdown] = useState<string>("전체");             // 매매 탭일 때 "전체/매수/매도".
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);                    // 드롭다운 열림 상태
-  const [expandedProposals, setExpandedProposals] = useState<Set<string>>(        // 닫힌 제안 카드에서 “자세히 보기” 눌렀는지(펼쳐짐 상태)
+  const [activeTab, setActiveTab] = useState<"ALL" | "TRADE" | "PAY">("ALL"); // "전체/매매/예수금 충전" 중 어디를 보고 있는지
+  const [tradeDropdown, setTradeDropdown] = useState<string>("전체"); // 매매 탭일 때 "전체/매수/매도".
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // 드롭다운 열림 상태
+  const [expandedProposals, setExpandedProposals] = useState<Set<string>>( // 닫힌 제안 카드에서 “자세히 보기” 눌렀는지(펼쳐짐 상태)
     new Set()
   );
   // 모달에 들어갈 데이터(현재 선택한 제안명 + 찬/반)
@@ -61,7 +64,7 @@ export default function VotingPage() {
     proposalId: "",
     voteType: "AGREE",
   });
-  
+
   // 실제 API에서 가져온 제안 데이터
   const [proposals, setProposals] = useState<ProposalDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -76,8 +79,8 @@ export default function VotingPage() {
         const data = await fetchProposals();
         setProposals(data);
       } catch (err) {
-        console.error('Failed to load proposals:', err);
-        setError('제안 데이터를 불러오는데 실패했습니다.');
+        console.error("Failed to load proposals:", err);
+        setError("제안 데이터를 불러오는데 실패했습니다.");
         // 에러 발생 시 빈 배열 사용
         setProposals([]);
       } finally {
@@ -106,34 +109,40 @@ export default function VotingPage() {
   };
 
   // 투표 API 호출 함수
-  const submitVote = async (proposalId: string, voteType: "AGREE" | "DISAGREE") => {
+  const submitVote = async (
+    proposalId: string,
+    voteType: "AGREE" | "DISAGREE"
+  ) => {
     try {
       await apiPost(`/vote/${proposalId}`, {
-        choice: voteType
+        choice: voteType,
       });
-      
-      console.log('Vote submitted successfully');
-      
+
+      console.log("Vote submitted successfully");
+
       // 투표 성공 후 데이터 새로고침
       const updatedProposals = await fetchProposals();
       setProposals(updatedProposals);
-      
     } catch (error) {
-      console.error('Failed to submit vote:', error);
-      
+      console.error("Failed to submit vote:", error);
+
       // 409 Conflict - 이미 투표했을 때
       if (error instanceof Error && (error as any).status === 409) {
         alert(error.message);
         return;
       }
-      
+
       // 기타 에러
-      alert('투표 제출에 실패했습니다. 다시 시도해주세요.');
+      alert("투표 제출에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
   // 모달 열고 어떤 선택인지 기록
-  const handleVote = (proposalName: string, proposalId: string, voteType: "AGREE" | "DISAGREE") => {
+  const handleVote = (
+    proposalName: string,
+    proposalId: string,
+    voteType: "AGREE" | "DISAGREE"
+  ) => {
     setVoteModal({
       isOpen: true,
       proposalName,
@@ -174,8 +183,10 @@ export default function VotingPage() {
     // 3) 정렬
     return filtered.sort((a, b) => {
       // OPEN이 항상 상단
-      if (a.status === ProposalStatus.OPEN && b.status !== ProposalStatus.OPEN) return -1;
-      if (a.status !== ProposalStatus.OPEN && b.status === ProposalStatus.OPEN) return 1;
+      if (a.status === ProposalStatus.OPEN && b.status !== ProposalStatus.OPEN)
+        return -1;
+      if (a.status !== ProposalStatus.OPEN && b.status === ProposalStatus.OPEN)
+        return 1;
 
       // 같은 상태끼리는 date 기준 내림차순(최신 먼저)
       return new Date(b.date).getTime() - new Date(a.date).getTime();
@@ -214,7 +225,7 @@ export default function VotingPage() {
           <button
             onClick={() => handleTabChange("ALL")}
             className={cn(
-              "flex-1 px-6 py-3 rounded-xl text-sm font-medium text-center transition-colors",
+              "flex-1 px-4 py-3 rounded-xl text-sm font-medium text-center transition-colors",
               activeTab === "ALL"
                 ? "bg-[#447AFA] text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -295,121 +306,132 @@ export default function VotingPage() {
 
       <div className="p-4 space-y-3">
         {isLoading ? (
-          <div className="flex justify-center items-center py-8">
+          <div className="flex justify-center items-center  text-center h-64">
             <div className="text-gray-500">제안 데이터를 불러오는 중...</div>
           </div>
         ) : error ? (
-          <div className="flex justify-center items-center py-8">
+          <div className="flex justify-center items-center  text-center h-64">
             <div className="text-red-500">{error}</div>
           </div>
         ) : getFilteredProposals().length === 0 ? (
-          <div className="flex justify-center items-center py-8">
+          <div className="flex justify-center items-center text-center h-64">
             <div className="text-gray-500">표시할 제안이 없습니다.</div>
           </div>
         ) : (
           getFilteredProposals().map((proposal) => (
-          <Card
-            key={proposal.proposalId}
-            className={cn(
-              proposal.status === ProposalStatus.OPEN
-                ? "bg-[#EEF2FF]"
-                : "bg-white"
-            )}
-          >
-            <div className="px-5 py-4 relative">
-              {proposal.status !== ProposalStatus.OPEN && (
-                 <div className="absolute top-4 left-5 z-0">
-                  {getStatusBadge(proposal.status)}
-                </div>
+            <Card
+              key={proposal.proposalId}
+              className={cn(
+                proposal.status === ProposalStatus.OPEN
+                  ? "bg-[#EEF2FF]"
+                  : "bg-white"
               )}
-
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  {proposal.status === ProposalStatus.OPEN && (
-                    <span className="text-xs">
-                      <span className="text-blue-600 font-bold">
-                        {proposal.closeAt && proposal.closeAt.includes('시') && proposal.closeAt.includes('분') 
-                          ? proposal.closeAt.match(/\d+시 \d+분/)?.[0] || proposal.closeAt // "15시 39분" 패턴 추출
-                          : proposal.closeAt || '시간 미정'
-                        }
-                      </span>
-                      <span className="text-gray-500 font-normal">까지</span>
-                    </span>
-                  )}
-                </div>
-                <span className="text-xs text-gray-400">
-                  {proposal.date}
-                </span>
-              </div>
-
-              <div
-                className={cn(
-                  "mb-4",
-                  proposal.status !== ProposalStatus.OPEN && "mt-6"
+            >
+              <div className="px-5 py-4 relative">
+                {proposal.status !== ProposalStatus.OPEN && (
+                  <div className="absolute top-4 left-5 z-0">
+                    {getStatusBadge(proposal.status)}
+                  </div>
                 )}
-              >
-                <h3 className="text-base font-medium text-gray-900">
-                  {proposal.proposalName}
-                </h3>
-              </div>
 
-              <div className="text-xs text-gray-500 mb-3">
-                {proposal.proposerName}
-              </div>
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    {proposal.status === ProposalStatus.OPEN && (
+                      <span className="text-xs">
+                        <span className="text-blue-600 font-bold">
+                          {proposal.closeAt &&
+                          proposal.closeAt.includes("시") &&
+                          proposal.closeAt.includes("분")
+                            ? proposal.closeAt.match(/\d+시 \d+분/)?.[0] ||
+                              proposal.closeAt // "15시 39분" 패턴 추출
+                            : proposal.closeAt || "시간 미정"}
+                        </span>
+                        <span className="text-gray-500 font-normal">까지</span>
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-400">{proposal.date}</span>
+                </div>
 
-              {proposal.status === ProposalStatus.OPEN ? (
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-700">
-                    {proposal.payload.reason}
-                  </p>
-                  <div className="flex items-center gap-2 justify-end">
+                <div
+                  className={cn(
+                    "mb-4",
+                    proposal.status !== ProposalStatus.OPEN && "mt-6"
+                  )}
+                >
+                  <h3 className="text-base font-medium text-gray-900">
+                    {proposal.proposalName}
+                  </h3>
+                </div>
+
+                <div className="text-xs text-gray-500 mb-3">
+                  {proposal.proposerName}
+                </div>
+
+                {proposal.status === ProposalStatus.OPEN ? (
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-700">
+                      {proposal.payload.reason}
+                    </p>
+                    <div className="flex items-center gap-2 justify-end">
+                      <button
+                        onClick={() =>
+                          handleVote(
+                            proposal.proposalName,
+                            proposal.proposalId,
+                            "AGREE"
+                          )
+                        }
+                        className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8] transition-colors"
+                      >
+                        찬성 {proposal.agreeCount}
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleVote(
+                            proposal.proposalName,
+                            proposal.proposalId,
+                            "DISAGREE"
+                          )
+                        }
+                        className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#F85449] text-white rounded hover:bg-[#E53E3E] transition-colors"
+                      >
+                        반대 {proposal.disagreeCount}
+                      </button>
+                    </div>
+                  </div>
+                ) : expandedProposals.has(proposal.proposalId) ? (
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-700">
+                      {proposal.payload.reason}
+                    </p>
+                    <div className="flex items-center gap-2 justify-end">
+                      <div className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#2563EB] text-white rounded cursor-default">
+                        찬성 {proposal.agreeCount}
+                      </div>
+                      <div className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#F85449] text-white rounded cursor-default">
+                        반대 {proposal.disagreeCount}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-700">
+                      {truncateText(proposal.payload.reason)}
+                    </p>
                     <button
-                      onClick={() => handleVote(proposal.proposalName, proposal.proposalId, "AGREE")}
-                      className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8] transition-colors"
+                      onClick={() => toggleExpanded(proposal.proposalId)}
+                      className="flex items-center gap-1 text-gray-600 text-sm hover:text-gray-800 transition-colors"
                     >
-                      찬성 {proposal.agreeCount}
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleVote(proposal.proposalName, proposal.proposalId, "DISAGREE")
-                      }
-                      className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#F85449] text-white rounded hover:bg-[#E53E3E] transition-colors"
-                    >
-                      반대 {proposal.disagreeCount}
+                      자세히 보기
+                      <ChevronDown className="w-4 h-4" />
                     </button>
                   </div>
-                </div>
-              ) : expandedProposals.has(proposal.proposalId) ? (
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-700">
-                    {proposal.payload.reason}
-                  </p>
-                  <div className="flex items-center gap-2 justify-end">
-                    <div className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#2563EB] text-white rounded cursor-default">
-                      찬성 {proposal.agreeCount}
-                    </div>
-                    <div className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#F85449] text-white rounded cursor-default">
-                      반대 {proposal.disagreeCount}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-700">
-                    {truncateText(proposal.payload.reason)}
-                  </p>
-                  <button
-                    onClick={() => toggleExpanded(proposal.proposalId)}
-                    className="flex items-center gap-1 text-gray-600 text-sm hover:text-gray-800 transition-colors"
-                  >
-                    자세히 보기
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-            </div>
-          </Card>
-        )))}
+                )}
+              </div>
+            </Card>
+          ))
+        )}
       </div>
 
       <VoteModal
@@ -421,10 +443,10 @@ export default function VotingPage() {
           console.log(
             `Vote ${voteModal.voteType} for ${voteModal.proposalName}`
           );
-          
+
           // 실제 투표 제출
           await submitVote(voteModal.proposalId, voteModal.voteType);
-          
+
           setVoteModal({ ...voteModal, isOpen: false });
         }}
       />
