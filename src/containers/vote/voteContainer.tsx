@@ -376,15 +376,17 @@ export default function VotingPage() {
                   </div>
                 )}
 
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  {proposal.status === ProposalStatus.OPEN && (
-                    <span className="text-xs">
-                      <span className="text-blue-600 font-bold">
-                        {formatCloseAt(proposal.closeAt)}
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    {proposal.status === ProposalStatus.OPEN && (
+                      <span className="text-xs">
+                        <span className="text-blue-600 font-bold">
+                          {formatCloseAt(proposal.closeAt)}
+                        </span>
                       </span>
-                    </span>
-                  )}
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-400">{proposal.date}</span>
                 </div>
 
                 <div
@@ -402,38 +404,65 @@ export default function VotingPage() {
                   {proposal.proposerName}
                 </div>
 
-              {proposal.status === ProposalStatus.OPEN ? (
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-700">
-                    {proposal.payload.reason}
-                  </p>
-                  
-                  <div className="flex items-center gap-2 justify-end">
+                {proposal.status === ProposalStatus.OPEN ? (
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-700">
+                      {proposal.payload.reason}
+                    </p>
+                    
+                    <div className="flex items-center gap-2 justify-end">
+                      <button
+                        onClick={() => handleVote(proposal.proposalName, proposal.proposalId, "AGREE", proposal.myVote)}
+                        disabled={proposal.myVote !== null}
+                        className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded transition-colors ${
+                          proposal.myVote === "AGREE"
+                            ? "bg-[#2563EB] text-white cursor-default"
+                            : proposal.myVote !== null
+                            ? "bg-[#2563EB] text-white cursor-default"
+                            : "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
+                        }`}
+                      >
+                        찬성 {proposal.agreeCount}
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleVote(proposal.proposalName, proposal.proposalId, "DISAGREE", proposal.myVote)
+                        }
+                        disabled={proposal.myVote !== null}
+                        className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded transition-colors ${
+                          proposal.myVote === "DISAGREE"
+                            ? "bg-gray-300 text-gray-500 cursor-default"
+                            : proposal.myVote !== null
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            : "bg-[#F85449] text-white hover:bg-[#E53E3E]"
+                        }`}
+                      >
+                        반대 {proposal.disagreeCount}
+                      </button>
+                    </div>
+                  </div>
+                ) : expandedProposals.has(proposal.proposalId) ? (
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-700">
+                      {proposal.payload.reason}
+                    </p>
+                    <div className="flex items-center gap-2 justify-end">
+                      <div className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#2563EB] text-white rounded cursor-default">
+                        찬성 {proposal.agreeCount}
+                      </div>
+                      <div className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#F85449] text-white rounded cursor-default">
+                        반대 {proposal.disagreeCount}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-700">
+                      {truncateText(proposal.payload.reason)}
+                    </p>
                     <button
-                      onClick={() => handleVote(proposal.proposalName, proposal.proposalId, "AGREE", proposal.myVote)}
-                      disabled={proposal.myVote !== null}
-                      className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded transition-colors ${
-                        proposal.myVote === "AGREE"
-                          ? "bg-green-600 text-white cursor-default"
-                          : proposal.myVote !== null
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
-                      }`}
-                    >
-                      찬성 {proposal.agreeCount}
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleVote(proposal.proposalName, proposal.proposalId, "DISAGREE", proposal.myVote)
-                      }
-                      disabled={proposal.myVote !== null}
-                      className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded transition-colors ${
-                        proposal.myVote === "DISAGREE"
-                          ? "bg-red-600 text-white cursor-default"
-                          : proposal.myVote !== null
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-[#F85449] text-white hover:bg-[#E53E3E]"
-                      }`}
+                      onClick={() => toggleExpanded(proposal.proposalId)}
+                      className="flex items-center gap-1 text-gray-600 text-sm hover:text-gray-800 transition-colors"
                     >
                       자세히 보기
                       <ChevronDown className="w-4 h-4" />
