@@ -167,7 +167,7 @@ export default function Header() {
 
         {/* 드롭다운 메뉴 */}
         {isDropdownOpen && (
-          <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-4 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
             <div className="py-2">
               <div
                 className="px-4 py-2 text-sm text-center text-gray-600 hover:bg-gray-50 cursor-pointer"
@@ -247,11 +247,11 @@ export default function Header() {
         isOpen={isMemberModalOpen}
         onClose={() => setIsMemberModalOpen(false)}
       >
-        <div className="text-center py-8">
-          <DialogTitle className="text-2xl font-bold text-gray-900 mb-4">
+        <div className="text-center mt-4 mb-2">
+          <DialogTitle className="text-2xl font-bold text-gray-900 mb-6">
             그룹원
           </DialogTitle>
-          <div className="max-h-[50dvh] overflow-y-auto">
+          <div className="max-h-[50dvh] overflow-y-auto mb-3">
             {isMembersLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>

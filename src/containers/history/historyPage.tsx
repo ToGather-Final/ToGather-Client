@@ -16,137 +16,6 @@ import HistoryCard from "@/components/history/HistoryCard";
 import HistoryCalendar from "@/components/history/HistoryCalendar";
 import { getHistory } from "@/utils/api/history";
 
-// Mock data for demonstration
-const mockHistoryData: HistoryDTO[] = [
-  {
-    id: "1",
-    category: HistoryCategory.TRADE,
-    type: HistoryType.TRADE_EXECUTED,
-    title: "테슬라 1주 58000원 매도 완료",
-    date: "2025-09-16",
-    payload: {
-      side: "SELL",
-      stockName: "테슬라",
-      shares: 1,
-      unitPrice: 5800000,
-      accountBalance: 7800000,
-    } as TradeExecutedPayloadDTO,
-  },
-  {
-    id: "2",
-    category: HistoryCategory.VOTE,
-    type: HistoryType.VOTE_APPROVED,
-    title: "투표 가결",
-    date: "2025-09-14",
-    payload: {
-      proposalId: "1",
-      scheduledAt: "2025년 9월 15일 오전 9시",
-      side: "SELL",
-      stockName: "테슬라",
-      shares: 1,
-      unitPrice: 5800000,
-    } as VoteApprovedPayloadDTO,
-  },
-  {
-    id: "3",
-    category: HistoryCategory.CASH,
-    type: HistoryType.CASH_DEPOSIT_COMPLETED,
-    title: "예수금 충전 완료",
-    date: "2025-09-14",
-    payload: {
-      depositorName: "박순영",
-      amount: 500000,
-      accountBalance: 6000000,
-    } as CashDepositCompletedPayloadDTO,
-  },
-  // {
-  //   id: "4",
-  //   category: HistoryCategory.VOTE,
-  //   type: HistoryType.VOTE_CREATED,
-  //   title: "테슬라 1주 58000원 매도 제안",
-  //   date: "2025-09-14",
-  //   payload: {
-  //     proposalId: "1",
-  //     proposalName: "테슬라 1주 58000원 매도 제안",
-  //     proposerName: "정다영",
-  //   } as VoteCreatedPayloadDTO,
-  // },
-  {
-    id: "5",
-    category: HistoryCategory.CASH,
-    type: HistoryType.CASH_DEPOSIT_COMPLETED,
-    title: "예수금 충전 완료",
-    date: "2025-09-14",
-    payload: {
-      depositorName: "박순영",
-      amount: 500000,
-      accountBalance: 6000000,
-    } as CashDepositCompletedPayloadDTO,
-  },
-  {
-    id: "6",
-    category: HistoryCategory.VOTE,
-    type: HistoryType.VOTE_REJECTED,
-    title: "투표 부결",
-    date: "2025-09-13",
-    payload: {
-      proposalId: "2",
-      proposalName: "아마존 2주 매수 제안",
-      proposerName: "김지수",
-    } as VoteCreatedPayloadDTO,
-  },
-  {
-    id: "7",
-    category: HistoryCategory.TRADE,
-    type: HistoryType.TRADE_FAILED,
-    title: "삼성전자 5주 매도 실패",
-    date: "2025-09-12",
-    payload: {
-      side: "SELL",
-      stockName: "삼성전자",
-      shares: 5,
-      unitPrice: 4500000,
-      accountBalance: 7800000,
-    } as TradeExecutedPayloadDTO,
-  },
-  {
-    id: "8",
-    category: HistoryCategory.PAY,
-    type: HistoryType.PAY_CHARGE_COMPLETED,
-    title: "페이 충전 완료",
-    date: "2025-09-11",
-    payload: {
-      depositorName: "황인찬",
-      amount: 200000,
-      accountBalance: 8000000,
-    } as CashDepositCompletedPayloadDTO,
-  },
-  {
-    id: "9",
-    category: HistoryCategory.GOAL,
-    type: HistoryType.GOAL_ACHIEVED,
-    title: "목표 달성",
-    date: "2025-09-10",
-    payload: {
-      targetAmount: 1000000,
-    } as GoalAchievedPayloadDTO,
-  },
-  {
-    id: "10",
-    category: HistoryCategory.TRADE,
-    type: HistoryType.TRADE_EXECUTED,
-    title: "엔비디아 2주 49200원 매수 완료",
-    date: "2025-09-09",
-    payload: {
-      side: "BUY",
-      stockName: "엔비디아",
-      shares: 2,
-      unitPrice: 98400,
-      accountBalance: 7702160,
-    } as TradeExecutedPayloadDTO,
-  },
-];
-
 export default function HistoryPage() {
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [selectedDate, setSelectedDate] = useState(new Date()); // 오늘 날짜
@@ -166,10 +35,8 @@ export default function HistoryPage() {
         const response = await getHistory();
         setHistoryData(response.items);
       } catch (err) {
-        console.error("히스토리 조회 실패:", err);
-        setError("히스토리를 불러오는데 실패했습니다.");
-        // 에러 발생 시 더미 데이터 사용
-        setHistoryData(mockHistoryData);
+        console.error("히스토리 조회 실패:", err)
+        setError("히스토리를 불러오는데 실패했습니다.")
       } finally {
         setLoading(false);
       }
@@ -259,7 +126,6 @@ export default function HistoryPage() {
         ) : error ? (
           <div className=" flex justify-center items-center text-center h-64">
             <div className="text-red-500 mb-2">{error}</div>
-            <div className="text-gray-500">더미 데이터를 표시합니다.</div>
           </div>
         ) : viewMode === "list" ? (
           /* List view */

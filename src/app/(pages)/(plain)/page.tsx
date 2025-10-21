@@ -25,7 +25,7 @@ const SplashScreen = ({ showAnimation }: { showAnimation: boolean }) => (
       {/* Logo */}
       <div className="mb-8">
         <div
-          className={`relative transition-all duration-800 ${showAnimation ? "transform -translate-y-24" : "transform translate-y-4"
+          className={`relative transition-all duration-800 ${showAnimation ? "transform -translate-y-27" : "transform translate-y-4"
             }`}
         >
           {/* White logo */}
@@ -66,14 +66,9 @@ const AuthSelectionScreen = ({ showButtons }: { showButtons: boolean }) => (
     <div className="flex flex-col items-center justify-center h-full px-8">
       {/* Logo */}
       <div className="mb-8">
-        <Image
-          src="/images/logo-blue.webp"
-          alt="ToGather Logo"
-          width={80}
-          height={80}
-          priority
-          fetchPriority="high"
-          className="h-20 w-20 object-contain"
+        <Logo
+          variant="blue"
+          size="lg"
         />
       </div>
 

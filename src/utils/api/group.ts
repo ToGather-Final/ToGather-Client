@@ -1,5 +1,6 @@
 import { getAuthHeaders } from "@/utils/token";
 import { API_GATEWAY_URL, API_ENDPOINTS } from "./config";
+import { apiRequest } from "./client";
 import {
   CreateGroupRequest,
   CreateGroupResponse,
@@ -35,38 +36,7 @@ export async function createGroup(
     console.log("Request body:", config.body);
     console.log("===============================");
 
-    const response = await fetch(url, config);
-
-    console.log("Create Group API Response Status:", response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Create Group API Error:", errorText);
-
-      let errorData: ApiErrorWithStatus;
-      try {
-        const parsed = JSON.parse(errorText);
-        errorData = {
-          code: parsed.code || `HTTP_${response.status}`,
-          message: parsed.message || "그룹 생성에 실패했습니다.",
-          path: parsed.path || "/groups",
-          timestamp: parsed.timestamp || new Date().toISOString(),
-          status: response.status,
-        };
-      } catch {
-        errorData = {
-          code: `HTTP_${response.status}`,
-          message: "그룹 생성에 실패했습니다.",
-          path: "/groups",
-          timestamp: new Date().toISOString(),
-          status: response.status,
-        };
-      }
-
-      throw errorData;
-    }
-
-    const result: CreateGroupResponse = await response.json();
+    const result = await apiRequest<CreateGroupResponse>(url, config);
     console.log("그룹 생성 성공:", result);
 
     return result;

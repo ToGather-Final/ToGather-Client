@@ -97,8 +97,6 @@ export async function apiRequest<T>(
         // 토큰 갱신 실패 시 로그만 찍기
         console.log('❌ Token refresh failed - but not clearing tokens for debugging');
         console.log('  - This means the original request will fail');
-        // clearTokens(); // 주석 처리
-        // throw new Error('Token refresh failed'); // 주석 처리
       }
     }
     
