@@ -7,42 +7,42 @@ import { ChevronDown } from "lucide-react";
 import VoteModal from "../../components/vote/VoteModal";
 import type { ProposalDTO } from "../../types/api/proposal";
 import {
-  ProposalCategory,
-  ProposalAction,
-  ProposalStatus,
+    ProposalCategory,
+    ProposalAction,
+    ProposalStatus,
 } from "../../types/api/proposal";
 import { cn } from "@/lib/utils";
 import { apiGet, apiPost } from "@/utils/api/client";
 
 // Vote Service API 호출 함수
 async function fetchProposals(): Promise<ProposalDTO[]> {
-  try {
-    const data = await apiGet<any[]>("/vote");
-    console.log("Fetched proposals:", data);
+    try {
+        const data = await apiGet<any[]>("/vote");
+        console.log("Fetched proposals:", data);
 
-    // API 응답을 ProposalDTO 형식으로 변환
-    return data.map((item: any) => ({
-      proposalId: item.proposalId,
-      proposalName: item.proposalName,
-      proposerName: item.proposerName,
-      category: item.category as ProposalCategory,
-      action: item.action as ProposalAction,
-      payload:
-        typeof item.payload === "string"
-          ? JSON.parse(item.payload)
-          : item.payload,
-      status: item.status as ProposalStatus,
-      date: item.date,
-      closeAt: item.closeAt,
-      agreeCount: item.agreeCount,
-      disagreeCount: item.disagreeCount,
-      myVote: item.myVote,
-    }));
-  } catch (error) {
-    console.error("Failed to fetch proposals:", error);
-    // 에러 발생 시 빈 배열 반환
-    return [];
-  }
+        // API 응답을 ProposalDTO 형식으로 변환
+        return data.map((item: any) => ({
+            proposalId: item.proposalId,
+            proposalName: item.proposalName,
+            proposerName: item.proposerName,
+            category: item.category as ProposalCategory,
+            action: item.action as ProposalAction,
+            payload:
+                typeof item.payload === "string"
+                    ? JSON.parse(item.payload)
+                    : item.payload,
+            status: item.status as ProposalStatus,
+            date: item.date,
+            closeAt: item.closeAt,
+            agreeCount: item.agreeCount,
+            disagreeCount: item.disagreeCount,
+            myVote: item.myVote,
+        }));
+    } catch (error) {
+        console.error("Failed to fetch proposals:", error);
+        // 에러 발생 시 빈 배열 반환
+        return [];
+    }
 }
 
 export default function VotingPage() {
@@ -126,19 +126,90 @@ export default function VotingPage() {
         choice: voteType,
       });
 
-      console.log("Vote submitted successfully");
+    // 투표 API 호출 함수
+    const submitVote = async (
+        proposalId: string,
+        voteType: "AGREE" | "DISAGREE"
+    ) => {
+        try {
+            await apiPost(`/vote/${proposalId}`, {
+                choice: voteType,
+            });
 
-      // 투표 성공 후 데이터 새로고침
-      const updatedProposals = await fetchProposals();
-      setProposals(updatedProposals);
-    } catch (error) {
-      console.error("Failed to submit vote:", error);
+            console.log("Vote submitted successfully");
 
-      // 409 Conflict - 이미 투표했을 때
-      if (error instanceof Error && (error as any).status === 409) {
-        alert(error.message);
-        return;
-      }
+            // 투표 성공 후 데이터 새로고침
+            const updatedProposals = await fetchProposals();
+            setProposals(updatedProposals);
+        } catch (error) {
+            console.error("Failed to submit vote:", error);
+
+            // 409 Conflict - 이미 투표했을 때
+            if (error instanceof Error && (error as any).status === 409) {
+                alert(error.message);
+                return;
+            }
+
+            // 기타 에러
+            alert("투표 제출에 실패했습니다. 다시 시도해주세요.");
+        }
+    };
+
+    // 모달 열고 어떤 선택인지 기록
+    const handleVote = (
+        proposalName: string,
+        proposalId: string,
+        voteType: "AGREE" | "DISAGREE"
+    ) => {
+        setVoteModal({
+            isOpen: true,
+            proposalName,
+            proposalId,
+            voteType,
+        });
+    };
+
+    const getFilteredProposals = () => {
+        let filtered = proposals;
+
+        // 1) 탭 필터
+        if (activeTab === "TRADE") {
+            filtered = filtered.filter(
+                (proposal) => proposal.category === ProposalCategory.TRADE
+            );
+        } else if (activeTab === "PAY") {
+            filtered = filtered.filter(
+                (proposal) => proposal.category === ProposalCategory.PAY
+            );
+        }
+        // "ALL" 탭일 때는 모든 카테고리의 제안을 표시
+
+        // 2) 드롭다운 필터 (매매 탭에서만 적용)
+        if (activeTab === "TRADE") {
+            if (tradeDropdown === "매수") {
+                filtered = filtered.filter(
+                    (proposal) => proposal.action === ProposalAction.BUY
+                );
+            } else if (tradeDropdown === "매도") {
+                filtered = filtered.filter(
+                    (proposal) => proposal.action === ProposalAction.SELL
+                );
+            }
+            // "전체"일 때는 모든 매매 관련 제안을 표시
+        }
+
+        // 3) 정렬
+        return filtered.sort((a, b) => {
+            // OPEN이 항상 상단
+            if (a.status === ProposalStatus.OPEN && b.status !== ProposalStatus.OPEN)
+                return -1;
+            if (a.status !== ProposalStatus.OPEN && b.status === ProposalStatus.OPEN)
+                return 1;
+
+            // 같은 상태끼리는 date 기준 내림차순(최신 먼저)
+            return new Date(b.date).getTime() - new Date(a.date).getTime();
+        });
+    };
 
       // 기타 에러
       alert("투표 제출에 실패했습니다. 다시 시도해주세요.");
@@ -189,13 +260,11 @@ export default function VotingPage() {
       // "전체"일 때는 모든 매매 관련 제안을 표시
     }
 
-    // 3) 정렬
-    return filtered.sort((a, b) => {
-      // OPEN이 항상 상단
-      if (a.status === ProposalStatus.OPEN && b.status !== ProposalStatus.OPEN)
-        return -1;
-      if (a.status !== ProposalStatus.OPEN && b.status === ProposalStatus.OPEN)
-        return 1;
+    const truncateText = (text: string, maxLines = 2) => {
+        const words = text.split(" ");
+        if (words.length <= 15) return text; // 대략 2줄 분량
+        return words.slice(0, 15).join(" ") + "...";
+    };
 
       // 같은 상태끼리는 date 기준 내림차순(최신 먼저)
       return new Date(b.date).getTime() - new Date(a.date).getTime();
@@ -376,10 +445,40 @@ export default function VotingPage() {
                   </div>
                 )}
 
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    {proposal.status === ProposalStatus.OPEN && (
-                      <span className="text-xs">
+            <div className="p-4 space-y-3">
+                {isLoading ? (
+                    <div className="flex justify-center items-center  text-center h-64">
+                        <div className="text-gray-500">제안 데이터를 불러오는 중...</div>
+                    </div>
+                ) : error ? (
+                    <div className="flex justify-center items-center  text-center h-64">
+                        <div className="text-red-500">{error}</div>
+                    </div>
+                ) : getFilteredProposals().length === 0 ? (
+                    <div className="flex justify-center items-center text-center h-64">
+                        <div className="text-gray-500">표시할 제안이 없습니다.</div>
+                    </div>
+                ) : (
+                    getFilteredProposals().map((proposal) => (
+                        <Card
+                            key={proposal.proposalId}
+                            className={cn(
+                                proposal.status === ProposalStatus.OPEN
+                                    ? "bg-[#EEF2FF]"
+                                    : "bg-white"
+                            )}
+                        >
+                            <div className="px-5 py-4 relative">
+                                {proposal.status !== ProposalStatus.OPEN && (
+                                    <div className="absolute top-4 left-5 z-0">
+                                        {getStatusBadge(proposal.status)}
+                                    </div>
+                                )}
+
+                                <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                        {proposal.status === ProposalStatus.OPEN && (
+                                            <span className="text-xs">
                         <span className="text-blue-600 font-bold">
                           {formatCloseAt(proposal.closeAt)}
                         </span>
@@ -469,28 +568,24 @@ export default function VotingPage() {
                     </button>
                   </div>
                 )}
-              </div>
-            </Card>
-          ))
-        )}
-      </div>
+            </div>
 
-      <VoteModal
-        isOpen={voteModal.isOpen}
-        onClose={() => setVoteModal({ ...voteModal, isOpen: false })}
-        voteType={voteModal.voteType === "AGREE" ? "approve" : "reject"}
-        proposalName={voteModal.proposalName}
-        onConfirm={async () => {
-          console.log(
-            `Vote ${voteModal.voteType} for ${voteModal.proposalName}`
-          );
+            <VoteModal
+                isOpen={voteModal.isOpen}
+                onClose={() => setVoteModal({ ...voteModal, isOpen: false })}
+                voteType={voteModal.voteType === "AGREE" ? "approve" : "reject"}
+                proposalName={voteModal.proposalName}
+                onConfirm={async () => {
+                    console.log(
+                        `Vote ${voteModal.voteType} for ${voteModal.proposalName}`
+                    );
 
-          // 실제 투표 제출
-          await submitVote(voteModal.proposalId, voteModal.voteType);
+                    // 실제 투표 제출
+                    await submitVote(voteModal.proposalId, voteModal.voteType);
 
-          setVoteModal({ ...voteModal, isOpen: false });
-        }}
-      />
-    </div>
-  );
+                    setVoteModal({ ...voteModal, isOpen: false });
+                }}
+            />
+        </div>
+    );
 }

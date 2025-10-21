@@ -18,6 +18,7 @@ ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 
 # 깃헙 액션에서 넣어준 산출물만 복사
 COPY .next/standalone ./
+COPY .next/server.js ./server.js
 COPY .next/static ./.next/static
 COPY public ./public
 
@@ -27,6 +28,9 @@ RUN addgroup --system --gid 1001 nodejs && \
 USER nextjs
 
 EXPOSE 3000
+
+ENV HOST=0.0.0.0
+ENV PORT=3000
 CMD ["node", "server.js"]
 
 
