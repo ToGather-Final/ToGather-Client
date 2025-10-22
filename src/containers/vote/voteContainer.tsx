@@ -126,90 +126,19 @@ export default function VotingPage() {
         choice: voteType,
       });
 
-    // 투표 API 호출 함수
-    const submitVote = async (
-        proposalId: string,
-        voteType: "AGREE" | "DISAGREE"
-    ) => {
-        try {
-            await apiPost(`/vote/${proposalId}`, {
-                choice: voteType,
-            });
+      console.log("Vote submitted successfully");
 
-            console.log("Vote submitted successfully");
+      // 투표 성공 후 데이터 새로고침
+      const updatedProposals = await fetchProposals();
+      setProposals(updatedProposals);
+    } catch (error) {
+      console.error("Failed to submit vote:", error);
 
-            // 투표 성공 후 데이터 새로고침
-            const updatedProposals = await fetchProposals();
-            setProposals(updatedProposals);
-        } catch (error) {
-            console.error("Failed to submit vote:", error);
-
-            // 409 Conflict - 이미 투표했을 때
-            if (error instanceof Error && (error as any).status === 409) {
-                alert(error.message);
-                return;
-            }
-
-            // 기타 에러
-            alert("투표 제출에 실패했습니다. 다시 시도해주세요.");
-        }
-    };
-
-    // 모달 열고 어떤 선택인지 기록
-    const handleVote = (
-        proposalName: string,
-        proposalId: string,
-        voteType: "AGREE" | "DISAGREE"
-    ) => {
-        setVoteModal({
-            isOpen: true,
-            proposalName,
-            proposalId,
-            voteType,
-        });
-    };
-
-    const getFilteredProposals = () => {
-        let filtered = proposals;
-
-        // 1) 탭 필터
-        if (activeTab === "TRADE") {
-            filtered = filtered.filter(
-                (proposal) => proposal.category === ProposalCategory.TRADE
-            );
-        } else if (activeTab === "PAY") {
-            filtered = filtered.filter(
-                (proposal) => proposal.category === ProposalCategory.PAY
-            );
-        }
-        // "ALL" 탭일 때는 모든 카테고리의 제안을 표시
-
-        // 2) 드롭다운 필터 (매매 탭에서만 적용)
-        if (activeTab === "TRADE") {
-            if (tradeDropdown === "매수") {
-                filtered = filtered.filter(
-                    (proposal) => proposal.action === ProposalAction.BUY
-                );
-            } else if (tradeDropdown === "매도") {
-                filtered = filtered.filter(
-                    (proposal) => proposal.action === ProposalAction.SELL
-                );
-            }
-            // "전체"일 때는 모든 매매 관련 제안을 표시
-        }
-
-        // 3) 정렬
-        return filtered.sort((a, b) => {
-            // OPEN이 항상 상단
-            if (a.status === ProposalStatus.OPEN && b.status !== ProposalStatus.OPEN)
-                return -1;
-            if (a.status !== ProposalStatus.OPEN && b.status === ProposalStatus.OPEN)
-                return 1;
-
-            // 같은 상태끼리는 date 기준 내림차순(최신 먼저)
-            return new Date(b.date).getTime() - new Date(a.date).getTime();
-        });
-    };
+      // 409 Conflict - 이미 투표했을 때
+      if (error instanceof Error && (error as any).status === 409) {
+        alert(error.message);
+        return;
+      }
 
       // 기타 에러
       alert("투표 제출에 실패했습니다. 다시 시도해주세요.");
@@ -223,8 +152,9 @@ export default function VotingPage() {
     voteType: "AGREE" | "DISAGREE",
     myVote: string | null
   ) => {
-    // 이미 투표한 경우 모달을 열지 않음
+    // 이미 투표한 경우 모달을 열지 않음 (투표 변경 불가)
     if (myVote !== null) {
+      alert("이미 투표하셨습니다. 투표는 변경할 수 없습니다.");
       return;
     }
 
@@ -265,11 +195,13 @@ export default function VotingPage() {
       // "전체"일 때는 모든 매매 관련 제안을 표시
     }
 
-    const truncateText = (text: string, maxLines = 2) => {
-        const words = text.split(" ");
-        if (words.length <= 15) return text; // 대략 2줄 분량
-        return words.slice(0, 15).join(" ") + "...";
-    };
+    // 3) 정렬
+    return filtered.sort((a, b) => {
+      // OPEN이 항상 상단
+      if (a.status === ProposalStatus.OPEN && b.status !== ProposalStatus.OPEN)
+        return -1;
+      if (a.status !== ProposalStatus.OPEN && b.status === ProposalStatus.OPEN)
+        return 1;
 
       // 같은 상태끼리는 date 기준 내림차순(최신 먼저)
       return new Date(b.date).getTime() - new Date(a.date).getTime();
@@ -454,40 +386,10 @@ export default function VotingPage() {
                   </div>
                 )}
 
-            <div className="p-4 space-y-3">
-                {isLoading ? (
-                    <div className="flex justify-center items-center  text-center h-64">
-                        <div className="text-gray-500">제안 데이터를 불러오는 중...</div>
-                    </div>
-                ) : error ? (
-                    <div className="flex justify-center items-center  text-center h-64">
-                        <div className="text-red-500">{error}</div>
-                    </div>
-                ) : getFilteredProposals().length === 0 ? (
-                    <div className="flex justify-center items-center text-center h-64">
-                        <div className="text-gray-500">표시할 제안이 없습니다.</div>
-                    </div>
-                ) : (
-                    getFilteredProposals().map((proposal) => (
-                        <Card
-                            key={proposal.proposalId}
-                            className={cn(
-                                proposal.status === ProposalStatus.OPEN
-                                    ? "bg-[#EEF2FF]"
-                                    : "bg-white"
-                            )}
-                        >
-                            <div className="px-5 py-4 relative">
-                                {proposal.status !== ProposalStatus.OPEN && (
-                                    <div className="absolute top-4 left-5 z-0">
-                                        {getStatusBadge(proposal.status)}
-                                    </div>
-                                )}
-
-                                <div className="flex items-start justify-between mb-3">
-                                    <div className="flex items-center gap-2">
-                                        {proposal.status === ProposalStatus.OPEN && (
-                                            <span className="text-xs">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    {proposal.status === ProposalStatus.OPEN && (
+                      <span className="text-xs">
                         <span className="text-blue-600 font-bold">
                           {formatCloseAt(proposal.closeAt)}
                         </span>
@@ -533,7 +435,7 @@ export default function VotingPage() {
                           proposal.myVote === "AGREE"
                             ? "bg-[#2563EB] text-white cursor-default"
                             : proposal.myVote !== null
-                            ? "bg-[#2563EB] text-white cursor-default"
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                             : "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
                         }`}
                       >
@@ -551,7 +453,7 @@ export default function VotingPage() {
                         disabled={proposal.myVote !== null}
                         className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded transition-colors ${
                           proposal.myVote === "DISAGREE"
-                            ? "bg-gray-300 text-gray-500 cursor-default"
+                            ? "bg-[#F85449] text-white cursor-default"
                             : proposal.myVote !== null
                             ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                             : "bg-[#F85449] text-white hover:bg-[#E53E3E]"
@@ -589,24 +491,28 @@ export default function VotingPage() {
                     </button>
                   </div>
                 )}
-            </div>
+              </div>
+            </Card>
+          ))
+        )}
+      </div>
 
-            <VoteModal
-                isOpen={voteModal.isOpen}
-                onClose={() => setVoteModal({ ...voteModal, isOpen: false })}
-                voteType={voteModal.voteType === "AGREE" ? "approve" : "reject"}
-                proposalName={voteModal.proposalName}
-                onConfirm={async () => {
-                    console.log(
-                        `Vote ${voteModal.voteType} for ${voteModal.proposalName}`
-                    );
+      <VoteModal
+        isOpen={voteModal.isOpen}
+        onClose={() => setVoteModal({ ...voteModal, isOpen: false })}
+        voteType={voteModal.voteType === "AGREE" ? "approve" : "reject"}
+        proposalName={voteModal.proposalName}
+        onConfirm={async () => {
+          console.log(
+            `Vote ${voteModal.voteType} for ${voteModal.proposalName}`
+          );
 
-                    // 실제 투표 제출
-                    await submitVote(voteModal.proposalId, voteModal.voteType);
+          // 실제 투표 제출
+          await submitVote(voteModal.proposalId, voteModal.voteType);
 
-                    setVoteModal({ ...voteModal, isOpen: false });
-                }}
-            />
-        </div>
-    );
+          setVoteModal({ ...voteModal, isOpen: false });
+        }}
+      />
+    </div>
+  );
 }
