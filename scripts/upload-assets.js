@@ -98,6 +98,64 @@ async function invalidateCloudFront() {
     console.log(`✅ Invalidation started: ${res.Invalidation.Id}`);
 }
 
+async function clearS3Bucket() {
+    console.log("🧹 Clearing S3 bucket before upload...");
+    let totalDeleted = 0;
+    let continuationToken = undefined;
+    
+    try {
+        do {
+            const listCommand = new ListObjectsV2Command({
+                Bucket: BUCKET_NAME,
+                Prefix: "_next/",
+                MaxKeys: 1000, // 한 번에 최대 1000개
+                ContinuationToken: continuationToken
+            });
+            
+            const listResult = await s3Client.send(listCommand);
+            
+            if (listResult.Contents && listResult.Contents.length > 0) {
+                console.log(`🗑️ Deleting ${listResult.Contents.length} files (batch)...`);
+                
+                // 병렬 삭제로 속도 향상
+                const deletePromises = listResult.Contents.map(async (object) => {
+                    try {
+                        const deleteCommand = new DeleteObjectCommand({
+                            Bucket: BUCKET_NAME,
+                            Key: object.Key
+                        });
+                        await s3Client.send(deleteCommand);
+                        console.log(`  ✅ Deleted: ${object.Key}`);
+                        return true;
+                    } catch (deleteErr) {
+                        console.error(`  ❌ Failed to delete ${object.Key}:`, deleteErr.message);
+                        return false;
+                    }
+                });
+                
+                const results = await Promise.all(deletePromises);
+                const successCount = results.filter(r => r).length;
+                totalDeleted += successCount;
+                
+                if (successCount < listResult.Contents.length) {
+                    console.warn(`⚠️ ${listResult.Contents.length - successCount} files failed to delete`);
+                }
+            }
+            
+            // 다음 페이지가 있는지 확인
+            continuationToken = listResult.NextContinuationToken;
+            
+        } while (continuationToken);
+        
+        console.log(`✅ S3 bucket cleared successfully! Deleted ${totalDeleted} files total.`);
+        
+    } catch (err) {
+        console.error("❌ Failed to clear S3 bucket:", err.message);
+        console.warn("⚠️ Continuing with upload despite clear failure...");
+        // 삭제 실패해도 업로드는 계속 진행
+    }
+}
+
 async function main() {
     console.log("🚀 Starting static asset deployment...");
     const nextDir = path.join(__dirname, "..", ".next");
@@ -116,15 +174,18 @@ async function main() {
         throw new Error("❌ .next/static 디렉토리를 찾을 수 없습니다. 빌드 실패로 추정됩니다.");
     }
 
-    // 2️⃣ .next/static 전체 업로드
+    // 2️⃣ 기존 S3 파일 정리 (선택사항)
+    await clearS3Bucket();
+
+    // 3️⃣ .next/static 전체 업로드
     await uploadDirectory(staticDir, "_next/static");
 
-    // 3️⃣ public 디렉토리 업로드 (이미지, 폰트 등)
+    // 4️⃣ public 디렉토리 업로드 (이미지, 폰트 등)
     if (fs.existsSync(publicDir)) {
         await uploadDirectory(publicDir, "");
     }
 
-    // 4️⃣ CDN 캐시 무효화
+    // 5️⃣ CDN 캐시 무효화
     await invalidateCloudFront();
 
     console.log("🎉 S3 업로드 및 CDN 무효화 완료!");
