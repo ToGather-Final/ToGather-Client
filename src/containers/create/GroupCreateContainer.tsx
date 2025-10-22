@@ -175,8 +175,8 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
          if (isNaN(memberCountForGroup) || memberCountForGroup <= 0) {
            return "그룹 인원수는 1명 이상의 숫자여야 합니다."
          }
-         if (memberCountForGroup > 100) {
-           return "그룹 인원수는 100명 이하여야 합니다."
+         if (memberCountForGroup > 10) {
+           return "그룹 인원수는 10명 이하여야 합니다."
          }
          // 예수금 총합 검증
          const initialAmountForGroup = parseInt(formData.initialInvestment) || 0
@@ -272,7 +272,7 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
     const goalAmount = parseInt(formData.targetInvestment)
     
      const numericValidation = 
-       !isNaN(memberCount) && memberCount > 0 && memberCount <= 100 &&
+       !isNaN(memberCount) && memberCount > 0 && memberCount <= 10 &&
        !isNaN(initialAmount) && initialAmount >= 0 &&
        !isNaN(goalAmount) && goalAmount > 0 &&
        initialAmount <= goalAmount &&
@@ -351,7 +351,7 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
                 required
                 type="number"
                 min="1"
-                max="100"
+                max="10"
               />
               {fieldErrors.groupMemberId && (
                 <p className="text-sm text-red-500 mt-1 ml-2">{fieldErrors.groupMemberId}</p>

@@ -79,7 +79,7 @@ export default function VotingPage() {
   // 컴포넌트 마운트 시 데이터 가져오기
   useEffect(() => {
     if (!isMounted) return;
-    
+
     const loadProposals = async () => {
       try {
         setIsLoading(true);
@@ -217,12 +217,17 @@ export default function VotingPage() {
   };
 
   // 모달 열고 어떤 선택인지 기록
-  const handleVote = (proposalName: string, proposalId: string, voteType: "AGREE" | "DISAGREE", myVote: string | null) => {
+  const handleVote = (
+    proposalName: string,
+    proposalId: string,
+    voteType: "AGREE" | "DISAGREE",
+    myVote: string | null
+  ) => {
     // 이미 투표한 경우 모달을 열지 않음
     if (myVote !== null) {
       return;
     }
-    
+
     setVoteModal({
       isOpen: true,
       proposalName,
@@ -290,7 +295,8 @@ export default function VotingPage() {
     }
   };
 
-  const truncateText = (text: string, maxLines = 2) => {
+  const truncateText = (text: string | undefined, maxLines = 2) => {
+    if (!text) return ""; // undefined나 null인 경우 빈 문자열 반환
     const words = text.split(" ");
     if (words.length <= 15) return text; // 대략 2줄 분량
     return words.slice(0, 15).join(" ") + "...";
@@ -298,29 +304,32 @@ export default function VotingPage() {
 
   // closeAt 시간 표시 포맷팅 함수
   const formatCloseAt = (closeAt: string) => {
-    if (!closeAt) return '시간 미정';
-    
+    if (!closeAt) return "시간 미정";
+
     try {
       // "2025-10-21 19시 57분" 형식에서 날짜와 시간 추출
-      const dateTimeMatch = closeAt.match(/(\d{4}-\d{2}-\d{2})\s+(\d+시\s+\d+분)/);
+      const dateTimeMatch = closeAt.match(
+        /(\d{4}-\d{2}-\d{2})\s+(\d+시\s+\d+분)/
+      );
       if (!dateTimeMatch) return closeAt;
-      
+
       const [, dateStr, timeStr] = dateTimeMatch;
       const closeDate = new Date(dateStr);
       const today = new Date();
-      
+
       // 날짜 비교 (년월일만)
-      const isToday = closeDate.getFullYear() === today.getFullYear() &&
-                     closeDate.getMonth() === today.getMonth() &&
-                     closeDate.getDate() === today.getDate();
-      
+      const isToday =
+        closeDate.getFullYear() === today.getFullYear() &&
+        closeDate.getMonth() === today.getMonth() &&
+        closeDate.getDate() === today.getDate();
+
       if (isToday) {
         return `오늘 ${timeStr}까지`;
       } else {
         return `${closeAt}까지`;
       }
     } catch (error) {
-      console.error('Error formatting closeAt:', error);
+      console.error("Error formatting closeAt:", error);
       return closeAt;
     }
   };
@@ -506,12 +515,19 @@ export default function VotingPage() {
                 {proposal.status === ProposalStatus.OPEN ? (
                   <div className="space-y-4">
                     <p className="text-sm text-gray-700">
-                      {proposal.payload.reason}
+                      {proposal.payload?.reason || "이유 없음"}
                     </p>
-                    
+
                     <div className="flex items-center gap-2 justify-end">
                       <button
-                        onClick={() => handleVote(proposal.proposalName, proposal.proposalId, "AGREE", proposal.myVote)}
+                        onClick={() =>
+                          handleVote(
+                            proposal.proposalName,
+                            proposal.proposalId,
+                            "AGREE",
+                            proposal.myVote
+                          )
+                        }
                         disabled={proposal.myVote !== null}
                         className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded transition-colors ${
                           proposal.myVote === "AGREE"
@@ -525,7 +541,12 @@ export default function VotingPage() {
                       </button>
                       <button
                         onClick={() =>
-                          handleVote(proposal.proposalName, proposal.proposalId, "DISAGREE", proposal.myVote)
+                          handleVote(
+                            proposal.proposalName,
+                            proposal.proposalId,
+                            "DISAGREE",
+                            proposal.myVote
+                          )
                         }
                         disabled={proposal.myVote !== null}
                         className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded transition-colors ${
@@ -543,7 +564,7 @@ export default function VotingPage() {
                 ) : expandedProposals.has(proposal.proposalId) ? (
                   <div className="space-y-4">
                     <p className="text-sm text-gray-700">
-                      {proposal.payload.reason}
+                      {proposal.payload?.reason || "이유 없음"}
                     </p>
                     <div className="flex items-center gap-2 justify-end">
                       <div className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#2563EB] text-white rounded cursor-default">
@@ -557,7 +578,7 @@ export default function VotingPage() {
                 ) : (
                   <div className="space-y-4">
                     <p className="text-sm text-gray-700">
-                      {truncateText(proposal.payload.reason)}
+                      {truncateText(proposal.payload?.reason)}
                     </p>
                     <button
                       onClick={() => toggleExpanded(proposal.proposalId)}
