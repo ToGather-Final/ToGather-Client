@@ -39,7 +39,7 @@ const config: Config = {
       },
       screens: {},
       fontFamily: {
-        pretendard: ["var(--font-pretendard)"],
+        pretendard: ["Pretendard", "sans-serif"],
       },
     },
   },

@@ -38,10 +38,18 @@ const nextConfig: NextConfig = {
         loaderFile: './src/lib/imageLoader.ts',
     },
 
-    // ✅ 실험적 옵션
+    // ✅ 실험적 옵션 (React 19 + Next.js 15.5.2)
     experimental: {
-        // serverActions: true,
-        optimizePackageImports: ["lucide-react"],
+        // React 19 최적화
+        reactCompiler: false, // Turbopack과 충돌 방지
+        // 스트리밍 SSR 활성화
+        serverActions: {
+            allowedOrigins: ['localhost:3000', 'xn--o79aq2k062a.store'],
+        },
+        // Next.js 15.5.2에서 지원하는 최적화
+        optimizePackageImports: ['lucide-react'],
+        // 메모리 사용량 최적화
+        memoryBasedWorkersCount: true,
     },
 
     distDir: ".next",
