@@ -239,7 +239,7 @@ export default function GroupCompleteContainer({
           {/* Link Box */}
           <div className="w-full max-w-sm mx-auto mb-4">
             <div className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-center">
-              <p className="text-base text-gray-700">https://github.com/Jixoo-IT</p>
+              <p className="text-base text-gray-700">https://xn--o79aq2k062a.store/</p>
             </div>
           </div>
 
