@@ -1,20 +1,4 @@
-# ---- Stage 1: Build ----
-FROM node:18-alpine AS builder
-
-WORKDIR /app
-RUN apk add --no-cache libc6-compat
-COPY package.json pnpm-lock.yaml ./
-RUN npm install -g pnpm && pnpm install --frozen-lockfile
-COPY . .
-
-# ✅ 빌드 (SSR + S3/CDN 병행)
-ARG NEXT_PUBLIC_API_BASE_URL
-ARG CDN_URL
-ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
-ENV CDN_URL=${CDN_URL}
-RUN pnpm run build
-
-# ---- Stage 2: Runtime ----
+# ---- Runtime Only (빌드는 CI/CD에서 완료) ----
 FROM node:18-alpine AS runner
 WORKDIR /app
 
@@ -23,10 +7,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=512 --max-semi-space-size=128"
 ENV NODE_NO_WARNINGS=1
 
-# ✅ 빌드 산출물 복사
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
+# ✅ CI/CD에서 빌드된 아티팩트 복사
+COPY .next/standalone ./
+COPY .next/static ./.next/static
+COPY public ./public
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs && \

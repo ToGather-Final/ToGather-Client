@@ -39,8 +39,8 @@ const nextConfig: NextConfig = {
     // 빌드 시 next-server.js를 생성
     outputFileTracingRoot: process.cwd(), // 워크스페이스 루트 경고 해결
     
-    // 🚀 빌드 ID 자동 생성 (Next.js가 내용 기반으로 해시 생성)
-    // generateBuildId 제거 - Next.js가 자동으로 일관된 해시 생성
+    // 🚀 빌드 ID 고정 (CI와 로컬 환경 일치)
+    generateBuildId: () => 'production-build',
 
     compiler: {
         removeConsole:

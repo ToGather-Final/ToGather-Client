@@ -178,6 +178,15 @@ async function main() {
     await clearS3Bucket();
 
     // 3️⃣ .next/static 전체 업로드
+    console.log("🔍 Uploading .next/static files...");
+    console.log("📁 Static directory contents:");
+    const staticFiles = getAllFiles(staticDir);
+    console.log(`Found ${staticFiles.length} files in .next/static`);
+    
+    // main-app 파일들 확인
+    const mainAppFiles = staticFiles.filter(f => f.includes('main-app'));
+    console.log("📋 main-app files found:", mainAppFiles.map(f => path.basename(f)));
+    
     await uploadDirectory(staticDir, "_next/static");
 
     // 4️⃣ public 디렉토리 업로드 (이미지, 폰트 등)
