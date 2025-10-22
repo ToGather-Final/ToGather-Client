@@ -24,9 +24,7 @@ const nextConfig: NextConfig = {
     distDir: ".next",
     // 🔑 standalone + Node runtime 엔트리 강제
     // 빌드 시 next-server.js를 생성
-    env: {
-        NODE_ENV: "production",
-    },
+    outputFileTracingRoot: process.cwd(), // 워크스페이스 루트 경고 해결
 
     compiler: {
         removeConsole:
