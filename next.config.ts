@@ -11,6 +11,14 @@ const nextConfig: NextConfig = {
     assetPrefix: process.env.NODE_ENV === 'production'
         ? process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net'
         : '',
+    
+    // 🚀 정적 자산 경로 설정
+    trailingSlash: false,
+    generateEtags: true,
+    poweredByHeader: false,
+    
+    // 🚀 서버 외부 패키지 설정 (standalone 빌드 안정성)
+    serverExternalPackages: ['sharp'],
 
     images: {
         formats: ["image/avif", "image/webp"],
