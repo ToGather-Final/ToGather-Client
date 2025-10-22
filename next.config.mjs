@@ -1,72 +1,66 @@
-/** @type {import('next').NextConfig} */ // kr 도입 코드.
+/** @type {import('next').NextConfig} */
 const nextConfig = {
     output: 'standalone',
     eslint: {
-        ignoreDuringBuilds: true,
+      ignoreDuringBuilds: true,
     },
     assetPrefix:
-        process.env.NODE_ENV === 'production'
-            ? process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net'
-            : '',
+      process.env.NODE_ENV === 'production'
+        ? process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net'
+        : '',
     images: {
-        formats: ['image/avif', 'image/webp'],
-        deviceSizes: [640, 750, 828, 1080, 1200],
-        imageSizes: [16, 32, 48, 64, 96, 128, 256],
-        minimumCacheTTL: 60,
-        dangerouslyAllowSVG: true,
-        contentSecurityPolicy:
-            "default-src 'self'; script-src 'none'; sandbox;",
-        ...(process.env.NODE_ENV === 'production'
-            ? {
-                loader: 'custom',
-                loaderFile: './src/lib/imageLoader.ts',
-            }
-            : {}),
+      formats: ['image/avif', 'image/webp'],
+      deviceSizes: [640, 750, 828, 1080, 1200],
+      imageSizes: [16, 32, 48, 64, 96, 128, 256],
+      minimumCacheTTL: 60,
+      dangerouslyAllowSVG: true,
     },
     compress: true,
     poweredByHeader: false,
     generateEtags: true,
+  
     experimental: {
-        serverActions: {
-            allowedOrigins: ['localhost:3000', 'xn--o79aq2k062a.store'],
-        },
-        optimizePackageImports: ['lucide-react'],
+      serverActions: true,
+      optimizePackageImports: ['lucide-react'],
     },
-    serverExternalPackages: ['sharp'],
+  
     compiler: {
-        removeConsole:
-            process.env.NODE_ENV === 'production'
-                ? { exclude: ['error', 'warn'] }
-                : false,
+      removeConsole:
+        process.env.NODE_ENV === 'production'
+          ? { exclude: ['error', 'warn'] }
+          : false,
     },
+  
+    modularizeImports: {
+      'lucide-react': {
+        transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
+      },
+    },
+  
     headers: async () => [
-        {
-            source: '/(.*)',
-            headers: [
-                {
-                    key: 'Cache-Control',
-                    value:
-                        'public, max-age=0, s-maxage=300, stale-while-revalidate=60',
-                },
-            ],
-        },
-        {
-            source: '/api/(.*)',
-            headers: [{ key: 'Cache-Control', value: 'no-store' }],
-        },
-        {
-            source: '/_next/static/(.*)',
-            headers: [
-                {
-                    key: 'Cache-Control',
-                    value: 'public, max-age=31536000, immutable',
-                },
-            ],
-        },
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value:
+              'public, max-age=0, s-maxage=300, stale-while-revalidate=60',
+          },
+        ],
+      },
+      {
+        source: '/api/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store',
+          },
+        ],
+      },
     ],
-};
-
-export default nextConfig;
+  };
+  
+  export default nextConfig;  
 
 
 // import type { NextConfig } from "next"; // kr 도입하려고 ts > mjs 로 전환 안돼면 롤백해야함
