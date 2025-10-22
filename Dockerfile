@@ -37,8 +37,8 @@ EXPOSE 3000
 ENV HOST=0.0.0.0
 ENV PORT=3000
 
-# ✅ Next.js 런타임
-CMD ["node", "next-server.js"]
+# ✅ Next.js 런타임 (server.js 또는 next-server.js 중 존재하는 것 실행)
+CMD ["sh", "-c", "if [ -f /app/server.js ]; then node server.js; elif [ -f /app/next-server.js ]; then node next-server.js; else echo 'No server file found' && exit 1; fi"]
 
     
 ## ---- runtime only ----
