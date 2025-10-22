@@ -5,6 +5,7 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import Select from "@/components/ui/select"
 import MainButton from "@/components/common/MainButton"
+import GroupConsentModal from "@/components/common/GroupConsentModal"
 import { createGroup, CreateGroupRequest } from "@/utils/api"
 import { ApiErrorWithStatus } from "@/types/api/auth"
 import Image from "next/image"
@@ -52,6 +53,7 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({})
+  const [showConsentModal, setShowConsentModal] = useState(false)
 
   // 드롭다운 옵션 생성 함수 (최소 2명부터)
   const generateQuorumOptions = (maxMembers: number) => {
@@ -71,6 +73,15 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    // 폼 유효성 검사만 하고 팝업 표시
+    if (!isFormValid()) {
+      return
+    }
+    setShowConsentModal(true)
+  }
+
+  const handleConsentConfirm = async () => {
+    setShowConsentModal(false)
     setIsLoading(true)
     setError(null)
 
@@ -164,6 +175,10 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleConsentCancel = () => {
+    setShowConsentModal(false)
   }
 
   // 입력값 유효성 검사 함수
@@ -476,6 +491,13 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
           </form>
         </div>
       </div>
+
+      {/* 동의 확인 팝업 */}
+      <GroupConsentModal
+        isOpen={showConsentModal}
+        onClose={handleConsentCancel}
+        onConfirm={handleConsentConfirm}
+      />
     </div>
   )
 }
