@@ -17,7 +17,8 @@ import { getGroupInfo } from "@/services/group/group";
 
 export default function Header() {
   const pathname = usePathname();
-  const payActive = pathname === "/pay" || pathname.startsWith("/pay/");
+  // 페이 페이지에서는 카드 아이콘을 활성화하지 않음 (이미 도착한 목적지)
+  const payActive = false;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isRuleModalOpen, setIsRuleModalOpen] = useState(false);
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
@@ -198,8 +199,8 @@ export default function Header() {
                     size-9 rounded-lg transition
                     ${
                       payActive
-                        ? "bg-stone-100 text-stone-900"
-                        : "text-stone-500 hover:bg-stone-50"
+                        ? "bg-blue-50 text-blue-600 border border-blue-200"
+                        : "text-stone-500 hover:bg-stone-50 hover:text-stone-700"
                     }`}
       >
         <CreditCard size={25} className="stroke-current" />
