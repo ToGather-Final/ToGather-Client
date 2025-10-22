@@ -1,67 +1,53 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-    output: 'standalone',
-    eslint: {
-      ignoreDuringBuilds: true,
-    },
-    assetPrefix:
-      process.env.NODE_ENV === 'production'
-        ? process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net'
-        : '',
-    images: {
-      formats: ['image/avif', 'image/webp'],
-      deviceSizes: [640, 750, 828, 1080, 1200],
-      imageSizes: [16, 32, 48, 64, 96, 128, 256],
-      minimumCacheTTL: 60,
-      dangerouslyAllowSVG: true,
-    },
-    compress: true,
-    poweredByHeader: false,
-    generateEtags: true,
-  
-    experimental: {
-      serverActions: true,
-      optimizePackageImports: ['lucide-react'],
-    },
-  
-    compiler: {
-      removeConsole:
-        process.env.NODE_ENV === 'production'
-          ? { exclude: ['error', 'warn'] }
-          : false,
-    },
-  
-    modularizeImports: {
-      'lucide-react': {
-        transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
-      },
-    },
-  
-    headers: async () => [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value:
-              'public, max-age=0, s-maxage=300, stale-while-revalidate=60',
-          },
-        ],
-      },
-      {
-        source: '/api/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-store',
-          },
-        ],
-      },
-    ],
-  };
-  
-  export default nextConfig;  
+import type { NextConfig } from "next";
 
+const nextConfig: NextConfig = {
+    // ✅ 기본 Next.js SSR 설정
+    output: "standalone",
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
+
+    images: {
+        formats: ["image/avif", "image/webp"],
+        deviceSizes: [640, 750, 828, 1080, 1200],
+        imageSizes: [16, 32, 48, 64, 96, 128, 256],
+        minimumCacheTTL: 60,
+        dangerouslyAllowSVG: true,
+    },
+
+    // ✅ 실험적 옵션
+    experimental: {
+        // serverActions: true,
+        optimizePackageImports: ["lucide-react"],
+    },
+
+    compiler: {
+        removeConsole:
+            process.env.NODE_ENV === "production"
+                ? { exclude: ["error", "warn"] }
+                : false,
+    },
+
+    modularizeImports: {
+        "lucide-react": {
+            transform: "lucide-react/dist/esm/icons/{{kebabCase member}}",
+        },
+    },
+
+    headers: async () => [
+        {
+            source: "/(.*)",
+            headers: [
+                {
+                    key: "Cache-Control",
+                    value: "public, max-age=0, s-maxage=300, stale-while-revalidate=60",
+                },
+            ],
+        },
+    ],
+};
+
+export default nextConfig;
 
 // import type { NextConfig } from "next"; // kr 도입하려고 ts > mjs 로 전환 안돼면 롤백해야함
 //
