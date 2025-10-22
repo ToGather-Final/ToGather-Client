@@ -16,7 +16,7 @@ export interface Stock {
 //   enabled: boolean
 
 export interface SimpleChartData {
-  date: string;
+  time: string;
   open: number;
   high: number;
   low: number;
