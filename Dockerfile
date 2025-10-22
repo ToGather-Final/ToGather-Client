@@ -27,7 +27,6 @@ COPY src/constants ./src/constants
 COPY src/types ./src/types
 COPY src/services ./src/services
 COPY src/containers ./src/containers
-COPY src/pages ./src/pages
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs && \
