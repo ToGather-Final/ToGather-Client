@@ -18,7 +18,9 @@ ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 
 # 깃헙 액션에서 넣어준 산출물만 복사
 COPY .next/standalone ./
-COPY .next/standalone/server.js ./server.js
+RUN if [ ! -f /app/server.js ] && [ -f /app/.next/standalone/server.js ]; then \
+      cp /app/.next/standalone/server.js /app/server.js; \
+    fi
 COPY .next/static ./.next/static
 COPY public ./public
 
