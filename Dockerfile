@@ -17,6 +17,16 @@ ENV CDN_URL=${CDN_URL}
 COPY .next/standalone ./
 COPY .next/static ./.next/static
 COPY public ./public
+COPY src/app ./src/app
+COPY src/components ./src/components
+COPY src/contexts ./src/contexts
+COPY src/hooks ./src/hooks
+COPY src/lib ./src/lib
+COPY src/utils ./src/utils
+COPY src/constants ./src/constants
+COPY src/types ./src/types
+COPY src/services ./src/services
+COPY src/containers ./src/containers
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs && \
