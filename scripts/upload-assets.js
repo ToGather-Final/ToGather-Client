@@ -177,17 +177,90 @@ async function main() {
     // 2️⃣ 기존 S3 파일 정리 (선택사항)
     await clearS3Bucket();
 
-    // 3️⃣ .next/static 전체 업로드
-    console.log("🔍 Uploading .next/static files...");
-    console.log("📁 Static directory contents:");
-    const staticFiles = getAllFiles(staticDir);
-    console.log(`Found ${staticFiles.length} files in .next/static`);
-    
-    // main-app 파일들 확인
-    const mainAppFiles = staticFiles.filter(f => f.includes('main-app'));
-    console.log("📋 main-app files found:", mainAppFiles.map(f => path.basename(f)));
-    
-    await uploadDirectory(staticDir, "_next/static");
+        // 3️⃣ .next/static 전체 업로드
+        console.log("🔍 Uploading .next/static files...");
+        console.log("📁 Static directory contents:");
+        const staticFiles = getAllFiles(staticDir);
+        console.log(`Found ${staticFiles.length} files in .next/static`);
+        
+        // main-app 파일들 확인
+        const mainAppFiles = staticFiles.filter(f => f.includes('main-app'));
+        console.log("📋 main-app files found:", mainAppFiles.map(f => path.basename(f)));
+        
+        await uploadDirectory(staticDir, "_next/static");
+
+        // 4️⃣ stock 이미지 업로드
+        console.log("🖼️ Uploading stock images...");
+        const stockImagesDir = path.join(process.cwd(), "public", "images", "stock");
+        if (fs.existsSync(stockImagesDir)) {
+            const stockFiles = getAllFiles(stockImagesDir);
+            console.log(`Found ${stockFiles.length} stock image files`);
+            
+            for (const file of stockFiles) {
+                const relativePath = path.relative(stockImagesDir, file);
+                const s3Key = `images/stock/${relativePath}`;
+                await uploadFile(file, stockImagesDir, "images/stock");
+                console.log(`✅ Uploaded stock image: ${s3Key}`);
+            }
+        } else {
+            console.log("⚠️ Stock images directory not found, skipping...");
+        }
+
+        // 5️⃣ 로고 및 파비콘 업로드
+        console.log("🎨 Uploading logos and favicons...");
+        const logoFiles = [
+            'logo.png',
+            'logo.webp', 
+            'logo_blue.png',
+            'favicon.ico'
+        ];
+        
+        for (const logoFile of logoFiles) {
+            const logoPath = path.join(process.cwd(), "public", logoFile);
+            if (fs.existsSync(logoPath)) {
+                await uploadFile(logoPath, path.join(process.cwd(), "public"), "");
+                console.log(`✅ Uploaded logo/favicon: ${logoFile}`);
+            } else {
+                console.log(`⚠️ Logo file not found: ${logoFile}`);
+            }
+        }
+
+        // 6️⃣ images/ PNG 파일들 업로드 (stock 폴더 제외)
+        console.log("🖼️ Uploading images/ PNG files (excluding stock)...");
+        const imagesDir = path.join(process.cwd(), "public", "images");
+        if (fs.existsSync(imagesDir)) {
+            const allFiles = getAllFiles(imagesDir);
+            const pngFiles = allFiles.filter(file => 
+                file.endsWith('.png') && 
+                !file.includes('stock/') // stock 폴더 제외
+            );
+            
+            console.log(`Found ${pngFiles.length} PNG files in images/ (excluding stock)`);
+            
+            for (const file of pngFiles) {
+                const relativePath = path.relative(imagesDir, file);
+                await uploadFile(file, imagesDir, "images");
+                console.log(`✅ Uploaded PNG image: images/${relativePath}`);
+            }
+        } else {
+            console.log("⚠️ Images directory not found, skipping...");
+        }
+
+        // 7️⃣ 폰트 파일들 업로드
+        console.log("🔤 Uploading font files...");
+        const fontsDir = path.join(process.cwd(), "public", "fonts");
+        if (fs.existsSync(fontsDir)) {
+            const fontFiles = getAllFiles(fontsDir);
+            console.log(`Found ${fontFiles.length} font files`);
+            
+            for (const file of fontFiles) {
+                const relativePath = path.relative(fontsDir, file);
+                await uploadFile(file, fontsDir, "fonts");
+                console.log(`✅ Uploaded font: fonts/${relativePath}`);
+            }
+        } else {
+            console.log("⚠️ Fonts directory not found, skipping...");
+        }
 
     // 4️⃣ public 디렉토리 업로드 (이미지, 폰트 등)
     if (fs.existsSync(publicDir)) {

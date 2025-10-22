@@ -2,10 +2,16 @@
 FROM node:18-alpine AS runner
 WORKDIR /app
 
+# 🚀 빌드 시 환경 변수 받기
+ARG NEXT_PUBLIC_WS_URL
+ARG CDN_URL
+
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=512 --max-semi-space-size=128"
 ENV NODE_NO_WARNINGS=1
+ENV NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL}
+ENV CDN_URL=${CDN_URL}
 
 # ✅ CI/CD에서 빌드된 아티팩트 복사
 COPY .next/standalone ./

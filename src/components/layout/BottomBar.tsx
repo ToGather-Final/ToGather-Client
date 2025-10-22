@@ -27,7 +27,7 @@ export default function BottomBar() {
             href={href}
             aria-label={label}
             aria-current={active ? "page" : undefined}
-            className={`group text-xs px-3 py-2 rounded-lg flex flex-col items-center gap-1 relative
+            className={`group text-xs px-3 pt-3 rounded-lg flex flex-col items-center gap-1 relative
                         ${
                           active
                             ? "text-[#447AFA]"

@@ -7,6 +7,13 @@ const nextConfig: NextConfig = {
         ignoreDuringBuilds: true,
     },
 
+    // 🚀 환경 변수 설정
+    env: {
+        NEXT_PUBLIC_WS_URL: process.env.NODE_ENV === 'production'
+            ? 'wss://xn--o79aq2k062a.store/ws'
+            : 'ws://localhost:8000/ws',
+    },
+
     // 🚀 CDN 최적화: 정적 자산을 CloudFront + S3로 분리
     assetPrefix: process.env.NODE_ENV === 'production'
         ? process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net'
@@ -26,6 +33,9 @@ const nextConfig: NextConfig = {
         imageSizes: [16, 32, 48, 64, 96, 128, 256],
         minimumCacheTTL: 60,
         dangerouslyAllowSVG: true,
+        // 🖼️ S3 + CloudFront 이미지 로더 설정
+        loader: 'custom',
+        loaderFile: './src/lib/imageLoader.ts',
     },
 
     // ✅ 실험적 옵션

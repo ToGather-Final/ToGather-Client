@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import AppShell from "../components/layout/AppShell";
+import AppShell from "../src/components/layout/AppShell";
 import { GroupIdProvider } from "@/contexts/groupIdContext";
 
 const pretendard = localFont({
@@ -37,7 +37,9 @@ const pretendard = localFont({
   //     style: "normal",
   //   },
   // ],
-  src: "../../public/fonts/PretendardVariable.woff2",
+  src: process.env.NODE_ENV === 'production' 
+    ? `${process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net'}/fonts/PretendardVariable.woff2`
+    : "../../public/fonts/PretendardVariable.woff2",
   display: "swap",
   weight: "100 900",
   variable: "--font-pretendard",
@@ -84,7 +86,10 @@ export default function RootLayout({
         {/* Preload critical resources */}
         <link
           rel="preload"
-          href="/fonts/PretendardVariable.woff2"
+          href={process.env.NODE_ENV === 'production' 
+            ? `${process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net'}/fonts/PretendardVariable.woff2`
+            : '/fonts/PretendardVariable.woff2'
+          }
           as="font"
           type="font/woff2"
           crossOrigin="anonymous"
@@ -93,7 +98,9 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
       </head>
       <GroupIdProvider>
-        <body className={pretendard.className}>{children}</body>
+        <body className={pretendard.className}>
+          <AppShell>{children}</AppShell>
+        </body>
       </GroupIdProvider>
     </html>
   );
