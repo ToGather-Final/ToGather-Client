@@ -1,14 +1,15 @@
-export default function handler(req, res) {
-  console.log('Simple Health check request received:', req.method);
-  
-  try {
-    res.status(200).json({ 
-      status: 'ok', 
-      timestamp: new Date().toISOString() 
-    });
-    console.log('Simple Health check response sent');
-  } catch (error) {
-    console.error('Simple Health check error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+    console.log('Health check requested');
+
+    try {
+        return NextResponse.json({
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+        });
+    } catch (err) {
+        console.error('Health check failed:', err);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
 }
