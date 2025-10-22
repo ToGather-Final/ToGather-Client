@@ -152,8 +152,9 @@ export default function VotingPage() {
     voteType: "AGREE" | "DISAGREE",
     myVote: string | null
   ) => {
-    // 이미 투표한 경우 모달을 열지 않음
+    // 이미 투표한 경우 모달을 열지 않음 (투표 변경 불가)
     if (myVote !== null) {
+      alert("이미 투표하셨습니다. 투표는 변경할 수 없습니다.");
       return;
     }
 
@@ -434,7 +435,7 @@ export default function VotingPage() {
                           proposal.myVote === "AGREE"
                             ? "bg-[#2563EB] text-white cursor-default"
                             : proposal.myVote !== null
-                            ? "bg-[#2563EB] text-white cursor-default"
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                             : "bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
                         }`}
                       >
@@ -452,7 +453,7 @@ export default function VotingPage() {
                         disabled={proposal.myVote !== null}
                         className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded transition-colors ${
                           proposal.myVote === "DISAGREE"
-                            ? "bg-gray-300 text-gray-500 cursor-default"
+                            ? "bg-[#F85449] text-white cursor-default"
                             : proposal.myVote !== null
                             ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                             : "bg-[#F85449] text-white hover:bg-[#E53E3E]"
