@@ -1,164 +1,125 @@
-// app/test-websocket/page.tsx
 "use client";
 
-import { useState } from "react";
-import { Price } from "@/types/api/stock";
-import { useStompWebSocket } from "@/hooks/useWebSocket";
+import { baseUrl } from "@/constants/baseUrl";
+import { getUserInvestmentAccount } from "@/services/group/group";
+import { useState, useEffect } from "react";
+import useSWR from "swr";
 
-export default function WebSocketTestPage() {
-  const [stockCode, setStockCode] = useState("005930");
-  const [testStockCode, setTestStockCode] = useState("005930");
+export default function Test1() {
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const { isConnected, orderbookData } = useStompWebSocket(testStockCode);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const id = localStorage.getItem("togather_user_id");
+      setUserId(id);
+    }
+  }, []);
 
-  const handleTest = () => {
-    setTestStockCode(stockCode);
-  };
-  console.log(isConnected);
-  console.log(orderbookData);
-  return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* 헤더 */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">
-            🔌 WebSocket 연결 테스트
+  const {
+    data: accountData,
+    error: accountError,
+    isLoading: accountIsLoading,
+  } = useSWR(
+    userId ? `${baseUrl}/trading/internal/accounts/user/${userId}` : null,
+    getUserInvestmentAccount
+  );
+
+  if (!userId) {
+    return (
+      <div className="min-h-screen p-8 bg-gray-50">
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-2xl font-bold mb-4">
+            사용자 투자 계좌 조회 테스트
           </h1>
+          <p className="text-red-600">
+            사용자 ID를 찾을 수 없습니다. 로그인이 필요합니다.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-          {/* 연결 상태 */}
-          <div className="flex items-center gap-4 mb-4">
-            <span className="text-gray-600">연결 상태:</span>
-            <div
-              className={`px-4 py-2 rounded-full font-semibold ${
-                isConnected
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-500"
-              }`}
-            >
-              {isConnected ? "✅ 연결됨" : "⏳ 연결 중..."}
-            </div>
+  if (accountIsLoading) {
+    return (
+      <div className="min-h-screen p-8 bg-gray-50">
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-2xl font-bold mb-4">
+            사용자 투자 계좌 조회 테스트
+          </h1>
+          <p>로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (accountError) {
+    return (
+      <div className="min-h-screen p-8 bg-gray-50">
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-2xl font-bold mb-4">
+            사용자 투자 계좌 조회 테스트
+          </h1>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <h2 className="text-lg font-semibold text-red-800 mb-2">
+              에러 발생
+            </h2>
+            <p className="text-red-600">
+              {accountError.message || "계좌 조회 실패"}
+            </p>
+            {accountError.code && (
+              <p className="text-sm text-red-500 mt-2">
+                코드: {accountError.code}
+              </p>
+            )}
           </div>
         </div>
-        {/* 데이터 표시 */}
-        {orderbookData ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 종목 정보 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-lg font-bold text-gray-800 mb-4">
-                📊 종목 정보
-              </h2>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">종목명:</span>
-                  <span className="font-semibold">
-                    {orderbookData.stockName}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">종목코드:</span>
-                  <span className="font-mono">
-                    {orderbookData.stockCode}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">현재가:</span>
-                  <span
-                    className={`font-bold text-lg ${
-                      orderbookData.changeDirection === "up"
-                        ? "text-red-600"
-                        : "text-blue-600"
-                    }`}
-                  >
-                    {orderbookData.currentPrice.toLocaleString()}원
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">변동:</span>
-                  <div
-                    className={`font-semibold ${
-                      orderbookData.changeDirection === "up"
-                        ? "text-red-600"
-                        : "text-blue-600"
-                    }`}
-                  >
-                    {orderbookData.changeDirection === "up" ? "▲" : "▼"}
-                    {Math.abs(orderbookData.changeAmount).toLocaleString()}
-                    원 ({orderbookData.changeDirection === "up" ? "+" : ""}
-                    {orderbookData.changeRate}%)
-                  </div>
-                </div>
-              </div>
-            </div>
+      </div>
+    );
+  }
 
-            {/* 원본 데이터 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-lg font-bold text-gray-800 mb-4">
-                📦 원본 응답
-              </h2>
-              <div className="bg-gray-50 p-4 rounded-lg overflow-auto max-h-64">
-                <pre className="text-xs text-gray-700">
-                  {JSON.stringify(orderbookData, null, 2)}
-                </pre>
-              </div>
-            </div>
+  return (
+    <div className="min-h-screen p-8 bg-gray-50">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-2xl font-bold mb-4">
+          사용자 투자 계좌 조회 테스트
+        </h1>
 
-            {/* 매도 호가 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-lg font-bold text-red-600 mb-4">
-                📈 매도 호가
-              </h2>
-              <div className="space-y-2">
-                {orderbookData.askPrices.map(
-                  (ask: Price, index: number) => (
-                    <div
-                      key={index}
-                      className="flex justify-between items-center p-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
-                    >
-                      <span className="font-semibold text-red-600">
-                        {ask.price.toLocaleString()}
-                      </span>
-                      <span className="text-gray-600">
-                        {ask.quantity.toLocaleString()}주
-                      </span>
-                    </div>
-                  )
-                )}
+        <div className="bg-white rounded-lg shadow p-6 mb-4">
+          <h2 className="text-lg font-semibold mb-3">계좌 정보</h2>
+          {accountData && (
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-gray-600">계좌 ID:</span>
+                <span className="font-mono">
+                  {accountData.investmentAccountId}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">사용자 ID:</span>
+                <span className="font-mono">{accountData.userId}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">계좌번호:</span>
+                <span className="font-mono font-bold">
+                  {accountData.accountNo}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">생성일:</span>
+                <span>
+                  {new Date(accountData.createdAt).toLocaleString("ko-KR")}
+                </span>
               </div>
             </div>
+          )}
+        </div>
 
-            {/* 매수 호가 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-lg font-bold text-blue-600 mb-4">
-                📉 매수 호가
-              </h2>
-              <div className="space-y-2">
-                {orderbookData.bidPrices.map(
-                  (bid: Price, index: number) => (
-                    <div
-                      key={index}
-                      className="flex justify-between items-center p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-                    >
-                      <span className="font-semibold text-blue-600">
-                        {bid.price.toLocaleString()}
-                      </span>
-                      <span className="text-gray-600">
-                        {bid.quantity.toLocaleString()}주
-                      </span>
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <div className="text-6xl mb-4">⏳</div>
-            <p className="text-gray-600 text-lg">데이터를 기다리는 중...</p>
-            <p className="text-gray-400 text-sm mt-2">
-              WebSocket이 연결되면 실시간 호가 데이터가 표시됩니다.
-            </p>
-          </div>
-        )}
+        <div className="bg-gray-100 rounded-lg p-4">
+          <h3 className="font-semibold mb-2">Raw Data:</h3>
+          <pre className="text-xs overflow-auto">
+            {JSON.stringify(accountData, null, 2)}
+          </pre>
+        </div>
       </div>
     </div>
   );

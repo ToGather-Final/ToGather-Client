@@ -77,6 +77,8 @@ export default function CelebrateContainer() {
           isOpen={isMemberModalOpen}
           onClose={() => setIsMemberModalOpen(false)}
           onYes={handleYesClick}
+          text1="아니오"
+          text2="예"
         >
           <div className="text-center py-8">
             <DialogTitle className="text-2xl font-bold text-gray-900 mb-4">

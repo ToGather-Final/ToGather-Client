@@ -1,4 +1,4 @@
-/** @type {import('next').NextConfig} */
+/** @type {import('next').NextConfig} */ // kr 도입 코드.
 const nextConfig = {
     output: 'standalone',
     eslint: {

@@ -143,41 +143,19 @@ export default function PortfolioContainer() {
       };
     }
 
-    // 평가금액 기준으로 내림차순 정렬
-    const sortedHoldings = [...portfolio.holdings].sort((a, b) => b.evalAmount - a.evalAmount);
-    
-    // 상위 5개와 나머지 분리
-    const topHoldings = sortedHoldings.slice(0, 5);
-    const otherHoldings = sortedHoldings.slice(5);
-    
-    // 라벨과 데이터 구성
-    const labels = topHoldings.map((h) => h.name);
-    const data = topHoldings.map((h) => h.evalAmount);
-    
-    // 나머지 종목이 있으면 "기타" 추가
-    if (otherHoldings.length > 0) {
-      const otherTotalAmount = otherHoldings.reduce((sum, h) => sum + h.evalAmount, 0);
-      labels.push("기타");
-      data.push(otherTotalAmount);
-    }
-    
-    // 색상 배열 (상위 5개 + 기타용 회색)
-    const colors = [
-      "rgb(255, 99, 132)",   // 빨강
-      "rgb(54, 162, 235)",   // 파랑
-      "rgb(255, 205, 86)",   // 노랑
-      "rgb(255, 159, 64)",   // 주황
-      "rgb(153, 102, 255)",  // 보라
-      "rgb(128, 128, 128)",  // 회색 (기타용)
-    ];
-
     return {
-      labels,
+      labels: portfolio.holdings.map((h) => h.name),
       datasets: [
         {
           label: "평가금액",
-          data,
-          backgroundColor: colors.slice(0, labels.length),
+          data: portfolio.holdings.map((h) => h.evalAmount),
+          backgroundColor: [
+            "rgb(255, 99, 132)",
+            "rgb(54, 162, 235)",
+            "rgb(255, 205, 86)",
+            "rgb(255, 159, 64)",
+            "rgb(153, 102, 255)",
+          ],
           borderWidth: 0,
           hoverOffset: 4,
         },
@@ -208,21 +186,11 @@ export default function PortfolioContainer() {
             label: (ctx: any) => {
               if (!portfolio) return "";
               const v = ctx.parsed ?? 0;
-              const isOther = ctx.label === "기타";
-              
-              if (isOther) {
-                // 기타 항목의 경우 전체 비중 계산
-                const totalValuation = portfolio.holdings.reduce((sum, h) => sum + h.evalAmount, 0);
-                const otherWeight = totalValuation > 0 ? v / totalValuation : 0;
-                return `평가금액: ${currency.format(v)}원 (${(otherWeight * 100).toFixed(1)}%)`;
-              } else {
-                // 개별 종목의 경우
-                const sortedHoldings = [...portfolio.holdings].sort((a, b) => b.evalAmount - a.evalAmount);
-                const topHoldings = sortedHoldings.slice(0, 5);
-                const holding = topHoldings[ctx.dataIndex];
-                const weight = holding ? holding.weight : 0;
-                return `평가금액: ${currency.format(v)}원 (${(weight * 100).toFixed(1)}%)`;
-              }
+              const holding = portfolio.holdings[ctx.dataIndex];
+              const weight = holding ? holding.weight : 0;
+              return `평가금액: ${currency.format(v)}원 (${(
+                weight * 100
+              ).toFixed(1)}%)`;
             },
           },
         },
