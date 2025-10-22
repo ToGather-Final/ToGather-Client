@@ -418,7 +418,7 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
                     options={voteQuorumOptions}
                     value={formData.voteQuorum}
                     onChange={(value) => handleInputChange("voteQuorum", value)}
-                    placeholder={maxMembers < 2 ? "2명 이상 필요" : "선택"}
+                    placeholder={maxMembers < 2 ? "-" : "선택"}
                     className="text-sm"
                   />
                 </div>
@@ -442,7 +442,7 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
                     options={dissolutionQuorumOptions}
                     value={formData.dissolutionQuorum}
                     onChange={(value) => handleInputChange("dissolutionQuorum", value)}
-                    placeholder={maxMembers < 2 ? "2명 이상 필요" : "선택"}
+                    placeholder={maxMembers < 2 ? "-" : "선택"}
                     className="text-sm"
                   />
                 </div>

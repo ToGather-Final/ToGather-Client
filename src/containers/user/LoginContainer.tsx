@@ -13,7 +13,11 @@ import { checkUserStatus } from "@/utils/userStatus"
 import { LoginRequest, ApiErrorWithStatus, GroupInfo } from "@/types/api/auth"
 import { useGroupId } from "@/contexts/groupIdContext"
 
-export default function LoginFlow() {
+interface LoginContainerProps {
+  showAnimation?: boolean
+}
+
+export default function LoginFlow({ showAnimation = true }: LoginContainerProps) {
   const [formData, setFormData] = useState({
     loginId: "",
     loginPassword: "",
@@ -171,18 +175,17 @@ export default function LoginFlow() {
 
   return (
     <div className="h-full bg-white relative overflow-hidden">
-      {/* Background coins */}
-      <BackgroundCoins />
-
       {/* Main content */}
       <div className="flex flex-col items-center justify-center h-full px-8 relative z-10">
         {/* Logo */}
-        <Logo variant="blue" size="lg" />
+        <div className={`mb-8 transition-all duration-1000 delay-200 ${showAnimation ? "opacity-100 transform translate-y-0" : "opacity-0 transform translate-y-8"}`}>
+          <Logo variant="blue" size="lg" />
+        </div>
 
-        <h1 className="text-5xl font-bold text-center mb-16" style={{ color: '#6592FD' }}>ToGather</h1>
+        <h1 className={`text-3xl font-bold text-center mb-16 transition-all duration-1000 delay-300 ${showAnimation ? "opacity-100 transform translate-y-0" : "opacity-0 transform translate-y-8"}`} style={{ color: '#6592FD' }}>ToGather</h1>
 
         {/* Login form */}
-        <div className="w-full max-w-sm space-y-4">
+        <div className={`w-full max-w-sm space-y-4 transition-all duration-1000 delay-500 ${showAnimation ? "opacity-100 transform translate-y-0" : "opacity-0 transform translate-y-8"}`}>
           <Input
             placeholder="아이디"
             value={formData.loginId}
