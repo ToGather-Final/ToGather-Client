@@ -206,24 +206,18 @@ async function main() {
             console.log("⚠️ Stock images directory not found, skipping...");
         }
 
-        // 5️⃣ 로고 및 파비콘 업로드
-        console.log("🎨 Uploading logos and favicons...");
+        // 5️⃣ 로고 및 파비콘 업로드 (Next.js 서버에서 직접 제공하므로 제외)
+        console.log("🎨 Skipping logos and favicons (served by Next.js server)...");
         const logoFiles = [
             'logo.png',
             'logo.webp', 
             'logo_blue.png',
+            'logo_white.png',
             'favicon.ico'
         ];
         
-        for (const logoFile of logoFiles) {
-            const logoPath = path.join(process.cwd(), "public", logoFile);
-            if (fs.existsSync(logoPath)) {
-                await uploadFile(logoPath, path.join(process.cwd(), "public"), "");
-                console.log(`✅ Uploaded logo/favicon: ${logoFile}`);
-            } else {
-                console.log(`⚠️ Logo file not found: ${logoFile}`);
-            }
-        }
+        console.log("ℹ️ Logo files will be served by Next.js server to avoid CloudFront 502 errors:");
+        logoFiles.forEach(file => console.log(`  - ${file}`));
 
         // 6️⃣ images/ PNG 파일들 업로드 (stock 폴더 제외)
         console.log("🖼️ Uploading images/ PNG files (excluding stock)...");
@@ -262,9 +256,23 @@ async function main() {
             console.log("⚠️ Fonts directory not found, skipping...");
         }
 
-    // 4️⃣ public 디렉토리 업로드 (이미지, 폰트 등)
+    // 4️⃣ public 디렉토리 업로드 (로고 파일 제외)
     if (fs.existsSync(publicDir)) {
-        await uploadDirectory(publicDir, "");
+        console.log("📁 Uploading public directory (excluding logo files)...");
+        const allFiles = getAllFiles(publicDir);
+        const logoFiles = ['logo.png', 'logo.webp', 'logo_blue.png', 'logo_white.png', 'favicon.ico'];
+        
+        // 로고 파일들을 제외한 파일들만 업로드
+        const filesToUpload = allFiles.filter(file => {
+            const fileName = path.basename(file);
+            return !logoFiles.includes(fileName);
+        });
+        
+        console.log(`📊 Found ${allFiles.length} files in public/, uploading ${filesToUpload.length} (excluding ${allFiles.length - filesToUpload.length} logo files)`);
+        
+        for (const file of filesToUpload) {
+            await uploadFile(file, publicDir, "");
+        }
     }
 
     // 5️⃣ CDN 캐시 무효화

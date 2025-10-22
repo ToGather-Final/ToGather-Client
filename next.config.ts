@@ -28,12 +28,14 @@ const nextConfig: NextConfig = {
     serverExternalPackages: ['sharp'],
 
     images: {
+        // 로고 파일은 Next.js 서버에서 직접 제공하므로 최적화 활성화
+        unoptimized: false,
         formats: ["image/avif", "image/webp"],
         deviceSizes: [640, 750, 828, 1080, 1200],
         imageSizes: [16, 32, 48, 64, 96, 128, 256],
         minimumCacheTTL: 60,
         dangerouslyAllowSVG: true,
-        // 🖼️ S3 + CloudFront 이미지 로더 설정
+        // 🖼️ S3 + CloudFront 이미지 로더 설정 (로고는 Next.js 서버 사용)
         loader: 'custom',
         loaderFile: './src/lib/imageLoader.ts',
     },

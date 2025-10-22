@@ -31,19 +31,13 @@ export default function imageLoader({ src, width, quality }: ImageLoaderProps): 
     return `${cdnUrl}/${cleanSrc}`;
   }
   
-  // 로고 및 파비콘 파일들 처리
-  const logoFiles = ['logo.png', 'logo.webp', 'logo_blue.png', 'favicon.ico'];
+  // 로고 및 파비콘 파일들은 Next.js 서버에서 직접 제공 (CloudFront 502 에러 방지)
+  const logoFiles = ['logo.png', 'logo.webp', 'logo_blue.png', 'logo_white.png', 'favicon.ico'];
   const isLogoFile = logoFiles.some(logoFile => src.includes(logoFile));
   
   if (isLogoFile) {
-    // 이미 CDN URL인 경우
-    if (src.startsWith('http')) {
-      return src;
-    }
-    
-    // 상대 경로인 경우 CDN URL로 변환
-    const cleanSrc = src.startsWith('/') ? src.slice(1) : src;
-    return `${cdnUrl}/${cleanSrc}`;
+    // 로고 파일은 Next.js 서버를 통해 제공 (CloudFront 문제 방지)
+    return src;
   }
 
   // images/ PNG 파일들 처리 (stock 폴더 제외)
