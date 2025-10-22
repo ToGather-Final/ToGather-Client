@@ -1,1 +1,5 @@
-export { default } from "@/containers/vote/voteContainer";
+import VoteContainer from "@/containers/vote/voteContainer";
+
+export default function VotePage() {
+  return <VoteContainer />;
+}

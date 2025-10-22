@@ -1,1 +1,5 @@
-export { default } from "@/containers/pay/PayContainer";
+import PayContainer from "@/containers/pay/PayContainer";
+
+export default function PayPage() {
+  return <PayContainer />;
+}

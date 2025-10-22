@@ -1,2 +1,6 @@
 export const dynamic = 'force-static'
-export { default } from "@/containers/user/LoginContainer";
+import LoginContainer from "@/containers/user/LoginContainer";
+
+export default function LoginPage() {
+  return <LoginContainer showAnimation={true} />;
+}

@@ -1,1 +1,5 @@
-export { default } from "@/containers/user/GroupJoinFlow"
+import GroupJoinFlow from "@/containers/user/GroupJoinFlow";
+
+export default function GroupJoinPage() {
+  return <GroupJoinFlow />;
+}
