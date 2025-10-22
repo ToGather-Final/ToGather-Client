@@ -8,7 +8,7 @@ import { getStockDetail } from "@/services/chart/stock";
 
 export default function RealtimePage() {
   const params = useParams();
-  const stockId = params.stockId as string;
+  const stockId = params?.stockId as string;
 
   // 종목 상세 정보를 가져와서 stockCode 추출
   const { data, error, isLoading } = useSWR(

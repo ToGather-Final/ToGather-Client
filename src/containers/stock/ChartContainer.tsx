@@ -33,7 +33,7 @@ import useSWR from "swr";
 
 export default function ChartContainer() {
   const params = useParams();
-  const stockId = params.stockId as string;
+  const stockId = params?.stockId as string;
 
   // stockId가 없으면 로딩 표시
   if (!stockId) {

@@ -392,7 +392,7 @@ export default function RealtimeContainer({
 
   // URL 쿼리 파라미터에서 탭 정보 읽기
   useEffect(() => {
-    const tab = searchParams.get("tab");
+    const tab = searchParams?.get("tab");
     if (tab === "buy") {
       setActiveTab("매수");
     } else if (tab === "sell") {

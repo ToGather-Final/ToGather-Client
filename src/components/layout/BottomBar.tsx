@@ -18,7 +18,7 @@ export default function BottomBar() {
     >
       {BOTTOM_TABS.map(({ href, label, Icon, match }) => {
         // 현재 경로와 비교해 활성화 여부 판단
-        const active = isActivePath(pathname, href, match);
+        const active = isActivePath(pathname || '', href, match);
         const showNotification = href === "/history" && notificationCount > 0;
         
         return (

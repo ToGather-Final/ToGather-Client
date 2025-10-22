@@ -22,14 +22,13 @@ export default function GroupWaitingPage() {
 
   useEffect(() => {
     // console.log("=== GroupWaitingPage useEffect 시작 ===")
-    const groupId = params.groupId as string
-    // console.log("GroupWaitingPage - groupId:", groupId)
-    
-    if (!groupId) {
+    if (!params?.groupId) {
       // console.log("GroupWaitingPage - groupId 없음, 로그인 페이지로 이동")
       router.push("/login")
       return
     }
+    const groupId = params.groupId as string
+    // console.log("GroupWaitingPage - groupId:", groupId)
 
     // 로그인 응답에서 받은 그룹 정보 확인 (sessionStorage에서)
     const loginGroupInfoStr = sessionStorage.getItem('loginGroupInfo')
@@ -50,7 +49,7 @@ export default function GroupWaitingPage() {
       }
     }
     // console.log("=== GroupWaitingPage useEffect 끝 ===")
-  }, [params.groupId, router])
+  }, [params?.groupId, router])
 
   // 그룹 상태 폴링
   useEffect(() => {
