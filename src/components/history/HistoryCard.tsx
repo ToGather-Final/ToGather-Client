@@ -40,6 +40,22 @@ const formatKoreanDate = (isoDateString: string) => {
     const hours = date.getHours();
     const minutes = date.getMinutes();
     
+    // 장이 닫힌 시간(15:30 이후)이거나 장이 열리기 전 시간(9시 이전)이면 오전 9시로 변경
+    if (hours > 15 || (hours === 15 && minutes >= 30) || hours < 9) {
+      const targetDay = new Date(date);
+      // 장이 닫힌 시간이면 다음 날, 장이 열리기 전이면 당일
+      if (hours > 15 || (hours === 15 && minutes >= 30)) {
+        targetDay.setDate(targetDay.getDate() + 1);
+      }
+      targetDay.setHours(9, 0, 0, 0);
+      
+      const targetYear = targetDay.getFullYear();
+      const targetMonth = targetDay.getMonth() + 1;
+      const targetDayDate = targetDay.getDate();
+      
+      return `${targetYear}년 ${targetMonth}월 ${targetDayDate}일 오전 9시`;
+    }
+    
     return `${year}년 ${month}월 ${day}일 ${hours}시 ${minutes}분`;
   } catch (error) {
     // console.error('날짜 포맷팅 오류:', error);

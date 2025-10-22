@@ -5,6 +5,7 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import Select from "@/components/ui/select"
 import MainButton from "@/components/common/MainButton"
+import GroupConsentModal from "@/components/common/GroupConsentModal"
 import { createGroup, CreateGroupRequest } from "@/utils/api"
 import { ApiErrorWithStatus } from "@/types/api/auth"
 import Image from "next/image"
@@ -52,6 +53,7 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({})
+  const [showConsentModal, setShowConsentModal] = useState(false)
 
   // 드롭다운 옵션 생성 함수 (최소 2명부터)
   const generateQuorumOptions = (maxMembers: number) => {
@@ -71,6 +73,15 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    // 폼 유효성 검사만 하고 팝업 표시
+    if (!isFormValid()) {
+      return
+    }
+    setShowConsentModal(true)
+  }
+
+  const handleConsentConfirm = async () => {
+    setShowConsentModal(false)
     setIsLoading(true)
     setError(null)
 
@@ -166,6 +177,10 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
     }
   }
 
+  const handleConsentCancel = () => {
+    setShowConsentModal(false)
+  }
+
   // 입력값 유효성 검사 함수
   const validateField = (field: string, value: string): string | null => {
     switch (field) {
@@ -175,8 +190,8 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
          if (isNaN(memberCountForGroup) || memberCountForGroup <= 0) {
            return "그룹 인원수는 1명 이상의 숫자여야 합니다."
          }
-         if (memberCountForGroup > 100) {
-           return "그룹 인원수는 100명 이하여야 합니다."
+         if (memberCountForGroup > 10) {
+           return "그룹 인원수는 10명 이하여야 합니다."
          }
          // 예수금 총합 검증
          const initialAmountForGroup = parseInt(formData.initialInvestment) || 0
@@ -272,7 +287,7 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
     const goalAmount = parseInt(formData.targetInvestment)
     
      const numericValidation = 
-       !isNaN(memberCount) && memberCount > 0 && memberCount <= 100 &&
+       !isNaN(memberCount) && memberCount > 0 && memberCount <= 10 &&
        !isNaN(initialAmount) && initialAmount >= 0 &&
        !isNaN(goalAmount) && goalAmount > 0 &&
        initialAmount <= goalAmount &&
@@ -351,7 +366,7 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
                 required
                 type="number"
                 min="1"
-                max="100"
+                max="10"
               />
               {fieldErrors.groupMemberId && (
                 <p className="text-sm text-red-500 mt-1 ml-2">{fieldErrors.groupMemberId}</p>
@@ -418,7 +433,7 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
                     options={voteQuorumOptions}
                     value={formData.voteQuorum}
                     onChange={(value) => handleInputChange("voteQuorum", value)}
-                    placeholder={maxMembers < 2 ? "2명 이상 필요" : "선택"}
+                    placeholder={maxMembers < 2 ? "-" : "선택"}
                     className="text-sm"
                   />
                 </div>
@@ -442,7 +457,7 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
                     options={dissolutionQuorumOptions}
                     value={formData.dissolutionQuorum}
                     onChange={(value) => handleInputChange("dissolutionQuorum", value)}
-                    placeholder={maxMembers < 2 ? "2명 이상 필요" : "선택"}
+                    placeholder={maxMembers < 2 ? "-" : "선택"}
                     className="text-sm"
                   />
                 </div>
@@ -476,6 +491,13 @@ export default function GroupCreateContainer({ onComplete }: GroupCreateContaine
           </form>
         </div>
       </div>
+
+      {/* 동의 확인 팝업 */}
+      <GroupConsentModal
+        isOpen={showConsentModal}
+        onClose={handleConsentCancel}
+        onConfirm={handleConsentConfirm}
+      />
     </div>
   )
 }

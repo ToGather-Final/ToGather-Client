@@ -4,6 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import MainButton from "@/components/common/MainButton"
+import GroupJoinConsentModal from "@/components/common/GroupJoinConsentModal"
 import GroupWaitingContainer from "./GroupWaitingContainer"
 import { joinGroup } from "@/utils/api"
 import { markGroupJoined } from "@/utils/userStatus"
@@ -19,6 +20,7 @@ export default function GroupJoinFlow() {
     groupName: string
   } | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [showConsentModal, setShowConsentModal] = useState(false)
 
   const handleCodeChange = (index: number, value: string) => {
     if (value.length <= 1) {
@@ -34,7 +36,7 @@ export default function GroupJoinFlow() {
     }
   }
 
-  const handleCodeSubmit = async () => {
+  const handleCodeSubmit = () => {
     const codeString = code.join("")
     if (codeString.length !== 4) {
       setError("4자리 코드를 모두 입력해주세요.")
@@ -42,6 +44,12 @@ export default function GroupJoinFlow() {
     }
 
     setError(null)
+    setShowConsentModal(true)
+  }
+
+  const handleConsentConfirm = async () => {
+    setShowConsentModal(false)
+    const codeString = code.join("")
 
     try {
       console.log("그룹 참여 API 호출:", codeString)
@@ -76,6 +84,10 @@ export default function GroupJoinFlow() {
       setError(errorMessage)
       setStep("code")
     }
+  }
+
+  const handleConsentCancel = () => {
+    setShowConsentModal(false)
   }
 
 
@@ -161,6 +173,13 @@ export default function GroupJoinFlow() {
             확인
           </MainButton>
         </div>
+
+        {/* 동의 확인 팝업 */}
+        <GroupJoinConsentModal
+          isOpen={showConsentModal}
+          onClose={handleConsentCancel}
+          onConfirm={handleConsentConfirm}
+        />
       </div>
     )
   }
