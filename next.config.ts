@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
         ignoreDuringBuilds: true,
     },
 
+    // 🚀 CDN 최적화: 정적 자산을 CloudFront + S3로 분리
+    assetPrefix: process.env.NODE_ENV === 'production'
+        ? process.env.CDN_URL || 'https://d36ue99r8i68ow.cloudfront.net'
+        : '',
+
     images: {
         formats: ["image/avif", "image/webp"],
         deviceSizes: [640, 750, 828, 1080, 1200],
@@ -25,6 +30,9 @@ const nextConfig: NextConfig = {
     // 🔑 standalone + Node runtime 엔트리 강제
     // 빌드 시 next-server.js를 생성
     outputFileTracingRoot: process.cwd(), // 워크스페이스 루트 경고 해결
+    
+    // 🚀 빌드 ID 고정 (CI/CD 환경에서)
+    generateBuildId: process.env.CI ? () => 'build' : undefined,
 
     compiler: {
         removeConsole:
