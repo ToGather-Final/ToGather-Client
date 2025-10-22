@@ -7,42 +7,42 @@ import { ChevronDown } from "lucide-react";
 import VoteModal from "../../components/vote/VoteModal";
 import type { ProposalDTO } from "../../types/api/proposal";
 import {
-    ProposalCategory,
-    ProposalAction,
-    ProposalStatus,
+  ProposalCategory,
+  ProposalAction,
+  ProposalStatus,
 } from "../../types/api/proposal";
 import { cn } from "@/lib/utils";
 import { apiGet, apiPost } from "@/utils/api/client";
 
 // Vote Service API 호출 함수
 async function fetchProposals(): Promise<ProposalDTO[]> {
-    try {
-        const data = await apiGet<any[]>("/vote");
-        console.log("Fetched proposals:", data);
+  try {
+    const data = await apiGet<any[]>("/vote");
+    console.log("Fetched proposals:", data);
 
-        // API 응답을 ProposalDTO 형식으로 변환
-        return data.map((item: any) => ({
-            proposalId: item.proposalId,
-            proposalName: item.proposalName,
-            proposerName: item.proposerName,
-            category: item.category as ProposalCategory,
-            action: item.action as ProposalAction,
-            payload:
-                typeof item.payload === "string"
-                    ? JSON.parse(item.payload)
-                    : item.payload,
-            status: item.status as ProposalStatus,
-            date: item.date,
-            closeAt: item.closeAt,
-            agreeCount: item.agreeCount,
-            disagreeCount: item.disagreeCount,
-            myVote: item.myVote,
-        }));
-    } catch (error) {
-        console.error("Failed to fetch proposals:", error);
-        // 에러 발생 시 빈 배열 반환
-        return [];
-    }
+    // API 응답을 ProposalDTO 형식으로 변환
+    return data.map((item: any) => ({
+      proposalId: item.proposalId,
+      proposalName: item.proposalName,
+      proposerName: item.proposerName,
+      category: item.category as ProposalCategory,
+      action: item.action as ProposalAction,
+      payload:
+        typeof item.payload === "string"
+          ? JSON.parse(item.payload)
+          : item.payload,
+      status: item.status as ProposalStatus,
+      date: item.date,
+      closeAt: item.closeAt,
+      agreeCount: item.agreeCount,
+      disagreeCount: item.disagreeCount,
+      myVote: item.myVote,
+    }));
+  } catch (error) {
+    console.error("Failed to fetch proposals:", error);
+    // 에러 발생 시 빈 배열 반환
+    return [];
+  }
 }
 
 export default function VotingPage() {

@@ -26,16 +26,18 @@ export default function GroupConsentModal({ isOpen, onClose, onConfirm }: GroupC
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="mx-auto w-[calc(100vw-24px)] max-w-lg rounded-xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="mx-auto w-[calc(100vw-80px)] max-w-sm rounded-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-center pt-4">
           <DialogTitle className="text-2xl font-semibold text-gray-900 text-center">
             그룹 생성 전 꼭 확인해주세요!
           </DialogTitle>
         </DialogHeader>
         
-        <div className="pt-4 px-6">
+        <div className="pt-2 px-2">
           <p className="text-sm text-stone-700 text-center mb-10">
-            우리 그룹은 모두의 돈이 함께 움직이는 '공동 투자 그룹'이에요.
+            우리 그룹은 모두의 돈이 함께 움직이는
+            <br />
+            '공동 투자 그룹'이에요.
             <br />
             규칙에 동의해야만 그룹 생성 가능하며,
             <br />
