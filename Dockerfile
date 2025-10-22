@@ -38,7 +38,7 @@ ENV HOST=0.0.0.0
 ENV PORT=3000
 
 # ✅ Next.js 런타임
-CMD ["node", "server.js"]
+CMD ["node", "next-server.js"]
 
     
 ## ---- runtime only ----

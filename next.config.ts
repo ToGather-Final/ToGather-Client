@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-    // ✅ 기본 Next.js SSR 설정
     output: "standalone",
+    reactStrictMode: true,
     eslint: {
         ignoreDuringBuilds: true,
     },
@@ -19,6 +19,13 @@ const nextConfig: NextConfig = {
     experimental: {
         // serverActions: true,
         optimizePackageImports: ["lucide-react"],
+    },
+
+    distDir: ".next",
+    // 🔑 standalone + Node runtime 엔트리 강제
+    // 빌드 시 next-server.js를 생성
+    env: {
+        NODE_ENV: "production",
     },
 
     compiler: {
