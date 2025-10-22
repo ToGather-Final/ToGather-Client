@@ -17,7 +17,7 @@ interface LoginContainerProps {
   showAnimation?: boolean
 }
 
-export default function LoginFlow({ showAnimation = true }: LoginContainerProps) {
+function LoginContainer({ showAnimation = true }: LoginContainerProps) {
   const [formData, setFormData] = useState({
     loginId: "",
     loginPassword: "",
@@ -226,3 +226,5 @@ export default function LoginFlow({ showAnimation = true }: LoginContainerProps)
     </div>
   )
 }
+
+export default LoginContainer
