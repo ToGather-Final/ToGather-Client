@@ -103,7 +103,7 @@ const SplashScreen = ({
                     }`}
                     style={{ top: "calc(50% + 60px)" }}
                 >
-                    <h1 className="text-3xl font-bold text-white text-center">
+                    <h1 className="text-3xl font-bold text-white text-center" style={{ fontFamily: 'Noto Sans KR, sans-serif' }}>
                         ToGather
                     </h1>
                 </div>
@@ -117,7 +117,7 @@ const SplashScreen = ({
                             ? "opacity-100 translate-y-0"
                             : "opacity-0 translate-y-4"
                     }`}
-                    style={{ color: "#6592FD" }}
+                    style={{ color: "#6592FD", fontFamily: 'Noto Sans KR, sans-serif' }}
                 >
                     ToGather
                 </h1>
