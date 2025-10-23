@@ -21,15 +21,17 @@ export const useStompWebSocket = (stockCode: string) => {
         if (typeof window !== 'undefined') {
             const hostname = window.location.hostname;
             if (hostname === 'localhost' || hostname === '127.0.0.1') {
-                return "ws://localhost:8000/ws";
+                // 개발 환경: API Gateway를 거치지 않고 직접 Trading Service 연결
+                return "ws://localhost:8081/ws";
             } else {
+                // 프로덕션 환경: Ingress를 통해 Trading Service 연결
                 return "wss://xn--o79aq2k062a.store/ws";
             }
         }
         
         // 서버 사이드에서는 환경 변수 사용
         return process.env.NODE_ENV === "development"
-            ? "ws://localhost:8000/ws"
+            ? "ws://localhost:8081/ws"
             : "wss://xn--o79aq2k062a.store/ws";
     })();
     useEffect(() => {
@@ -71,11 +73,25 @@ export const useStompWebSocket = (stockCode: string) => {
             onStompError: (frame) => {
                 logError(":x: STOMP 에러:", frame.headers["message"]);
                 setIsConnected(false);
+                // 재연결 시도
+                setTimeout(() => {
+                    if (clientRef.current && !clientRef.current.connected) {
+                        logInfo("🔄 STOMP 재연결 시도 중...");
+                        clientRef.current.activate();
+                    }
+                }, 5000);
             },
             // WebSocket 에러
             onWebSocketError: (error) => {
                 logError(":x: WebSocket 에러:", error);
                 setIsConnected(false);
+                // 재연결 시도
+                setTimeout(() => {
+                    if (clientRef.current && !clientRef.current.connected) {
+                        logInfo("🔄 WebSocket 재연결 시도 중...");
+                        clientRef.current.activate();
+                    }
+                }, 5000);
             },
             // 연결 끊김
             onDisconnect: () => {
@@ -132,6 +148,9 @@ export const useStompWebSocket = (stockCode: string) => {
         isConnected,
         orderbookData,
         disconnect,
+        // 디버깅을 위한 추가 정보
+        connectionUrl: WS_BASE_URL,
+        stockCode,
     };
 };
 
