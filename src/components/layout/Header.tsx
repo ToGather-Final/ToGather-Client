@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, CreditCard, Crown } from "lucide-react";
+import { ChevronDown, Crown } from "lucide-react";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import Modal from "@/components/common/Modal";
@@ -196,14 +196,20 @@ export default function Header() {
         href="/pay"
         aria-label="페이"
         className={`ml-auto inline-flex items-center justify-center
-                    size-9 rounded-lg transition
+                    size-10 rounded-lg transition
                     ${
                       payActive
                         ? "bg-blue-50 text-blue-600 border border-blue-200"
                         : "text-stone-500 hover:bg-stone-50 hover:text-stone-700"
                     }`}
       >
-        <CreditCard size={25} className="stroke-current" />
+        <Image
+          src="/pay.png"
+          alt="페이"
+          width={60}
+          height={60}
+          className="object-contain"
+        />
       </Link>
 
       {/* 모임 규칙 모달 */}
