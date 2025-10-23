@@ -61,7 +61,7 @@ export default function CelebrateContainer() {
   };
 
   return (
-    <div className="min-h-screen bg-white relative">
+    <div className="fixed inset-0 h-screen bg-white relative z-50">
       {/* Confetti canvas - 배경 레이어 */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <canvas
@@ -72,7 +72,7 @@ export default function CelebrateContainer() {
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col items-center justify-center min-h-screen px-8 relative z-10">
+      <div className="flex flex-col items-center justify-center px-8 h-screen relative z-10">
         <YesNoModal
           isOpen={isMemberModalOpen}
           onClose={() => setIsMemberModalOpen(false)}

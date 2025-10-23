@@ -658,10 +658,10 @@ export default function RealtimeContainer({
 
                 <div>
                   <label className="block text-[14px] font-medium text-gray-700 mb-1">
-                    마감 시간
+                    마감일자
                   </label>
                   <input
-                    type="time"
+                    type="datetime-local"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
                     className={`w-full px-2 py-1 border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 ${

@@ -14,7 +14,7 @@ type Props = {
 export default function QRScannerContainer({
   onDetected,
   onScan,
-  once = true,
+  once = false,
 }: Props) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const scannerRef = useRef<QrScanner | null>(null);
@@ -72,7 +72,8 @@ export default function QRScannerContainer({
 
         if (once && !handledRef.current) {
           handledRef.current = true;
-          scanner.stop();
+          // once 모드에서는 스캐너를 정지하지 않고 계속 스캔 가능하도록 변경
+          // scanner.stop();
         }
       },
       {
@@ -128,9 +129,12 @@ export default function QRScannerContainer({
     setIsTransferModalOpen(false);
     setResult(null);
     setScannedData("");
+    
+    // handledRef 리셋하여 다시 스캔 가능하도록 설정
+    handledRef.current = false;
 
-    // 스캐너 재시작 (once 모드가 아닌 경우)
-    if (!once && scannerRef.current) {
+    // 스캐너 재시작
+    if (scannerRef.current) {
       scannerRef.current.start();
     }
   };
@@ -139,9 +143,12 @@ export default function QRScannerContainer({
     setIsTransferModalOpen(false);
     setResult(null);
     setScannedData("");
+    
+    // handledRef 리셋하여 다시 스캔 가능하도록 설정
+    handledRef.current = false;
 
-    // 스캐너 재시작 (once 모드가 아닌 경우)
-    if (!once && scannerRef.current) {
+    // 스캐너 재시작
+    if (scannerRef.current) {
       scannerRef.current.start();
     }
   };

@@ -284,7 +284,7 @@ export default function PortfolioContainer() {
   }
 
   return (
-    <div>
+    <div className="pb-4">
       <div>
         <div className="border border-[#e9e9e9] m-[15px] p-[20px] rounded-[20px]">
           <div className="flex justify-between">

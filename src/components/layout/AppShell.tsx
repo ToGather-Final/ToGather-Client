@@ -24,7 +24,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* 본문만 스크롤 */}
         <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
-          {children}
+          <div>
+            {children}
+          </div>
         </main>
 
         {/* (선택) 하단을 더 확실히 고정하고 싶으면 sticky */}
